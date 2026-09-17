@@ -758,6 +758,74 @@ def test_end_to_end_through_real_client():
     check("credits are accumulated from the envelopes", api.credits >= 7, f"got {api.credits}")
 
 
+# --------------------------------------------------------------------------- #
+# 13. The residuals the README leans on, each pinned by a fixture.
+#
+#     An outside reviewer's fair challenge: if the caveats are only prose, they
+#     are not caveats. Each one below is a claim the write-up makes, with a
+#     fixture that makes it false if the code stops reporting it.
+# --------------------------------------------------------------------------- #
+def test_residuals_are_measured_not_asserted():
+    print("\n[13] every residual the write-up claims, pinned to a fixture")
+
+    # A clean aggregate hiding one broken asset: 100 short by 30, 100 over by 30.
+    assets = [asset(1, "FINE", "stock", 100.0), asset(2, "BROKEN", "stock", 100.0)]
+    issuers = [issuer("a1", "Alpha"), issuer("b2", "Bravo")]
+    tokens = {"1": [token("a1", "Alpha", "F1", 100.0, crypto_id=10)],
+              "2": [token("b2", "Bravo", "B1", 130.0, crypto_id=11)]}
+    snap = run(FakeCMC(assets, issuers, tokens, platforms={"10": "Ethereum", "11": "Ethereum"}))
+    rec = snap["coverage"]["reconciliation"]
+    check("aggregate ratio looks healthy at 1.15", approx(rec["ratio"], 1.15, 1e-4),
+          f"got {rec['ratio']}")
+    check("but the per-asset check still names the broken one",
+          rec["assets_off_by_over_1pct"] == 1, f"got {rec['assets_off_by_over_1pct']}")
+    check("and names it by symbol",
+          rec["worst_assets"] and rec["worst_assets"][0]["symbol"] == "BROKEN",
+          str(rec["worst_assets"]))
+    check("the healthy asset is not flagged",
+          all(w["symbol"] != "FINE" for w in rec["worst_assets"]), str(rec["worst_assets"]))
+
+    # crypto_ids the cryptocurrency endpoint never returns
+    api = FakeCMC(assets, issuers, tokens, platforms={"10": "Ethereum"}, missing_ids={"11"})
+    snap2 = run(api)
+    check("an id the chain endpoint omits is counted",
+          snap2["coverage"]["unmatched_crypto_ids"] == 1,
+          f"got {snap2['coverage']['unmatched_crypto_ids']}")
+    check("and its value is reported as unplaced",
+          snap2["coverage"]["value_without_a_chain"] > 0,
+          f"got {snap2['coverage']['value_without_a_chain']}")
+
+    # null caps attributed to the issuer that holds them
+    assets3 = [asset(1, "A", "stock", 50.0)]
+    tokens3 = {"1": [token("a1", "Alpha", "T1", 50.0),
+                     token("a1", "Alpha", "T2", None),
+                     token("a1", "Alpha", "T3", None),
+                     token("b2", "Bravo", "T4", None)]}
+    snap3 = run(FakeCMC(assets3, issuers, tokens3))
+    by = {r["issuer"]: r["tokens_without_cap"] for r in snap3["coverage"]["null_caps_by_issuer"]}
+    check("null caps are attributed to the issuer holding them",
+          by.get("Alpha") == 2, str(snap3["coverage"]["null_caps_by_issuer"]))
+    check("and the ranking is ordered, worst first",
+          snap3["coverage"]["null_caps_by_issuer"][0]["issuer"] == "Alpha",
+          str(snap3["coverage"]["null_caps_by_issuer"]))
+
+    # concentration across assets, not only across issuers - a market can look
+    # diverse by issuer while being one asset wearing several coats
+    assets4 = [asset(1, "BIG", "commodity", 900.0), asset(2, "SMALL", "stock", 100.0)]
+    tokens4 = {"1": [token("a1", "Alpha", "X", 450.0), token("b2", "Bravo", "Y", 450.0)],
+               "2": [token("a1", "Alpha", "Z", 100.0)]}
+    snap4 = run(FakeCMC(assets4, issuers, tokens4))
+    am, iss = snap4["asset_mix"], snap4["overall"]
+    # assets .9/.1 -> HHI 8200 ; issuers 550/450 -> .55/.45 -> 5050
+    check("asset_mix measures concentration across assets",
+          approx(am["hhi"], 8200.0, 0.1), f"got {am['hhi']}")
+    check("and is not the issuer figure wearing a different label",
+          approx(iss["hhi"], 5050.0, 0.1) and am["hhi"] != iss["hhi"],
+          f"asset {am['hhi']} vs issuer {iss['hhi']}")
+    check("the dominant asset is named", am["leaders"][0]["label"] == "BIG",
+          str(am["leaders"][:2]))
+
+
 if __name__ == "__main__":
     test_per_token_attribution()
     test_reconciliation_gap()
@@ -771,6 +839,7 @@ if __name__ == "__main__":
     test_venues_and_placeholders()
     test_client_envelopes()
     test_end_to_end_through_real_client()
+    test_residuals_are_measured_not_asserted()
 
     print("\n" + "-" * 60)
     if FAILURES:

@@ -1,6 +1,6 @@
 # Backstop
 
-**Who actually stands behind tokenised real-world assets?**
+**How few issuers is CoinMarketCap's tokenised-asset catalogue made of?**
 
 Built for the [Build with CMC: API Hackathon](https://dorahacks.io/hackathon/coinmarketcap-api-202609/detail) · **Real World Assets** track.
 
@@ -8,39 +8,82 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 
 ---
 
+## What it found
+
+From the first production run — 107 calls, 73 credits, committed to
+`docs/data/snapshot.json`:
+
+> In CoinMarketCap's tokenised real-world-asset catalogue, **790 assets** carry
+> tokens, holding **$7.42bn** of reported market cap. **Fifteen** issuers hold all
+> of it. Tether and Paxos are **62%** between them, the top five **94%**. Almost
+> half the tokens — 669 of 1,428 — report no market cap at all. And every single
+> one of the 777 off-chain listings the API returns is Binance.
+
+| | |
+|---|---|
+| Assets in `map` / carrying tokens | 7,811 / **790** |
+| Reported tokenised cap | **$7.42bn** (token sum; asset-level sum $7.32bn — see below) |
+| Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
+| HHI over issuers, by value | **2,342.6** — 4.27 effective issuers |
+| Top 1 / 3 / 5 share | 36.7% / 73.9% / **94.1%** |
+| Tokens reporting no market cap | **669 of 1,428 (46.8%)** |
+| Off-chain listings, and where | 777 — **all Binance**, venue HHI 10,000 |
+| Chain concentration | Ethereum 74.5%; 1.73 effective chains |
+
+## What this catalogue is, and what it is not
+
+This matters more than the headline, because the headline is quotable and wrong
+without it.
+
+**It is not the RWA market as usually discussed.** CoinMarketCap's RWA catalogue
+contains exactly three asset classes: `commodity`, `stock` and `etf`. There is **no
+tokenised-treasury class at all** — no BUIDL, no BENJI, no OUSG. The institutional
+T-bill funds that dominate most RWA league tables are simply absent. What is here
+is tokenised gold plus equity and ETF wrappers.
+
+**The concentration is largely one asset.** Tokenised gold is **63.1%** of the
+whole catalogue. Tether's $2.72bn is two tokens on that one asset; Paxos's $1.89bn
+is one. So "two issuers are 62%" is, underneath, "tokenised gold is most of this
+catalogue, and two firms mint most of the gold". Both statements are true; only
+the second is informative.
+
+**The directory is complete, and padded.** `issuers_outside_directory` is **0** —
+every issuer appearing on a token is in the directory. But six entries declare
+tokens and carry no value whatever (`NA (Derivatives)`, Dinari Assets, Kinesis
+Assets, XAGx, Token, Superstate Assets), and four more never appear on a token at
+all. The residue is not *missing* issuers. It is *empty* ones.
+
+**Every share is a share of the half that reports a cap.** 46.8% of tokens return
+`market_cap: null`. 625 of those 669 belong to one issuer, Backed Assets, whose
+$746m is computed from the minority of its tokens that report anything.
+
+**The reconciliation gap is unresolved.** Per-token caps sum to $105.6m more than
+CoinMarketCap's own asset-level figures for the same 790 assets — a ratio of
+**1.0144**. Gold reconciles at 1.0000 and so does every other asset in the top 25,
+so the gap lives in the tail. It is published, not smoothed, and the attribution
+should not be called settled until it is explained.
+
+**"All listings are Binance" is about a field, not about price discovery.**
+`tradfi_markets[]` returns exchange listings. Every one of the 777 it returned is
+Binance. That is a real and total concentration *in what this field reports*. It
+is not a claim that Binance is where these assets are priced.
+
 ## The question
 
 Every tokenised real-world asset was minted by somebody, and CoinMarketCap's
-`issuers/list` directory lists **25 names**. Nothing in a per-asset view tells you
-how the market's value actually distributes across them. Backstop rebuilds the
-market along the issuer axis and measures it: Herfindahl-Hirschman Index, the
-effective number of issuers, and top-1/3/5 share — by value, overall and within
-each chain and asset class.
+`issuers/list` directory lists 25 names. Nothing in a per-asset view tells you how
+the catalogue's value distributes across them. Backstop rebuilds it along the
+issuer axis and measures the concentration by value: HHI, the effective number of
+issuers, and top-1/3/5 share — overall, within each chain, and within each asset
+class.
 
-### What is and isn't being claimed
+### What "issuer" means here
 
-The catalogue is large and the directory is small, which is a tempting sentence to
-write. It is not one this data licenses, so it isn't written here. Specifically:
-
-- **"Issuer" means the name CoinMarketCap attributes a token to.** The API's
-  issuer record carries a name, a website and a token roster. It carries no
-  custody, no jurisdiction and no legal entity, so it cannot answer who is
-  *liable* for a token — BlackRock, Securitize and the fund vehicle are three
-  different answers to "who is behind BUIDL" and this data distinguishes none of
-  them. Read every figure here as concentration of **attributed issuance**.
-- **25 is the directory's size, not a proven market count.** Three of the 25
-  (Bitget Assets, Coinbase, Swarm Assets) declare zero tokens. A fourth entry,
-  `NA (Derivatives)`, declares 239 tokens carrying no value at all — a catalogue
-  bucket, not an issuer. Backstop counts issuers that appear on tokens but are
-  absent from the directory, and publishes that residual, precisely because the
-  directory should not be assumed complete.
-- **The asset count depends which endpoint you ask.** `map` reports
-  `total_size: 7811`; `assets/list` reports `7942`. CoinMarketCap's own two
-  endpoints disagree by 131, and Backstop publishes both rather than picking the
-  bigger one.
-- **Most catalogued assets carry no value.** In a 250-asset page, 192 had
-  `has_tokens: true` and only **121 had a non-zero tokenised market cap**. The
-  concentration figures describe the assets that carry value, not the catalogue.
+The API's issuer record carries a name, a website and a token roster. It carries no
+custody, no jurisdiction and no legal entity, so it cannot say who is *liable* for
+a token — BlackRock, Securitize and the fund vehicle are three different answers to
+"who is behind BUIDL" and this data distinguishes none of them. Read every figure
+as concentration of **attributed issuance**, nothing more.
 
 ## Why the obvious way is wrong
 
@@ -139,8 +182,10 @@ URL, never logged, and never written into the snapshot.
 project. It carries `issuer_id`, `issuer_name` and a per-token `market_cap`, which
 means the issuer→value attribution needs no fuzzy matching, no name normalisation
 and no join at all. Nothing else I know of publishes tokenised-asset market caps
-broken out by the party that minted them. A full refresh of all 7,942 assets costs
-around 100 credits and takes a few minutes.
+broken out by the party that minted them. A full refresh — the whole 7,811-row map,
+every one of the 790 assets that carry tokens, the issuer directory, the chain
+lookup and the metadata — measured **73 credits and 107 calls**, a few minutes end
+to end.
 
 **Where it got in the way.**
 
@@ -175,9 +220,12 @@ around 100 credits and takes a few minutes.
    publishes is a share of the value that *is* reported. Treating null as zero is
    arithmetically harmless and editorially misleading, so the count is published
    as its own line, overall and per issuer.
-7. **The two endpoints disagree about how big the universe is.** `map` says 7,811,
-   `assets/list` says 7,942. Neither is documented as a subset of the other. Both
-   are published.
+7. **The two endpoints disagree about how big the catalogue is.** `map` says 7,811,
+   `assets/list` says 7,942. Neither is documented as a subset of the other, and
+   neither is the number that matters: only **790** rows carry tokens at all. A
+   write-up that quotes either total as "the tokenised market" is out by an order
+   of magnitude — which is the mistake this README made until the first live run
+   corrected it.
 8. **`num_tokens` in the issuer directory doesn't agree with the token data.**
    Bitget Assets and Coinbase are both listed with `num_tokens: 0`. Backed Assets
    declares 1,176. Backstop reports the declared count alongside the count it
@@ -208,7 +256,7 @@ scripts/
   fetch_snapshot.py             the pipeline
   probe.ps1  probe.py           endpoint discovery — dumps raw responses
 tests/
-  test_aggregation.py           90 checks, hand-calculated, no network
+  test_aggregation.py           130 checks, hand-calculated, no network
   make_fixture.py               synthetic snapshot for dashboard work
 docs/
   index.html                    the dashboard
@@ -228,7 +276,7 @@ python -m http.server -d docs 8000               # then open localhost:8000
 ## On correctness
 
 The numbers are the product, so the arithmetic is tested rather than trusted.
-`tests/test_aggregation.py` runs 90 checks against fixtures whose answers are
+`tests/test_aggregation.py` runs 130 checks against fixtures whose answers are
 worked out by hand in the comments — including the Gold case above in miniature,
 where a three-issuer asset must total 200 and not the 460 that per-asset counting
 would produce. It needs no network and runs in the workflow before a single credit

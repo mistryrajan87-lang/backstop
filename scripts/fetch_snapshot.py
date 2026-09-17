@@ -4,18 +4,27 @@ Backstop - issuer concentration in the tokenised real-world-asset market.
 
 THE QUESTION
 ------------
-CoinMarketCap lists the tokenised real-world-asset universe as a flat list of
-roughly 7,900 assets. But a tokenised asset is not one thing: "Gold" is a single
-row with a single market cap, and behind it sit seven different tokens minted by
-six different issuers - Tether mints two of them. Backstop rebuilds the market
-along that second axis and measures how concentrated it is by value.
+CoinMarketCap's RWA map lists 7,811 rows, but only 790 of them carry tokens. Those
+790 hold $7.42bn of reported cap and are what Backstop measures. A tokenised asset
+is not one thing: "Gold" is a single row with a single market cap, and behind it
+sit seven tokens minted by six different issuers - Tether mints two of them.
+Backstop rebuilds the catalogue along that second axis and measures how
+concentrated it is by value.
 
-CoinMarketCap's issuer directory lists 25 names. That is the directory's size, not
-a proven count of the market: three of those rows declare no tokens at all, one is
-an aggregate bucket, and `map` and `assets/list` disagree about how large the
-catalogue is (7,811 against 7,942). Nothing here assumes the directory is
-complete - the count of issuers that appear on tokens but not in it is computed
-and published on every run.
+Scope, from the first live run, because the figures mislead without it:
+
+  * The catalogue holds three asset classes - commodity, stock, etf. There is no
+    tokenised-treasury class, so BUIDL, BENJI and OUSG are absent. This is
+    tokenised gold plus equity and ETF wrappers, not the institutional RWA market.
+  * Tokenised gold is 63% of it. The two largest issuers are large because they
+    mint gold: Tether holds two tokens on one asset, Paxos one.
+  * The issuer directory is complete for this join - no issuer appears on a token
+    without being listed - but six entries carry no value at all and four never
+    appear on a token. The residue is empty issuers, not missing ones.
+  * 47% of tokens report market_cap as null, so every share is a share of the
+    half that reports one.
+
+None of those are assumed. Each is computed and published on every run.
 
 WHAT IT MEASURES
 ----------------
@@ -493,6 +502,7 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
     # cannot move a concentration figure, and credits are finite.
     print("5/7 chain lookup via crypto_id ...")
     chain_of: dict[str, str] = {}
+    unmatched_ids: list[str] = []
     if chain_lookup:
         want = sorted({l["crypto_id"] for l in links
                        if l["crypto_id"] and l["market_cap"] > 0})
@@ -501,7 +511,9 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
             print(f"    capping at {max_chain_calls} of {len(cbatches)} batches",
                   file=sys.stderr)
             cbatches = cbatches[:max_chain_calls]
+        asked: set[str] = set()
         for batch in cbatches:
+            asked.update(batch)
             data = api.get(ENDPOINTS["crypto_info"]["path"], id=",".join(batch))
             if not isinstance(data, dict):
                 continue
@@ -512,7 +524,9 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
                 name = text(plat, "name") if isinstance(plat, dict) else ""
                 # A coin with no platform is its own chain, not an unknown.
                 chain_of[str(cid)] = name or (text(rec, "name") or "unknown")
-        print(f"    {len(chain_of)} of {len(want)} valued tokens placed on a chain")
+        unmatched_ids = sorted(asked - set(chain_of))
+        print(f"    {len(chain_of)} of {len(want)} valued tokens placed on a chain"
+              + (f"; {len(unmatched_ids)} crypto_ids not returned" if unmatched_ids else ""))
 
     print("6/7 issuer cross-check ...")
     declared: dict[str, int] = {}
@@ -552,7 +566,8 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
 
     return {"universe": universe, "tokenised": tokenised, "issuers": issuers,
             "links": links, "tradfi": tradfi, "tradfi_venues": dict(tradfi_venues),
-            "null_caps": null_caps, "chain_of": chain_of, "cap_by_id": cap_by_id,
+            "null_caps": null_caps, "chain_of": chain_of,
+            "unmatched_crypto_ids": unmatched_ids, "cap_by_id": cap_by_id,
             "quoted_caps": quoted_caps, "assets_seen": assets_seen,
             "declared": declared, "info": info, "market_pairs_probe": mp,
             "batches_run": len(batches), "batches_total":
@@ -644,6 +659,27 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
     token_total = sum(summed_by_asset[r] for r in recon_assets)
     asset_total = sum(raw["quoted_caps"][r] for r in recon_assets)
 
+    # An aggregate ratio of 1.0 can hide one asset reconciling perfectly and
+    # another being badly wrong. Check every asset on its own and name the ones
+    # that miss, so a clean total cannot cover a broken join.
+    outliers = []
+    for rid in recon_assets:
+        cap = raw["quoted_caps"][rid]
+        if cap <= 0:
+            continue
+        ratio = summed_by_asset[rid] / cap
+        if abs(ratio - 1.0) > 0.01:
+            a = raw["assets_seen"].get(rid, {})
+            outliers.append({
+                "rwa_id": rid,
+                "symbol": text(a, "symbol"),
+                "name": text(a, "name"),
+                "asset_cap": cap,
+                "token_sum": summed_by_asset[rid],
+                "ratio": round(ratio, 4),
+            })
+    outliers.sort(key=lambda o: -abs(o["ratio"] - 1.0))
+
     # The largest assets, and how their value splits across issuers - the single
     # clearest illustration of why per-asset attribution would have been wrong.
     top_assets = []
@@ -714,7 +750,14 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                 "sum_of_asset_caps": asset_total,
                 "difference": token_total - asset_total,
                 "ratio": round(token_total / asset_total, 4) if asset_total > 0 else None,
+                "assets_off_by_over_1pct": len(outliers),
+                "worst_assets": outliers[:15],
             },
+            "unmatched_crypto_ids": len(raw.get("unmatched_crypto_ids") or []),
+            "null_caps_by_issuer": sorted(
+                ({"issuer": m["name"], "tokens_without_cap": m["tokens_without_cap"]}
+                 for m in meta.values() if m["tokens_without_cap"]),
+                key=lambda r: -r["tokens_without_cap"])[:10],
             "note": "Issuer weights are summed from each token's own market cap. A "
                     "material share of tokens report market_cap as null; they are "
                     "counted here but carry no value and cannot move a concentration "
@@ -732,6 +775,11 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                                    key=lambda kv: -chain_total[kv[0]])
         },
         "chain_mix": concentration_block(dict(chain_total)),
+        "asset_mix": concentration_block(
+            {rid: cap for rid, cap in raw["quoted_caps"].items() if cap > 0},
+            {rid: (text(raw["assets_seen"].get(rid, {}), "symbol") or rid)
+             for rid in raw["quoted_caps"]},
+        ),
         "by_asset_class": {
             cls: concentration_block(dict(w), labels)
             for cls, w in sorted(class_issuer.items(),

@@ -256,11 +256,11 @@ footer a { color: var(--ink-2); }
     <div class="toprow">
       <div>
         <p class="eyebrow">Backstop · CoinMarketCap Real World Assets API</p>
-        <h1>How few issuers is the tokenised asset market made of?</h1>
+        <h1>How few issuers is this catalogue made of?</h1>
         <p class="standfirst">
-          The tokenised asset universe is published as a list of assets. Every one of
-          those tokens was minted by somebody. Backstop rebuilds the market along that
-          axis and measures, by value, how concentrated it is.
+          CoinMarketCap publishes its tokenised real-world assets as a list of assets.
+          Every one of those tokens was minted by somebody. Backstop rebuilds the
+          catalogue along that axis and measures, by value, how concentrated it is.
         </p>
         <p class="standfirst" style="margin-top:10px;font-size:14px">
           <strong>Issuer</strong> here means the name CoinMarketCap attributes a token
@@ -278,15 +278,16 @@ footer a { color: var(--ink-2); }
     <span id="bannertext"></span>
   </div>
 
-  <div class="banner on" id="scopebanner" style="border-left-color:var(--series-1)">
-    <span class="ico" aria-hidden="true" style="color:var(--series-1)">i</span>
-    <span id="scopebannertext"></span>
-  </div>
+  <section class="card" id="scopecard" aria-labelledby="h-scope">
+    <h2 id="h-scope">What this measures, and what it does not</h2>
+    <div class="kv" id="scopekv"></div>
+    <p class="sub" id="scopeprose" style="margin:16px 0 0"></p>
+  </section>
 
   <!-- headline ------------------------------------------------------------- -->
   <section class="card" aria-labelledby="h-headline">
     <h2 id="h-headline">Concentration headline</h2>
-    <p class="sub" id="scopedesc">Across the whole tokenised real-world-asset market, weighted by tokenised market capitalisation.</p>
+    <p class="sub" id="scopedesc">Across the whole catalogue, weighted by tokenised market capitalisation.</p>
 
     <div class="hero">
       <div class="heroblock">
@@ -776,7 +777,7 @@ function majorChains(s) {
 
 function blockFor(id) {
   if (id === "all") {
-    return { block: SNAP.overall, label: "the whole tokenised real-world-asset market", full: true };
+    return { block: SNAP.overall, label: "the whole tokenised-asset catalogue", full: true };
   }
   const kind = id.split(":")[0];
   const key = id.split(":").slice(1).join(":");
@@ -848,19 +849,68 @@ function renderScope(id) {
 function renderStatic() {
   const s = SNAP;
 
-  // What the figures do and do not cover, stated before the figures, not after.
+  // The scope card. Every value is read from the snapshot, so it cannot drift
+  // from the run it describes.
   {
-    const c = s.coverage || {}, n = s.counts || {};
-    const zero = (s.issuers || []).filter((r) => r.placeholder).length;
+    const c = s.coverage || {}, n = s.counts || {}, o = s.overall || {};
+    const cls = Object.entries(s.by_asset_class || {}).sort((a, b) => b[1].total - a[1].total);
+    const biggestClass = cls[0];
+    const topAsset = (s.top_assets || [])[0];
+    const rec = c.reconciliation || {};
+    const placeholders = (s.issuers || []).filter((r) => r.placeholder);
+    const neverSeen = Math.max(0, (n.issuers_in_directory || 0) - (n.issuers_seen || 0));
+
+    const rows = [
+      ["Rows in the asset map", fmtNum(n.assets_mapped)],
+      ["Of those, carrying tokens", fmtNum(n.assets_tokenised) + " — this is what is measured"],
+      ["Reported tokenised cap", fmtUSD(o.total)],
+      ["Issuers listed / on a token / with value",
+       fmtNum(n.issuers_in_directory) + " / " + fmtNum(n.issuers_seen) + " / " + fmtNum(n.issuers_with_value)],
+      ["Tokens reporting no market cap",
+       fmtNum(c.tokens_without_market_cap) + " of " + fmtNum(n.tokens_attributed) +
+       " (" + fmtPct((c.tokens_without_market_cap || 0) / Math.max(1, n.tokens_attributed || 1)) + ")"],
+      ["Issuers on a token but not in the directory", fmtNum(c.issuers_outside_directory)],
+      ["Directory entries carrying nothing",
+       fmtNum(placeholders.length) + " declare tokens worth $0; " + fmtNum(neverSeen) + " never appear on one"],
+      ["Per-token vs asset-level totals",
+       rec.ratio == null ? "—" : fmtNum(rec.ratio, 4) + "× — " + fmtUSD(Math.abs(rec.difference || 0)) + " apart"],
+    ];
+    document.getElementById("scopekv").innerHTML = rows.map(function (kvp) {
+      return "<div><span class=\"k\">" + esc(kvp[0]) + "</span><span class=\"v\">" + esc(kvp[1]) + "</span></div>";
+    }).join("");
+
     const bits = [];
-    bits.push(`Concentration is measured by <strong>tokenised market cap</strong> over the ` +
-      `${fmtNum(n.issuers_with_value)} issuers carrying any, out of ${fmtNum(n.issuers_in_directory)} in CoinMarketCap's directory.`);
-    if (zero) bits.push(`${fmtNum(zero)} further ${zero === 1 ? "entry declares" : "entries declare"} tokens worth nothing and ${zero === 1 ? "is" : "are"} excluded.`);
-    if (c.tokens_without_market_cap) bits.push(`${fmtNum(c.tokens_without_market_cap)} of ${fmtNum(n.tokens_attributed)} tokens report no market cap at all, so every share below is a share of the value that <em>is</em> reported.`);
-    bits.push(c.issuers_outside_directory
-      ? `<strong>${fmtNum(c.issuers_outside_directory)} issuers appear on tokens but not in the directory</strong> — the directory is not a complete census.`
-      : `No issuer appeared on a token without also being in the directory in this run.`);
-    document.getElementById("scopebannertext").innerHTML = bits.join(" ");
+    const classNames = cls.map(function (e) { return e[0]; });
+    if (classNames.length) {
+      const hasIncome = classNames.some(function (k) { return /treasur|bond|fund|credit/i.test(k); });
+      bits.push("<strong>This is not the RWA market as usually discussed.</strong> The catalogue holds " +
+        classNames.length + " asset " + (classNames.length === 1 ? "class" : "classes") + " — " +
+        classNames.map(esc).join(", ") +
+        (hasIncome ? "." :
+          " — and no tokenised-treasury class at all, so the institutional T-bill funds that dominate most RWA league tables are absent from it."));
+    }
+    if (biggestClass && o.total > 0) {
+      const classShare = biggestClass[1].total / o.total;
+      const assetShare = topAsset ? topAsset.tokenized_market_cap / o.total : 0;
+      // If the biggest class is essentially one asset, saying both percentages
+      // reads like a mistake. Say it once.
+      const classIsOneAsset = topAsset && Math.abs(classShare - assetShare) < 0.01;
+      if (classIsOneAsset) {
+        bits.push("<strong>" + fmtPct(assetShare) + " of it is a single asset</strong> — " +
+          esc(topAsset.name || topAsset.symbol) + ", which is essentially the whole " +
+          esc(biggestClass[0]) + " class. The largest issuers are large because they mint it, " +
+          "so read the issuer figures as a statement about that asset before anything else.");
+      } else {
+        bits.push("<strong>" + esc(biggestClass[0]) + " is " + fmtPct(classShare) + " of it</strong>" +
+          (topAsset ? ", and " + esc(topAsset.symbol) + " alone is " + fmtPct(assetShare) + "." : "."));
+      }
+    }
+    if (placeholders.length) {
+      bits.push("The residue is not <em>missing</em> issuers but <em>empty</em> ones: " +
+        placeholders.slice(0, 8).map(function (r) { return esc(r.name); }).join(", ") +
+        " declare tokens and carry nothing.");
+    }
+    document.getElementById("scopeprose").innerHTML = bits.join(" ");
   }
 
   if (s.synthetic) {
