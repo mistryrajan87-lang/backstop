@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-17T22:54:32+00:00",
+ "generated_at": "2026-09-17T23:40:13+00:00",
  "method": {
   "metric": "Herfindahl-Hirschman Index over issuer shares of tokenised market cap",
   "scale": "0-10000; 1500 and 2500 are the 2010 US Horizontal Merger Guidelines thresholds for moderate and high concentration",

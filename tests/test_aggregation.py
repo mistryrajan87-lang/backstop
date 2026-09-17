@@ -18,13 +18,15 @@ Run:  python3 tests/test_aggregation.py
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from fetch_snapshot import (  # noqa: E402
-    CMC, ENDPOINTS, asset_cap, build_snapshot, collect, concentration_block, usd_quote,
+    CMC, ENDPOINTS, PARAM, asset_cap, build_snapshot, collect, concentration_block,
+    error_code, usd_quote,
 )
 
 FAILURES: list[str] = []
@@ -554,6 +556,208 @@ def test_venues_and_placeholders():
           snap["overall"]["n"] == 1, f"got {snap['overall']['n']}")
 
 
+# --------------------------------------------------------------------------- #
+# 11. The client, against real response envelopes.
+#
+#     This is the test whose absence cost a production run. Every other test
+#     replaces CMC.get() wholesale, so the client's own status handling was never
+#     exercised: /v1/key/info returns the INTEGER 0 on success and every
+#     /v5/real-world-assets endpoint returns the STRING "0". `if
+#     status.get("error_code")` therefore passed the plan check and rejected all
+#     seven data endpoints, because "0" is truthy. Four calls, two credits, and an
+#     empty snapshot that the publish gate caught.
+# --------------------------------------------------------------------------- #
+class StubResponse:
+    def __init__(self, payload, status_code=200, text=""):
+        self.status_code = status_code
+        self._payload = payload
+        self.text = text
+
+    def json(self):
+        if self._payload is None:
+            raise ValueError("no json")
+        return self._payload
+
+
+class StubSession:
+    """Stands in for requests.Session, so the REAL CMC.get() runs."""
+
+    def __init__(self, script):
+        self.script = list(script)
+        self.headers = {}
+        self.calls = []
+
+    def get(self, url, params=None, timeout=None):
+        self.calls.append((url, dict(params or {})))
+        return self.script.pop(0)
+
+
+def client_with(script):
+    api = CMC("dummy-key", rate_limit_minute=6000)   # no real throttling in tests
+    stub = StubSession(script)
+    stub.headers.update(api.s.headers)               # keep the auth header the client set
+    api.s = stub
+    return api
+
+
+def test_client_envelopes():
+    print("\n[11] the client against real CMC status envelopes")
+
+    check("integer 0 reads as success", error_code({"error_code": 0}) is None)
+    check("STRING \"0\" also reads as success — the bug that broke the first run",
+          error_code({"error_code": "0"}) is None, repr(error_code({"error_code": "0"})))
+    check("a real code survives as an error", error_code({"error_code": 1006}) == 1006)
+    check("a real code as a string survives too", error_code({"error_code": "1006"}) == "1006")
+    check("a missing code is success", error_code({}) is None)
+    check("an unparseable code is not waved through",
+          error_code({"error_code": "nope"}) == "nope")
+
+    # v5 success: string "0", data under an envelope key
+    api = client_with([StubResponse(
+        {"status": {"error_code": "0", "error_message": "", "credit_count": 1},
+         "data": {"rwa_assets": [{"rwa_id": 1, "symbol": "GOLD"}],
+                  "total_size": 1, "has_more": False}})])
+    data = api.get(ENDPOINTS["map"]["path"], limit=250)
+    check("a v5 call with error_code \"0\" returns its data",
+          isinstance(data, dict) and len(data.get("rwa_assets", [])) == 1, repr(data))
+    check("and is not recorded as refused", api.refused == [], str(api.refused))
+    check("its credit is counted", api.credits == 1, f"got {api.credits}")
+
+    # v1 success: integer 0
+    api2 = client_with([StubResponse(
+        {"status": {"error_code": 0, "error_message": None, "credit_count": 0},
+         "data": {"plan": {"credit_limit_monthly": 15000, "rate_limit_minute": 50},
+                  "usage": {"current_month": {"credits_used": 0, "credits_left": 15000}}}})])
+    api2.read_plan()
+    check("key/info's integer 0 still reads as success",
+          api2.plan.get("credit_limit_monthly") == 15000, str(api2.plan))
+    check("and the real rate limit is adopted",
+          abs(api2.min_interval - 60.0 / 46) < 1e-9, f"got {api2.min_interval}")
+
+    # plan gate
+    api3 = client_with([StubResponse(
+        {"status": {"error_code": 1006,
+                    "error_message": "Your API Key subscription plan doesn't support this endpoint.",
+                    "credit_count": 0}}, status_code=403)])
+    out = api3.get(ENDPOINTS["market_pairs"]["path"], **{PARAM["rwa_id"]: "1"})
+    check("a plan-gated call returns None", out is None)
+    check("and is recorded with its reason", len(api3.refused) == 1 and
+          "1006" in api3.refused[0]["reason"], str(api3.refused))
+
+    # 429 then success
+    api4 = client_with([
+        StubResponse(None, status_code=429),
+        StubResponse({"status": {"error_code": "0", "credit_count": 1},
+                      "data": {"issuers": [{"issuer_id": "a1", "name": "Alpha"}],
+                               "total_size": 1, "has_more": False}}),
+    ])
+    api4.max_retries = 3
+    import fetch_snapshot as fs
+    real_sleep, fs.time.sleep = fs.time.sleep, lambda *_: None
+    try:
+        d4 = api4.get(ENDPOINTS["issuers_list"]["path"], limit=250)
+    finally:
+        fs.time.sleep = real_sleep
+    check("a 429 is retried rather than recorded as a failure",
+          isinstance(d4, dict) and len(d4.get("issuers", [])) == 1, repr(d4))
+    check("and the retry is not counted as a refusal", api4.refused == [], str(api4.refused))
+
+    # non-JSON
+    api5 = client_with([StubResponse(None, status_code=502, text="<html>bad gateway</html>")])
+    check("a non-JSON body returns None", api5.get("/v5/real-world-assets/map") is None)
+    check("and is recorded", len(api5.refused) == 1 and "non-JSON" in api5.refused[0]["reason"],
+          str(api5.refused))
+
+    # the key must never reach a URL or a recorded param
+    api6 = client_with([StubResponse({"status": {"error_code": "0"}, "data": {}})])
+    api6.get(ENDPOINTS["quotes"]["path"], **{PARAM["rwa_id"]: "1,2,3"})
+    url, params = api6.s.calls[0]
+    check("the key is not in the URL", "dummy-key" not in url, url)
+    check("the key is not in the params", "dummy-key" not in json.dumps(params), str(params))
+    check("the key travels as a header",
+          api6.s.headers.get("X-CMC_PRO_API_KEY") == "dummy-key", str(api6.s.headers))
+
+
+# --------------------------------------------------------------------------- #
+# 12. End-to-end through the REAL client, with realistic envelopes.
+#
+#     The seam is where this broke: client and aggregation were each correct and
+#     the join between them was not. So drive collect() through CMC.get() with
+#     nothing stubbed but the HTTP call itself.
+# --------------------------------------------------------------------------- #
+def test_end_to_end_through_real_client():
+    print("\n[12] collect() end to end through the real client")
+
+    def env(key, items, total=None, more=False, credit=1):
+        return StubResponse({"status": {"error_code": "0", "error_message": "", "credit_count": credit},
+                             "data": {key: items, "total_size": total if total is not None else len(items),
+                                      "has_more": more}})
+
+    assets = [asset(1, "GOLD", "commodity", 100.0), asset(2, "NVDA", "stock", 60.0)]
+    tokens1 = [token("a1", "Alpha", "PAXG", 70.0, crypto_id=10),
+               token("b2", "Bravo", "XAUt", 30.0, crypto_id=11)]
+    tokens2 = [token("a1", "Alpha", "NVDAX", 60.0, crypto_id=12)]
+
+    quotes_payload = StubResponse({
+        "status": {"error_code": "0", "credit_count": 1},
+        "data": {"rwa_assets": [
+            {**assets[0], "tokens": tokens1, "tradfi_markets": []},
+            {**assets[1], "tokens": tokens2,
+             "tradfi_markets": [venue("Binance", "NVDA")]},
+        ], "total_size": 2, "has_more": False}})
+
+    script = [
+        StubResponse({"status": {"error_code": 0, "credit_count": 0},
+                      "data": {"plan": {"credit_limit_monthly": 15000, "rate_limit_minute": 50},
+                               "usage": {"current_month": {"credits_left": 15000}}}}),  # key/info
+        env("rwa_assets", assets, credit=0),        # map
+        env("issuers", [issuer("a1", "Alpha", 2), issuer("b2", "Bravo", 1)]),
+        env("rwa_assets", assets),                  # assets/list
+        quotes_payload,                             # quotes/latest
+        StubResponse({"status": {"error_code": "0", "credit_count": 1},
+                      "data": {"10": {"id": 10, "symbol": "PAXG",
+                                      "platform": {"name": "Ethereum"}},
+                               "11": {"id": 11, "symbol": "XAUt",
+                                      "platform": {"name": "Ethereum"}},
+                               "12": {"id": 12, "symbol": "NVDAX",
+                                      "platform": {"name": "Solana"}}}}),   # crypto info
+        env("tokens", [], total=2),                 # issuer detail a1
+        env("tokens", [], total=1),                 # issuer detail b2
+        env("rwa_assets", [{"rwa_id": 1, "industry": "Mining"}]),           # info
+        StubResponse({"status": {"error_code": 1006,
+                                 "error_message": "plan doesn't support this endpoint"}}),  # market-pairs
+    ]
+
+    api = client_with(script)
+    import fetch_snapshot as fs
+    real_sleep, fs.time.sleep = fs.time.sleep, lambda *_: None
+    try:
+        snap = build_snapshot(collect(api, max_assets=9000, quote_batch=100,
+                                      max_quote_calls=120, info_sample=25), api)
+    finally:
+        fs.time.sleep = real_sleep
+
+    o = snap["overall"]
+    check("the run attributes value rather than producing an empty snapshot",
+          o["n"] > 0, f"got {o['n']} issuers with value")
+    check("both issuers land", o["n"] == 2, f"got {o['n']}")
+    check("total is 160", approx(o["total"], 160.0), f"got {o['total']}")
+    # Alpha 70+60=130, Bravo 30 -> shares .8125 / .1875
+    #   .8125^2 + .1875^2 = .66015625 + .03515625 = .6953125 -> HHI 6953.1
+    check("HHI is 6953.1", approx(o["hhi"], 6953.1, 0.1), f"got {o['hhi']}")
+    check("no list endpoint was recorded as refused",
+          [r for r in api.refused if "market-pairs" not in r["path"]] == [],
+          str(api.refused))
+    check("only the plan-gated endpoint is refused", len(api.refused) == 1, str(api.refused))
+    check("chains resolved through the real client", len(snap["by_chain"]) == 2,
+          str(list(snap["by_chain"])))
+    check("the Binance listing is picked up",
+          snap["tradfi_reference"]["venues"] and
+          snap["tradfi_reference"]["venues"][0]["name"] == "Binance",
+          str(snap["tradfi_reference"]["venues"]))
+    check("credits are accumulated from the envelopes", api.credits >= 7, f"got {api.credits}")
+
+
 if __name__ == "__main__":
     test_per_token_attribution()
     test_reconciliation_gap()
@@ -565,6 +769,8 @@ if __name__ == "__main__":
     test_null_market_caps()
     test_chain_join()
     test_venues_and_placeholders()
+    test_client_envelopes()
+    test_end_to_end_through_real_client()
 
     print("\n" + "-" * 60)
     if FAILURES:

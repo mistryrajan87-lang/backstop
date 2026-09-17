@@ -142,6 +142,25 @@ PARAM = {"rwa_id": "rwa_id", "issuer_id": "issuer_id"}
 LIST_KEYS = ("rwa_assets", "issuers", "tokens")
 
 
+def error_code(status: dict) -> int | str | None:
+    """The real error code from a CMC status block, or None on success.
+
+    CoinMarketCap is not consistent about the type. /v1/key/info returns the
+    integer 0 on success; every /v5/real-world-assets endpoint returns the
+    STRING "0". A plain truthiness test therefore passes the key check and
+    rejects every data call, because "0" is truthy in Python - which is exactly
+    what happened on the first production run: four calls, two credits, and an
+    empty snapshot the publish gate refused.
+    """
+    code = status.get("error_code")
+    if code is None or code == "":
+        return None
+    try:
+        return None if int(code) == 0 else code
+    except (TypeError, ValueError):
+        return code          # unparseable is not success
+
+
 # --------------------------------------------------------------------------- #
 # client
 # --------------------------------------------------------------------------- #
@@ -199,9 +218,9 @@ class CMC:
             status = body.get("status") or {}
             self.credits += status.get("credit_count") or 0
 
-            if status.get("error_code"):
-                self._record(path, params,
-                             f"{status.get('error_code')}: {status.get('error_message')}")
+            err = error_code(status)
+            if err:
+                self._record(path, params, f"{err}: {status.get('error_message')}")
                 return None
             return body.get("data")
 
