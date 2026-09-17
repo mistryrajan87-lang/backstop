@@ -7,10 +7,15 @@ THE QUESTION
 CoinMarketCap lists the tokenised real-world-asset universe as a flat list of
 roughly 7,900 assets. But a tokenised asset is not one thing: "Gold" is a single
 row with a single market cap, and behind it sit seven different tokens minted by
-seven different issuers. Backstop rebuilds the market along that second axis and
-measures how few issuers it actually depends on.
+six different issuers - Tether mints two of them. Backstop rebuilds the market
+along that second axis and measures how concentrated it is by value.
 
-The whole directory holds 25 issuers.
+CoinMarketCap's issuer directory lists 25 names. That is the directory's size, not
+a proven count of the market: three of those rows declare no tokens at all, one is
+an aggregate bucket, and `map` and `assets/list` disagree about how large the
+catalogue is (7,811 against 7,942). Nothing here assumes the directory is
+complete - the count of issuers that appear on tokens but not in it is computed
+and published on every run.
 
 WHAT IT MEASURES
 ----------------
@@ -19,10 +24,14 @@ effective number of issuers (1 / sum of squared shares) - the count of
 equal-sized issuers that would produce the same concentration. Reported overall
 and within each asset class.
 
-HHI thresholds follow the 2010 US Horizontal Merger Guidelines: below 1500
-unconcentrated, 1500-2500 moderately concentrated, above 2500 highly
-concentrated. (The 2023 guidelines lowered the highly-concentrated line to 1800;
-the stricter 2010 reading is used here so the verdict is never overstated.)
+HHI here is concentration of CoinMarketCap-attributed tokenised market cap. It is
+not a measure of issuance capacity, redemption liability or transfer-agent share,
+and the antitrust thresholds below do not turn it into a risk model. Below 1500
+unconcentrated, 1500-2500 moderately concentrated, above 2500 highly concentrated,
+per the 2010 US Horizontal Merger Guidelines. (The 2023 guidelines lowered the
+highly-concentrated line to 1800;
+the 2010 cutoffs are used here, so fewer markets are
+called highly concentrated than the current guidelines would call.)
 
 HOW THE ATTRIBUTION WORKS - and why the obvious way is wrong
 ------------------------------------------------------------

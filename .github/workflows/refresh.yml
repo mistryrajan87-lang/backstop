@@ -83,10 +83,29 @@ jobs:
           # The per-token totals must land near CoinMarketCap's own asset-level
           # figure. If they do not, the attribution is wrong and the page would
           # publish a confident wrong number.
+          #
+          # The bands are deliberately tight. A 0.5-2.0 gate passes a 30%
+          # systematic bias, which is exactly the failure that would survive to
+          # the headline. The Gold example reconciles at 1.0000, so anything
+          # outside a couple of percent wants looking at before it is published,
+          # and anything outside 15% is not a wobble.
           r = c["reconciliation"]
-          if r["ratio"] is not None and not (0.5 <= r["ratio"] <= 2.0):
-              sys.exit(f"Refusing to publish: token caps are {r['ratio']}x the "
-                       f"asset caps over {r['assets_compared']} assets.")
+          if r["ratio"] is not None:
+              if not (0.85 <= r["ratio"] <= 1.15):
+                  sys.exit(
+                      f"Refusing to publish: per-token caps are {r['ratio']}x the "
+                      f"asset-level caps over {r['assets_compared']} assets. That is "
+                      f"a systematic attribution error, not noise - check whether "
+                      f"quotes/latest returned every token for those assets before "
+                      f"loosening this gate."
+                  )
+              if not (0.98 <= r["ratio"] <= 1.02):
+                  print(f"::warning::Reconciliation ratio {r['ratio']} over "
+                        f"{r['assets_compared']} assets - outside the 0.98-1.02 band. "
+                        f"Published, but do not quote the headline figures until you "
+                        f"know why.")
+          else:
+              print("::warning::No reconciliation ratio - nothing could be compared.")
           if not c["assets_fully_quoted"]:
               print(f"::warning::Partial run - {c['quote_batches_run']} of "
                     f"{c['quote_batches_total']} quote batches. The page says so.")
