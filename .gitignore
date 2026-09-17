@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+
+# Raw probe dumps are working artefacts, and probe 1's includes the key/info
+# response. The curated request/response evidence lives in the README instead.
+probe_output.json
+probe2_output.json
+
+# Internal working notes. Carries account handles, an email address and the
+# session-to-session context - none of which belongs in a public repository.
+HANDOVER.md
+SUBMISSION-DRAFTS.md
+
+# Never, under any circumstance.
+.env
+*.key
+secrets*

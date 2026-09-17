@@ -1,0 +1,3085 @@
+{
+ "generated_at": "2026-09-17T22:54:32+00:00",
+ "method": {
+  "metric": "Herfindahl-Hirschman Index over issuer shares of tokenised market cap",
+  "scale": "0-10000; 1500 and 2500 are the 2010 US Horizontal Merger Guidelines thresholds for moderate and high concentration",
+  "effective_n": "1 / sum of squared shares - the number of equal-sized issuers that would produce the same HHI",
+  "weight": "each token's own market cap in USD, from quotes/latest tokens[], summed by issuer - never the asset's cap, which several issuers share"
+ },
+ "counts": {
+  "assets_mapped": 600,
+  "assets_tokenised": 518,
+  "assets_quoted": 518,
+  "issuers_in_directory": 26,
+  "issuers_seen": 26,
+  "issuers_with_value": 25,
+  "tokens_attributed": 1030
+ },
+ "coverage": {
+  "quote_batches_run": 6,
+  "quote_batches_total": 6,
+  "assets_fully_quoted": true,
+  "tokens_without_issuer": 0,
+  "value_without_issuer": 0.0,
+  "tokens_without_market_cap": 129,
+  "issuers_outside_directory": 0,
+  "chains_resolved": 11,
+  "value_without_a_chain": 0.0,
+  "placeholder_issuers": 1,
+  "reconciliation": {
+   "assets_compared": 518,
+   "sum_of_token_caps": 26946007563.079975,
+   "sum_of_asset_caps": 26946007563.079967,
+   "difference": 7.62939453125e-06,
+   "ratio": 1.0
+  },
+  "note": "Issuer weights are summed from each token's own market cap. A material share of tokens report market_cap as null; they are counted here but carry no value and cannot move a concentration figure, so every share below is a share of the value that IS reported. The reconciliation compares the per-token total against the asset-level tokenised market cap CoinMarketCap gives for the same assets; a ratio far from 1.0 means the token lists do not account for the whole of those assets."
+ },
+ "plan": {
+  "credit_limit_monthly": 15000,
+  "rate_limit_minute": 50,
+  "credits_left_this_month": 14900
+ },
+ "overall": {
+  "total": 26946007563.080006,
+  "hhi": 1703.9,
+  "effective_n": 5.87,
+  "verdict": "moderately concentrated",
+  "top1": 0.3594,
+  "top3": 0.5807,
+  "top5": 0.6844,
+  "n": 25,
+  "leaders": [
+   {
+    "key": "issuer01",
+    "label": "Synthetic Issuer 01",
+    "value": 9684153208.49,
+    "share": 0.3594
+   },
+   {
+    "key": "issuer02",
+    "label": "Synthetic Issuer 02",
+    "value": 4229177206.6900005,
+    "share": 0.157
+   },
+   {
+    "key": "issuer03",
+    "label": "Synthetic Issuer 03",
+    "value": 1735508907.6499999,
+    "share": 0.0644
+   },
+   {
+    "key": "issuer04",
+    "label": "Synthetic Issuer 04",
+    "value": 1500670926.82,
+    "share": 0.0557
+   },
+   {
+    "key": "issuer05",
+    "label": "Synthetic Issuer 05",
+    "value": 1293515943.5199995,
+    "share": 0.048
+   },
+   {
+    "key": "issuer06",
+    "label": "Synthetic Issuer 06",
+    "value": 1055683193.44,
+    "share": 0.0392
+   },
+   {
+    "key": "issuer07",
+    "label": "Synthetic Issuer 07",
+    "value": 1054661621.3299998,
+    "share": 0.0391
+   },
+   {
+    "key": "issuer08",
+    "label": "Synthetic Issuer 08",
+    "value": 886139648.0900002,
+    "share": 0.0329
+   },
+   {
+    "key": "issuer10",
+    "label": "Synthetic Issuer 10",
+    "value": 619708023.8799999,
+    "share": 0.023
+   },
+   {
+    "key": "issuer11",
+    "label": "Synthetic Issuer 11",
+    "value": 592253582.48,
+    "share": 0.022
+   },
+   {
+    "key": "issuer13",
+    "label": "Synthetic Issuer 13",
+    "value": 507078688.3700002,
+    "share": 0.0188
+   },
+   {
+    "key": "issuer09",
+    "label": "Synthetic Issuer 09",
+    "value": 438844318.1099999,
+    "share": 0.0163
+   }
+  ]
+ },
+ "by_chain": {
+  "Ethereum": {
+   "total": 11020200776.769999,
+   "hhi": 1722.0,
+   "effective_n": 5.81,
+   "verdict": "moderately concentrated",
+   "top1": 0.3716,
+   "top3": 0.5614,
+   "top5": 0.6718,
+   "n": 25,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 4095507396.319999,
+     "share": 0.3716
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 1373200560.92,
+     "share": 0.1246
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 718159511.39,
+     "share": 0.0652
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 623325776.4100001,
+     "share": 0.0566
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 593644569.27,
+     "share": 0.0539
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 569278400.35,
+     "share": 0.0517
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 463856608.71,
+     "share": 0.0421
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 316762157.40999997,
+     "share": 0.0287
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 283586119.38000005,
+     "share": 0.0257
+    },
+    {
+     "key": "issuer13",
+     "label": "Synthetic Issuer 13",
+     "value": 234649312.5,
+     "share": 0.0213
+    },
+    {
+     "key": "issuer11",
+     "label": "Synthetic Issuer 11",
+     "value": 179417605.34999996,
+     "share": 0.0163
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 169202435.48999995,
+     "share": 0.0154
+    }
+   ]
+  },
+  "Solana": {
+   "total": 5222955817.0,
+   "hhi": 1824.3,
+   "effective_n": 5.48,
+   "verdict": "moderately concentrated",
+   "top1": 0.3805,
+   "top3": 0.5797,
+   "top5": 0.7334,
+   "n": 25,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 1987283745.67,
+     "share": 0.3805
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 528243103.05999994,
+     "share": 0.1011
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 511961273.7800001,
+     "share": 0.098
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 460328893.38,
+     "share": 0.0881
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 342455744.27000004,
+     "share": 0.0656
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 252253216.81,
+     "share": 0.0483
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 170159861.1,
+     "share": 0.0326
+    },
+    {
+     "key": "issuer13",
+     "label": "Synthetic Issuer 13",
+     "value": 121438205.67999999,
+     "share": 0.0233
+    },
+    {
+     "key": "issuer15",
+     "label": "Synthetic Issuer 15",
+     "value": 90813945.84,
+     "share": 0.0174
+    },
+    {
+     "key": "issuer09",
+     "label": "Synthetic Issuer 09",
+     "value": 86006375.58,
+     "share": 0.0165
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 73021509.78999998,
+     "share": 0.014
+    },
+    {
+     "key": "issuer11",
+     "label": "Synthetic Issuer 11",
+     "value": 62934383.470000006,
+     "share": 0.012
+    }
+   ]
+  },
+  "Base": {
+   "total": 3022297072.059999,
+   "hhi": 1182.7,
+   "effective_n": 8.46,
+   "verdict": "unconcentrated",
+   "top1": 0.2724,
+   "top3": 0.4986,
+   "top5": 0.6276,
+   "n": 25,
+   "leaders": [
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 823342043.1299999,
+     "share": 0.2724
+    },
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 354452817.72,
+     "share": 0.1173
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 329204127.53,
+     "share": 0.1089
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 197246881.44,
+     "share": 0.0653
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 192593616.1,
+     "share": 0.0637
+    },
+    {
+     "key": "issuer11",
+     "label": "Synthetic Issuer 11",
+     "value": 134625380.60000002,
+     "share": 0.0445
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 120799012.29,
+     "share": 0.04
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 104979106.49,
+     "share": 0.0347
+    },
+    {
+     "key": "issuer12",
+     "label": "Synthetic Issuer 12",
+     "value": 101332357.49,
+     "share": 0.0335
+    },
+    {
+     "key": "issuer13",
+     "label": "Synthetic Issuer 13",
+     "value": 101283793.27999999,
+     "share": 0.0335
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 76158790.26,
+     "share": 0.0252
+    },
+    {
+     "key": "issuer14",
+     "label": "Synthetic Issuer 14",
+     "value": 75156078.29,
+     "share": 0.0249
+    }
+   ]
+  },
+  "Polygon": {
+   "total": 2895373453.03,
+   "hhi": 2363.8,
+   "effective_n": 4.23,
+   "verdict": "moderately concentrated",
+   "top1": 0.4519,
+   "top3": 0.6509,
+   "top5": 0.7444,
+   "n": 24,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 1308392930.31,
+     "share": 0.4519
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 410216591.83000004,
+     "share": 0.1417
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 165994839.27,
+     "share": 0.0573
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 145468359.53,
+     "share": 0.0502
+    },
+    {
+     "key": "issuer11",
+     "label": "Synthetic Issuer 11",
+     "value": 125183638.65999998,
+     "share": 0.0432
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 100789002.4,
+     "share": 0.0348
+    },
+    {
+     "key": "issuer09",
+     "label": "Synthetic Issuer 09",
+     "value": 65161390.89,
+     "share": 0.0225
+    },
+    {
+     "key": "issuer15",
+     "label": "Synthetic Issuer 15",
+     "value": 56234871.77,
+     "share": 0.0194
+    },
+    {
+     "key": "issuer16",
+     "label": "Synthetic Issuer 16",
+     "value": 55918329.44,
+     "share": 0.0193
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 55778968.67,
+     "share": 0.0193
+    },
+    {
+     "key": "issuer12",
+     "label": "Synthetic Issuer 12",
+     "value": 43292688.53,
+     "share": 0.015
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 41420692.21,
+     "share": 0.0143
+    }
+   ]
+  },
+  "Avalanche": {
+   "total": 2186498269.2599998,
+   "hhi": 2489.4,
+   "effective_n": 4.02,
+   "verdict": "moderately concentrated",
+   "top1": 0.4503,
+   "top3": 0.6947,
+   "top5": 0.7729,
+   "n": 24,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 984476487.46,
+     "share": 0.4503
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 412942567.68,
+     "share": 0.1889
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 121439841.8,
+     "share": 0.0555
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 96572503.76,
+     "share": 0.0442
+    },
+    {
+     "key": "issuer11",
+     "label": "Synthetic Issuer 11",
+     "value": 74438477.99,
+     "share": 0.034
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 70589629.64,
+     "share": 0.0323
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 69154440.12,
+     "share": 0.0316
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 51892231.400000006,
+     "share": 0.0237
+    },
+    {
+     "key": "issuer09",
+     "label": "Synthetic Issuer 09",
+     "value": 48963606.45999999,
+     "share": 0.0224
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 36535833.34,
+     "share": 0.0167
+    },
+    {
+     "key": "issuer12",
+     "label": "Synthetic Issuer 12",
+     "value": 33722369.6,
+     "share": 0.0154
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 29374562.62,
+     "share": 0.0134
+    }
+   ]
+  },
+  "Arbitrum": {
+   "total": 2027672646.3700001,
+   "hhi": 1809.0,
+   "effective_n": 5.53,
+   "verdict": "moderately concentrated",
+   "top1": 0.3056,
+   "top3": 0.6368,
+   "top5": 0.7549,
+   "n": 21,
+   "leaders": [
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 619565617.72,
+     "share": 0.3056
+    },
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 532147293.79,
+     "share": 0.2624
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 139510720.54999998,
+     "share": 0.0688
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 123112808.87,
+     "share": 0.0607
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 116257627.4,
+     "share": 0.0573
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 115475664.95999998,
+     "share": 0.0569
+    },
+    {
+     "key": "issuer09",
+     "label": "Synthetic Issuer 09",
+     "value": 67348002.03999999,
+     "share": 0.0332
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 60082767.3,
+     "share": 0.0296
+    },
+    {
+     "key": "issuer14",
+     "label": "Synthetic Issuer 14",
+     "value": 54903354.309999995,
+     "share": 0.0271
+    },
+    {
+     "key": "issuer19",
+     "label": "Synthetic Issuer 19",
+     "value": 30011459.75,
+     "share": 0.0148
+    },
+    {
+     "key": "issuer13",
+     "label": "Synthetic Issuer 13",
+     "value": 24896089.83,
+     "share": 0.0123
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 24865253.53,
+     "share": 0.0123
+    }
+   ]
+  },
+  "Coin 1557": {
+   "total": 421892537.22,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "verdict": "highly concentrated",
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 421892537.22,
+     "share": 1.0
+    }
+   ]
+  },
+  "Coin 1570": {
+   "total": 76623145.34,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "verdict": "highly concentrated",
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "leaders": [
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 76623145.34,
+     "share": 1.0
+    }
+   ]
+  },
+  "Coin 1915": {
+   "total": 61666722.35,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "verdict": "highly concentrated",
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "leaders": [
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 61666722.35,
+     "share": 1.0
+    }
+   ]
+  },
+  "Coin 1430": {
+   "total": 7109836.37,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "verdict": "highly concentrated",
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "leaders": [
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 7109836.37,
+     "share": 1.0
+    }
+   ]
+  },
+  "Coin 2045": {
+   "total": 3717287.31,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "verdict": "highly concentrated",
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "leaders": [
+    {
+     "key": "issuer18",
+     "label": "Synthetic Issuer 18",
+     "value": 3717287.31,
+     "share": 1.0
+    }
+   ]
+  }
+ },
+ "chain_mix": {
+  "total": 26946007563.08001,
+  "hhi": 2414.6,
+  "effective_n": 4.14,
+  "verdict": "moderately concentrated",
+  "top1": 0.409,
+  "top3": 0.715,
+  "top5": 0.9036,
+  "n": 11,
+  "leaders": [
+   {
+    "key": "Ethereum",
+    "label": "Ethereum",
+    "value": 11020200776.770006,
+    "share": 0.409
+   },
+   {
+    "key": "Solana",
+    "label": "Solana",
+    "value": 5222955817.000002,
+    "share": 0.1938
+   },
+   {
+    "key": "Base",
+    "label": "Base",
+    "value": 3022297072.0600004,
+    "share": 0.1122
+   },
+   {
+    "key": "Polygon",
+    "label": "Polygon",
+    "value": 2895373453.0300007,
+    "share": 0.1075
+   },
+   {
+    "key": "Avalanche",
+    "label": "Avalanche",
+    "value": 2186498269.26,
+    "share": 0.0811
+   },
+   {
+    "key": "Arbitrum",
+    "label": "Arbitrum",
+    "value": 2027672646.3699996,
+    "share": 0.0752
+   },
+   {
+    "key": "Coin 1557",
+    "label": "Coin 1557",
+    "value": 421892537.22,
+    "share": 0.0157
+   },
+   {
+    "key": "Coin 1570",
+    "label": "Coin 1570",
+    "value": 76623145.34,
+    "share": 0.0028
+   },
+   {
+    "key": "Coin 1915",
+    "label": "Coin 1915",
+    "value": 61666722.35,
+    "share": 0.0023
+   },
+   {
+    "key": "Coin 1430",
+    "label": "Coin 1430",
+    "value": 7109836.37,
+    "share": 0.0003
+   },
+   {
+    "key": "Coin 2045",
+    "label": "Coin 2045",
+    "value": 3717287.31,
+    "share": 0.0001
+   }
+  ]
+ },
+ "by_asset_class": {
+  "stock": {
+   "total": 19220540395.379993,
+   "hhi": 1759.7,
+   "effective_n": 5.68,
+   "verdict": "moderately concentrated",
+   "top1": 0.3673,
+   "top3": 0.5926,
+   "top5": 0.6971,
+   "n": 25,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 7058976907.059999,
+     "share": 0.3673
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 3000030657.45,
+     "share": 0.1561
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 1330130977.9899998,
+     "share": 0.0692
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 1056783602.3100001,
+     "share": 0.055
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 952181092.4699999,
+     "share": 0.0495
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 757703546.1599998,
+     "share": 0.0394
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 610319954.8700001,
+     "share": 0.0318
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 607902808.8000002,
+     "share": 0.0316
+    },
+    {
+     "key": "issuer11",
+     "label": "Synthetic Issuer 11",
+     "value": 493151387.28999996,
+     "share": 0.0257
+    },
+    {
+     "key": "issuer13",
+     "label": "Synthetic Issuer 13",
+     "value": 419970549.91000015,
+     "share": 0.0219
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 371990725.53,
+     "share": 0.0194
+    },
+    {
+     "key": "issuer12",
+     "label": "Synthetic Issuer 12",
+     "value": 300629787.26,
+     "share": 0.0156
+    }
+   ]
+  },
+  "commodity": {
+   "total": 2646135543.7199993,
+   "hhi": 1743.1,
+   "effective_n": 5.74,
+   "verdict": "moderately concentrated",
+   "top1": 0.3569,
+   "top3": 0.6123,
+   "top5": 0.7182,
+   "n": 25,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 944280742.74,
+     "share": 0.3569
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 449152291.66999996,
+     "share": 0.1697
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 226844824.08,
+     "share": 0.0857
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 158716319.08,
+     "share": 0.06
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 121473309.29,
+     "share": 0.0459
+    },
+    {
+     "key": "issuer09",
+     "label": "Synthetic Issuer 09",
+     "value": 78759137.89,
+     "share": 0.0298
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 67175472.37,
+     "share": 0.0254
+    },
+    {
+     "key": "issuer13",
+     "label": "Synthetic Issuer 13",
+     "value": 60068031.989999995,
+     "share": 0.0227
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 54374430.57,
+     "share": 0.0205
+    },
+    {
+     "key": "issuer23",
+     "label": "Synthetic Issuer 23",
+     "value": 53442874.9,
+     "share": 0.0202
+    },
+    {
+     "key": "issuer14",
+     "label": "Synthetic Issuer 14",
+     "value": 53431492.050000004,
+     "share": 0.0202
+    },
+    {
+     "key": "issuer11",
+     "label": "Synthetic Issuer 11",
+     "value": 49341707.629999995,
+     "share": 0.0186
+    }
+   ]
+  },
+  "private credit": {
+   "total": 2509531661.73,
+   "hhi": 2237.5,
+   "effective_n": 4.47,
+   "verdict": "moderately concentrated",
+   "top1": 0.4086,
+   "top3": 0.6916,
+   "top5": 0.7839,
+   "n": 22,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 1025356510.9399999,
+     "share": 0.4086
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 519486477.8,
+     "share": 0.207
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 190803229.62,
+     "share": 0.076
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 145578027.45,
+     "share": 0.058
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 86026504.97999999,
+     "share": 0.0343
+    },
+    {
+     "key": "issuer06",
+     "label": "Synthetic Issuer 06",
+     "value": 64024986.83,
+     "share": 0.0255
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 60410691.0,
+     "share": 0.0241
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 59430783.919999994,
+     "share": 0.0237
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 42612769.629999995,
+     "share": 0.017
+    },
+    {
+     "key": "issuer14",
+     "label": "Synthetic Issuer 14",
+     "value": 37671722.73,
+     "share": 0.015
+    },
+    {
+     "key": "issuer09",
+     "label": "Synthetic Issuer 09",
+     "value": 37625844.28,
+     "share": 0.015
+    },
+    {
+     "key": "issuer15",
+     "label": "Synthetic Issuer 15",
+     "value": 35790405.43,
+     "share": 0.0143
+    }
+   ]
+  },
+  "tokenised treasury": {
+   "total": 1057649044.8,
+   "hhi": 1175.4,
+   "effective_n": 8.51,
+   "verdict": "unconcentrated",
+   "top1": 0.2091,
+   "top3": 0.5349,
+   "top5": 0.6816,
+   "n": 22,
+   "leaders": [
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 221185229.66,
+     "share": 0.2091
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 176799124.29000002,
+     "share": 0.1672
+    },
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 167707003.94,
+     "share": 0.1586
+    },
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 93245611.41999999,
+     "share": 0.0882
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 61954430.61,
+     "share": 0.0586
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 59924264.08,
+     "share": 0.0567
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 51812764.239999995,
+     "share": 0.049
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 32594573.95,
+     "share": 0.0308
+    },
+    {
+     "key": "issuer09",
+     "label": "Synthetic Issuer 09",
+     "value": 31333683.39,
+     "share": 0.0296
+    },
+    {
+     "key": "issuer14",
+     "label": "Synthetic Issuer 14",
+     "value": 20529049.71,
+     "share": 0.0194
+    },
+    {
+     "key": "issuer18",
+     "label": "Synthetic Issuer 18",
+     "value": 19830053.93,
+     "share": 0.0187
+    },
+    {
+     "key": "issuer24",
+     "label": "Synthetic Issuer 24",
+     "value": 18473434.15,
+     "share": 0.0175
+    }
+   ]
+  },
+  "real estate": {
+   "total": 1001864982.8399998,
+   "hhi": 2693.6,
+   "effective_n": 3.71,
+   "verdict": "highly concentrated",
+   "top1": 0.4869,
+   "top3": 0.6948,
+   "top5": 0.7951,
+   "n": 19,
+   "leaders": [
+    {
+     "key": "issuer01",
+     "label": "Synthetic Issuer 01",
+     "value": 487832043.81,
+     "share": 0.4869
+    },
+    {
+     "key": "issuer05",
+     "label": "Synthetic Issuer 05",
+     "value": 128866080.97,
+     "share": 0.1286
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 79430417.99,
+     "share": 0.0793
+    },
+    {
+     "key": "issuer07",
+     "label": "Synthetic Issuer 07",
+     "value": 60042727.9,
+     "share": 0.0599
+    },
+    {
+     "key": "issuer14",
+     "label": "Synthetic Issuer 14",
+     "value": 40413376.08,
+     "share": 0.0403
+    },
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 31692428.85,
+     "share": 0.0316
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 28709771.29,
+     "share": 0.0287
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 23612496.47,
+     "share": 0.0236
+    },
+    {
+     "key": "issuer15",
+     "label": "Synthetic Issuer 15",
+     "value": 22940846.07,
+     "share": 0.0229
+    },
+    {
+     "key": "issuer25",
+     "label": "Synthetic Issuer 25",
+     "value": 19993645.12,
+     "share": 0.02
+    },
+    {
+     "key": "issuer20",
+     "label": "Synthetic Issuer 20",
+     "value": 17487497.490000002,
+     "share": 0.0175
+    },
+    {
+     "key": "issuer24",
+     "label": "Synthetic Issuer 24",
+     "value": 15233533.61,
+     "share": 0.0152
+    }
+   ]
+  },
+  "money market fund": {
+   "total": 238063589.35000005,
+   "hhi": 3871.2,
+   "effective_n": 2.58,
+   "verdict": "highly concentrated",
+   "top1": 0.5434,
+   "top3": 0.9088,
+   "top5": 0.9763,
+   "n": 8,
+   "leaders": [
+    {
+     "key": "issuer03",
+     "label": "Synthetic Issuer 03",
+     "value": 129370472.36000001,
+     "share": 0.5434
+    },
+    {
+     "key": "issuer08",
+     "label": "Synthetic Issuer 08",
+     "value": 68699109.77000001,
+     "share": 0.2886
+    },
+    {
+     "key": "issuer19",
+     "label": "Synthetic Issuer 19",
+     "value": 18291923.63,
+     "share": 0.0768
+    },
+    {
+     "key": "issuer16",
+     "label": "Synthetic Issuer 16",
+     "value": 9664261.66,
+     "share": 0.0406
+    },
+    {
+     "key": "issuer23",
+     "label": "Synthetic Issuer 23",
+     "value": 6403243.9,
+     "share": 0.0269
+    },
+    {
+     "key": "issuer24",
+     "label": "Synthetic Issuer 24",
+     "value": 3475988.61,
+     "share": 0.0146
+    },
+    {
+     "key": "issuer25",
+     "label": "Synthetic Issuer 25",
+     "value": 1313919.83,
+     "share": 0.0055
+    },
+    {
+     "key": "issuer22",
+     "label": "Synthetic Issuer 22",
+     "value": 844669.59,
+     "share": 0.0035
+    }
+   ]
+  },
+  "unclassified": {
+   "total": 191181917.63,
+   "hhi": 2482.3,
+   "effective_n": 4.03,
+   "verdict": "moderately concentrated",
+   "top1": 0.3821,
+   "top3": 0.8018,
+   "top5": 0.9597,
+   "n": 6,
+   "leaders": [
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 73059412.03,
+     "share": 0.3821
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 40906005.44,
+     "share": 0.214
+    },
+    {
+     "key": "issuer02",
+     "label": "Synthetic Issuer 02",
+     "value": 39322550.11,
+     "share": 0.2057
+    },
+    {
+     "key": "issuer18",
+     "label": "Synthetic Issuer 18",
+     "value": 15688793.32,
+     "share": 0.0821
+    },
+    {
+     "key": "issuer12",
+     "label": "Synthetic Issuer 12",
+     "value": 14505339.65,
+     "share": 0.0759
+    },
+    {
+     "key": "issuer17",
+     "label": "Synthetic Issuer 17",
+     "value": 7699817.08,
+     "share": 0.0403
+    }
+   ]
+  },
+  "corporate bond": {
+   "total": 81040427.63,
+   "hhi": 6058.4,
+   "effective_n": 1.65,
+   "verdict": "highly concentrated",
+   "top1": 0.7604,
+   "top3": 0.9879,
+   "top5": 1.0,
+   "n": 4,
+   "leaders": [
+    {
+     "key": "issuer04",
+     "label": "Synthetic Issuer 04",
+     "value": 61623870.82,
+     "share": 0.7604
+    },
+    {
+     "key": "issuer10",
+     "label": "Synthetic Issuer 10",
+     "value": 11503635.81,
+     "share": 0.1419
+    },
+    {
+     "key": "issuer23",
+     "label": "Synthetic Issuer 23",
+     "value": 6935441.26,
+     "share": 0.0856
+    },
+    {
+     "key": "issuer25",
+     "label": "Synthetic Issuer 25",
+     "value": 977479.74,
+     "share": 0.0121
+    }
+   ]
+  }
+ },
+ "issuers": [
+  {
+   "issuer_id": "issuer01",
+   "name": "Synthetic Issuer 01",
+   "site": "https://syntheticissuer01.invalid",
+   "in_directory": true,
+   "tokens": 43,
+   "tokens_without_cap": 7,
+   "assets": 43,
+   "market_cap": 9684153208.49,
+   "volume_24h": 193683064.1698001,
+   "classes": [
+    "commodity",
+    "money market fund",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Coin 1557",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 40,
+   "declared_tokens": 46,
+   "attributed_tokens": 43,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer02",
+   "name": "Synthetic Issuer 02",
+   "site": "https://syntheticissuer02.invalid",
+   "in_directory": true,
+   "tokens": 37,
+   "tokens_without_cap": 5,
+   "assets": 37,
+   "market_cap": 4229177206.6900005,
+   "volume_24h": 84583544.13380001,
+   "classes": [
+    "commodity",
+    "private credit",
+    "stock",
+    "tokenised treasury",
+    "unclassified"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Coin 1915",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 36,
+   "declared_tokens": 39,
+   "attributed_tokens": 37,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer03",
+   "name": "Synthetic Issuer 03",
+   "site": "https://syntheticissuer03.invalid",
+   "in_directory": true,
+   "tokens": 35,
+   "tokens_without_cap": 4,
+   "assets": 35,
+   "market_cap": 1735508907.6499999,
+   "volume_24h": 34710178.153,
+   "classes": [
+    "commodity",
+    "money market fund",
+    "private credit",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 34,
+   "declared_tokens": 37,
+   "attributed_tokens": 35,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer04",
+   "name": "Synthetic Issuer 04",
+   "site": "https://syntheticissuer04.invalid",
+   "in_directory": true,
+   "tokens": 37,
+   "tokens_without_cap": 7,
+   "assets": 37,
+   "market_cap": 1500670926.82,
+   "volume_24h": 30013418.536399998,
+   "classes": [
+    "commodity",
+    "corporate bond",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury",
+    "unclassified"
+   ],
+   "chains": [
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 35,
+   "declared_tokens": 39,
+   "attributed_tokens": 37,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer05",
+   "name": "Synthetic Issuer 05",
+   "site": "https://syntheticissuer05.invalid",
+   "in_directory": true,
+   "tokens": 36,
+   "tokens_without_cap": 7,
+   "assets": 36,
+   "market_cap": 1293515943.5199995,
+   "volume_24h": 25870318.8704,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 34,
+   "declared_tokens": 39,
+   "attributed_tokens": 36,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer06",
+   "name": "Synthetic Issuer 06",
+   "site": "https://syntheticissuer06.invalid",
+   "in_directory": true,
+   "tokens": 35,
+   "tokens_without_cap": 3,
+   "assets": 35,
+   "market_cap": 1055683193.44,
+   "volume_24h": 21113663.8688,
+   "classes": [
+    "commodity",
+    "private credit",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Coin 1430",
+    "Coin 1570",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 34,
+   "declared_tokens": 37,
+   "attributed_tokens": 35,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer07",
+   "name": "Synthetic Issuer 07",
+   "site": "https://syntheticissuer07.invalid",
+   "in_directory": true,
+   "tokens": 49,
+   "tokens_without_cap": 9,
+   "assets": 49,
+   "market_cap": 1054661621.3299998,
+   "volume_24h": 21093232.4266,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 46,
+   "declared_tokens": 49,
+   "attributed_tokens": 49,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer08",
+   "name": "Synthetic Issuer 08",
+   "site": "https://syntheticissuer08.invalid",
+   "in_directory": true,
+   "tokens": 42,
+   "tokens_without_cap": 3,
+   "assets": 42,
+   "market_cap": 886139648.0900002,
+   "volume_24h": 17722792.961799998,
+   "classes": [
+    "commodity",
+    "money market fund",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 42,
+   "declared_tokens": 42,
+   "attributed_tokens": 42,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer10",
+   "name": "Synthetic Issuer 10",
+   "site": "https://syntheticissuer10.invalid",
+   "in_directory": true,
+   "tokens": 37,
+   "tokens_without_cap": 4,
+   "assets": 37,
+   "market_cap": 619708023.8799999,
+   "volume_24h": 12394160.477599999,
+   "classes": [
+    "commodity",
+    "corporate bond",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury",
+    "unclassified"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 36,
+   "declared_tokens": 38,
+   "attributed_tokens": 37,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer11",
+   "name": "Synthetic Issuer 11",
+   "site": "https://syntheticissuer11.invalid",
+   "in_directory": true,
+   "tokens": 37,
+   "tokens_without_cap": 5,
+   "assets": 37,
+   "market_cap": 592253582.48,
+   "volume_24h": 11845071.649599997,
+   "classes": [
+    "commodity",
+    "private credit",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 34,
+   "declared_tokens": 39,
+   "attributed_tokens": 37,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer13",
+   "name": "Synthetic Issuer 13",
+   "site": "https://syntheticissuer13.invalid",
+   "in_directory": true,
+   "tokens": 45,
+   "tokens_without_cap": 3,
+   "assets": 45,
+   "market_cap": 507078688.3700002,
+   "volume_24h": 10141573.767399998,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 45,
+   "declared_tokens": 46,
+   "attributed_tokens": 45,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer09",
+   "name": "Synthetic Issuer 09",
+   "site": "https://syntheticissuer09.invalid",
+   "in_directory": true,
+   "tokens": 37,
+   "tokens_without_cap": 5,
+   "assets": 37,
+   "market_cap": 438844318.1099999,
+   "volume_24h": 8776886.362200001,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 36,
+   "declared_tokens": 40,
+   "attributed_tokens": 37,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer14",
+   "name": "Synthetic Issuer 14",
+   "site": "https://syntheticissuer14.invalid",
+   "in_directory": true,
+   "tokens": 51,
+   "tokens_without_cap": 9,
+   "assets": 51,
+   "market_cap": 394960738.0300001,
+   "volume_24h": 7899214.760600002,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 50,
+   "declared_tokens": 51,
+   "attributed_tokens": 51,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer12",
+   "name": "Synthetic Issuer 12",
+   "site": "https://syntheticissuer12.invalid",
+   "in_directory": true,
+   "tokens": 28,
+   "tokens_without_cap": 4,
+   "assets": 28,
+   "market_cap": 360326652.52000004,
+   "volume_24h": 7206533.0504,
+   "classes": [
+    "commodity",
+    "private credit",
+    "stock",
+    "unclassified"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 28,
+   "declared_tokens": 28,
+   "attributed_tokens": 28,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer17",
+   "name": "Synthetic Issuer 17",
+   "site": "https://syntheticissuer17.invalid",
+   "in_directory": true,
+   "tokens": 38,
+   "tokens_without_cap": 4,
+   "assets": 38,
+   "market_cap": 334907386.03,
+   "volume_24h": 6698147.7206000015,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury",
+    "unclassified"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 38,
+   "declared_tokens": 40,
+   "attributed_tokens": 38,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer15",
+   "name": "Synthetic Issuer 15",
+   "site": "https://syntheticissuer15.invalid",
+   "in_directory": true,
+   "tokens": 43,
+   "tokens_without_cap": 4,
+   "assets": 43,
+   "market_cap": 287154099.86999995,
+   "volume_24h": 5743081.9974000035,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 39,
+   "declared_tokens": 44,
+   "attributed_tokens": 43,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer19",
+   "name": "Synthetic Issuer 19",
+   "site": "https://syntheticissuer19.invalid",
+   "in_directory": true,
+   "tokens": 39,
+   "tokens_without_cap": 7,
+   "assets": 39,
+   "market_cap": 251026406.05,
+   "volume_24h": 5020528.121,
+   "classes": [
+    "commodity",
+    "money market fund",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 38,
+   "declared_tokens": 40,
+   "attributed_tokens": 39,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer18",
+   "name": "Synthetic Issuer 18",
+   "site": "https://syntheticissuer18.invalid",
+   "in_directory": true,
+   "tokens": 41,
+   "tokens_without_cap": 2,
+   "assets": 41,
+   "market_cap": 239732622.7,
+   "volume_24h": 4794652.454,
+   "classes": [
+    "commodity",
+    "real estate",
+    "stock",
+    "tokenised treasury",
+    "unclassified"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Coin 2045",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 38,
+   "declared_tokens": 44,
+   "attributed_tokens": 41,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer23",
+   "name": "Synthetic Issuer 23",
+   "site": "https://syntheticissuer23.invalid",
+   "in_directory": true,
+   "tokens": 41,
+   "tokens_without_cap": 8,
+   "assets": 41,
+   "market_cap": 239119154.31999993,
+   "volume_24h": 4782383.0863999985,
+   "classes": [
+    "commodity",
+    "corporate bond",
+    "money market fund",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 39,
+   "declared_tokens": 44,
+   "attributed_tokens": 41,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer16",
+   "name": "Synthetic Issuer 16",
+   "site": "https://syntheticissuer16.invalid",
+   "in_directory": true,
+   "tokens": 39,
+   "tokens_without_cap": 3,
+   "assets": 39,
+   "market_cap": 233264293.90000004,
+   "volume_24h": 4665285.878,
+   "classes": [
+    "commodity",
+    "money market fund",
+    "private credit",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 39,
+   "declared_tokens": 41,
+   "attributed_tokens": 39,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer25",
+   "name": "Synthetic Issuer 25",
+   "site": "https://syntheticissuer25.invalid",
+   "in_directory": true,
+   "tokens": 45,
+   "tokens_without_cap": 5,
+   "assets": 45,
+   "market_cap": 232032947.17999998,
+   "volume_24h": 4640658.943599999,
+   "classes": [
+    "commodity",
+    "corporate bond",
+    "money market fund",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 44,
+   "declared_tokens": 45,
+   "attributed_tokens": 45,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer21",
+   "name": "Synthetic Issuer 21",
+   "site": "https://syntheticissuer21.invalid",
+   "in_directory": true,
+   "tokens": 36,
+   "tokens_without_cap": 5,
+   "assets": 36,
+   "market_cap": 209028938.16000003,
+   "volume_24h": 4180578.7632000004,
+   "classes": [
+    "commodity",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 36,
+   "declared_tokens": 39,
+   "attributed_tokens": 36,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer22",
+   "name": "Synthetic Issuer 22",
+   "site": "https://syntheticissuer22.invalid",
+   "in_directory": true,
+   "tokens": 40,
+   "tokens_without_cap": 5,
+   "assets": 40,
+   "market_cap": 193679239.24999997,
+   "volume_24h": 3873584.7850000006,
+   "classes": [
+    "commodity",
+    "money market fund",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 38,
+   "declared_tokens": 41,
+   "attributed_tokens": 40,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer24",
+   "name": "Synthetic Issuer 24",
+   "site": "https://syntheticissuer24.invalid",
+   "in_directory": true,
+   "tokens": 39,
+   "tokens_without_cap": 5,
+   "assets": 39,
+   "market_cap": 192551361.85,
+   "volume_24h": 3851027.237000001,
+   "classes": [
+    "commodity",
+    "money market fund",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Arbitrum",
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Polygon",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 35,
+   "declared_tokens": 41,
+   "attributed_tokens": 39,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "issuer20",
+   "name": "Synthetic Issuer 20",
+   "site": "https://syntheticissuer20.invalid",
+   "in_directory": true,
+   "tokens": 40,
+   "tokens_without_cap": 6,
+   "assets": 40,
+   "market_cap": 180828454.35,
+   "volume_24h": 3616569.087000001,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [
+    "Avalanche",
+    "Base",
+    "Ethereum",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 38,
+   "declared_tokens": 40,
+   "attributed_tokens": 40,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "placeholder",
+   "name": "NA (Derivatives)",
+   "site": "https://na(derivatives).invalid",
+   "in_directory": true,
+   "tokens": 40,
+   "tokens_without_cap": 0,
+   "assets": 40,
+   "market_cap": 0.0,
+   "volume_24h": 0.0,
+   "classes": [
+    "commodity",
+    "private credit",
+    "real estate",
+    "stock",
+    "tokenised treasury"
+   ],
+   "chains": [],
+   "assets_with_tradfi_market": 38,
+   "declared_tokens": 239,
+   "attributed_tokens": 40,
+   "placeholder": true
+  }
+ ],
+ "top_assets": [
+  {
+   "rwa_id": "18",
+   "name": "SYN018 asset",
+   "symbol": "SYN018",
+   "asset_class": "stock",
+   "tokenized_market_cap": 734998148.92,
+   "tokens": 6,
+   "issuers": 6,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.9807,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 720803131.23,
+     "share": 0.9807
+    },
+    {
+     "issuer": "Synthetic Issuer 20",
+     "market_cap": 9686514.14,
+     "share": 0.0132
+    },
+    {
+     "issuer": "Synthetic Issuer 24",
+     "market_cap": 4508503.55,
+     "share": 0.0061
+    },
+    {
+     "issuer": "Synthetic Issuer 07",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Synthetic Issuer 02",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "110",
+   "name": "SYN110 asset",
+   "symbol": "SYN110",
+   "asset_class": "stock",
+   "tokenized_market_cap": 609479444.78,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 0,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.8776,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 534896715.89,
+     "share": 0.8776
+    },
+    {
+     "issuer": "Synthetic Issuer 05",
+     "market_cap": 57776191.31,
+     "share": 0.0948
+    },
+    {
+     "issuer": "Synthetic Issuer 15",
+     "market_cap": 9355645.52,
+     "share": 0.0154
+    },
+    {
+     "issuer": "Synthetic Issuer 19",
+     "market_cap": 7450892.07,
+     "share": 0.0122
+    },
+    {
+     "issuer": "Synthetic Issuer 22",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "175",
+   "name": "SYN175 asset",
+   "symbol": "SYN175",
+   "asset_class": "stock",
+   "tokenized_market_cap": 537954220.43,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 537954220.43,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "306",
+   "name": "SYN306 asset",
+   "symbol": "SYN306",
+   "asset_class": "stock",
+   "tokenized_market_cap": 515952694.47,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.8177,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 421892537.22,
+     "share": 0.8177
+    },
+    {
+     "issuer": "Synthetic Issuer 03",
+     "market_cap": 79098274.01,
+     "share": 0.1533
+    },
+    {
+     "issuer": "Synthetic Issuer 09",
+     "market_cap": 7110880.79,
+     "share": 0.0138
+    },
+    {
+     "issuer": "Synthetic Issuer 15",
+     "market_cap": 6445677.25,
+     "share": 0.0125
+    },
+    {
+     "issuer": "Synthetic Issuer 21",
+     "market_cap": 1405325.2,
+     "share": 0.0027
+    }
+   ]
+  },
+  {
+   "rwa_id": "282",
+   "name": "SYN282 asset",
+   "symbol": "SYN282",
+   "asset_class": "stock",
+   "tokenized_market_cap": 510363178.59,
+   "tokens": 3,
+   "issuers": 3,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.9247,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 471955429.31,
+     "share": 0.9247
+    },
+    {
+     "issuer": "Synthetic Issuer 12",
+     "market_cap": 30230543.66,
+     "share": 0.0592
+    },
+    {
+     "issuer": "Synthetic Issuer 22",
+     "market_cap": 8177205.62,
+     "share": 0.016
+    }
+   ]
+  },
+  {
+   "rwa_id": "116",
+   "name": "SYN116 asset",
+   "symbol": "SYN116",
+   "asset_class": "private credit",
+   "tokenized_market_cap": 463036026.5,
+   "tokens": 4,
+   "issuers": 4,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.8485,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 392869328.25,
+     "share": 0.8485
+    },
+    {
+     "issuer": "Synthetic Issuer 04",
+     "market_cap": 59756219.75,
+     "share": 0.1291
+    },
+    {
+     "issuer": "Synthetic Issuer 22",
+     "market_cap": 10410478.5,
+     "share": 0.0225
+    },
+    {
+     "issuer": "Synthetic Issuer 03",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "1",
+   "name": "SYN001 asset",
+   "symbol": "SYN001",
+   "asset_class": "private credit",
+   "tokenized_market_cap": 461561066.9,
+   "tokens": 2,
+   "issuers": 2,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 461561066.9,
+     "share": 1.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "300",
+   "name": "SYN300 asset",
+   "symbol": "SYN300",
+   "asset_class": "stock",
+   "tokenized_market_cap": 439686134.49,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 439686134.49,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "241",
+   "name": "SYN241 asset",
+   "symbol": "SYN241",
+   "asset_class": "stock",
+   "tokenized_market_cap": 418844567.2,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 418844567.2,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "200",
+   "name": "SYN200 asset",
+   "symbol": "SYN200",
+   "asset_class": "stock",
+   "tokenized_market_cap": 383817711.94,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 383817711.94,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "227",
+   "name": "SYN227 asset",
+   "symbol": "SYN227",
+   "asset_class": "stock",
+   "tokenized_market_cap": 374660618.76,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.4258,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 159531755.96,
+     "share": 0.4258
+    },
+    {
+     "issuer": "Synthetic Issuer 02",
+     "market_cap": 159436385.79,
+     "share": 0.4255
+    },
+    {
+     "issuer": "Synthetic Issuer 07",
+     "market_cap": 44505769.12,
+     "share": 0.1188
+    },
+    {
+     "issuer": "Synthetic Issuer 23",
+     "market_cap": 7669103.77,
+     "share": 0.0205
+    },
+    {
+     "issuer": "Synthetic Issuer 13",
+     "market_cap": 3517604.13,
+     "share": 0.0094
+    }
+   ]
+  },
+  {
+   "rwa_id": "112",
+   "name": "SYN112 asset",
+   "symbol": "SYN112",
+   "asset_class": "private credit",
+   "tokenized_market_cap": 364804642.32,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 02",
+   "top_issuer_share": 0.8953,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 02",
+     "market_cap": 326594641.58,
+     "share": 0.8953
+    },
+    {
+     "issuer": "Synthetic Issuer 07",
+     "market_cap": 23998315.81,
+     "share": 0.0658
+    },
+    {
+     "issuer": "Synthetic Issuer 15",
+     "market_cap": 7295359.08,
+     "share": 0.02
+    },
+    {
+     "issuer": "Synthetic Issuer 16",
+     "market_cap": 6916325.86,
+     "share": 0.019
+    },
+    {
+     "issuer": "Synthetic Issuer 24",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "195",
+   "name": "SYN195 asset",
+   "symbol": "SYN195",
+   "asset_class": "commodity",
+   "tokenized_market_cap": 351481348.57,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.9385,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 329860646.2,
+     "share": 0.9385
+    },
+    {
+     "issuer": "Synthetic Issuer 17",
+     "market_cap": 13715909.62,
+     "share": 0.039
+    },
+    {
+     "issuer": "Synthetic Issuer 20",
+     "market_cap": 7904792.75,
+     "share": 0.0225
+    },
+    {
+     "issuer": "Synthetic Issuer 04",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Synthetic Issuer 02",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "454",
+   "name": "SYN454 asset",
+   "symbol": "SYN454",
+   "asset_class": "real estate",
+   "tokenized_market_cap": 340066992.69,
+   "tokens": 4,
+   "issuers": 4,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.9335,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 317445017.8,
+     "share": 0.9335
+    },
+    {
+     "issuer": "Synthetic Issuer 05",
+     "market_cap": 16882702.58,
+     "share": 0.0496
+    },
+    {
+     "issuer": "Synthetic Issuer 09",
+     "market_cap": 5739272.31,
+     "share": 0.0169
+    },
+    {
+     "issuer": "Synthetic Issuer 19",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "176",
+   "name": "SYN176 asset",
+   "symbol": "SYN176",
+   "asset_class": "stock",
+   "tokenized_market_cap": 335830818.88,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.8541,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 286838358.19,
+     "share": 0.8541
+    },
+    {
+     "issuer": "Synthetic Issuer 07",
+     "market_cap": 30244842.44,
+     "share": 0.0901
+    },
+    {
+     "issuer": "Synthetic Issuer 18",
+     "market_cap": 9687916.26,
+     "share": 0.0288
+    },
+    {
+     "issuer": "Synthetic Issuer 25",
+     "market_cap": 9059701.98,
+     "share": 0.027
+    },
+    {
+     "issuer": "Synthetic Issuer 23",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "313",
+   "name": "SYN313 asset",
+   "symbol": "SYN313",
+   "asset_class": "stock",
+   "tokenized_market_cap": 326615254.88,
+   "tokens": 2,
+   "issuers": 2,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.9754,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 318580487.72,
+     "share": 0.9754
+    },
+    {
+     "issuer": "Synthetic Issuer 13",
+     "market_cap": 8034767.16,
+     "share": 0.0246
+    }
+   ]
+  },
+  {
+   "rwa_id": "448",
+   "name": "SYN448 asset",
+   "symbol": "SYN448",
+   "asset_class": "stock",
+   "tokenized_market_cap": 315159971.69,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 315159971.69,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "21",
+   "name": "SYN021 asset",
+   "symbol": "SYN021",
+   "asset_class": "stock",
+   "tokenized_market_cap": 305640025.56,
+   "tokens": 3,
+   "issuers": 3,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 02",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 02",
+     "market_cap": 305640025.56,
+     "share": 1.0
+    },
+    {
+     "issuer": "Synthetic Issuer 19",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "384",
+   "name": "SYN384 asset",
+   "symbol": "SYN384",
+   "asset_class": "stock",
+   "tokenized_market_cap": 293092789.49,
+   "tokens": 2,
+   "issuers": 2,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.7945,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 232858489.21,
+     "share": 0.7945
+    },
+    {
+     "issuer": "Synthetic Issuer 03",
+     "market_cap": 60234300.28,
+     "share": 0.2055
+    }
+   ]
+  },
+  {
+   "rwa_id": "224",
+   "name": "SYN224 asset",
+   "symbol": "SYN224",
+   "asset_class": "stock",
+   "tokenized_market_cap": 289567426.55,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 289567426.55,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "121",
+   "name": "SYN121 asset",
+   "symbol": "SYN121",
+   "asset_class": "stock",
+   "tokenized_market_cap": 285996746.28,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 02",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 02",
+     "market_cap": 285996746.28,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "192",
+   "name": "SYN192 asset",
+   "symbol": "SYN192",
+   "asset_class": "commodity",
+   "tokenized_market_cap": 271455967.7,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 1,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 271455967.7,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "418",
+   "name": "SYN418 asset",
+   "symbol": "SYN418",
+   "asset_class": "stock",
+   "tokenized_market_cap": 270708180.43,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 02",
+   "top_issuer_share": 0.6061,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 02",
+     "market_cap": 164068104.03,
+     "share": 0.6061
+    },
+    {
+     "issuer": "Synthetic Issuer 03",
+     "market_cap": 58684702.65,
+     "share": 0.2168
+    },
+    {
+     "issuer": "Synthetic Issuer 06",
+     "market_cap": 44597737.29,
+     "share": 0.1647
+    },
+    {
+     "issuer": "Synthetic Issuer 22",
+     "market_cap": 3357636.46,
+     "share": 0.0124
+    },
+    {
+     "issuer": "Synthetic Issuer 14",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "538",
+   "name": "SYN538 asset",
+   "symbol": "SYN538",
+   "asset_class": "stock",
+   "tokenized_market_cap": 256220415.09,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.838,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 214702275.99,
+     "share": 0.838
+    },
+    {
+     "issuer": "Synthetic Issuer 06",
+     "market_cap": 25344919.55,
+     "share": 0.0989
+    },
+    {
+     "issuer": "Synthetic Issuer 16",
+     "market_cap": 7732854.63,
+     "share": 0.0302
+    },
+    {
+     "issuer": "Synthetic Issuer 24",
+     "market_cap": 5547209.25,
+     "share": 0.0217
+    },
+    {
+     "issuer": "Synthetic Issuer 13",
+     "market_cap": 2893155.68,
+     "share": 0.0113
+    }
+   ]
+  },
+  {
+   "rwa_id": "220",
+   "name": "SYN220 asset",
+   "symbol": "SYN220",
+   "asset_class": "stock",
+   "tokenized_market_cap": 253374184.54,
+   "tokens": 4,
+   "issuers": 4,
+   "tradfi_markets": 2,
+   "industry": "Mining",
+   "primary_exchange": "NYSE",
+   "cik": "0000000001",
+   "top_issuer": "Synthetic Issuer 01",
+   "top_issuer_share": 0.5961,
+   "split": [
+    {
+     "issuer": "Synthetic Issuer 01",
+     "market_cap": 151038259.47,
+     "share": 0.5961
+    },
+    {
+     "issuer": "Synthetic Issuer 03",
+     "market_cap": 95165215.71,
+     "share": 0.3756
+    },
+    {
+     "issuer": "Synthetic Issuer 22",
+     "market_cap": 7170709.36,
+     "share": 0.0283
+    },
+    {
+     "issuer": "Synthetic Issuer 23",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  }
+ ],
+ "tradfi_reference": {
+  "assets_checked": 518,
+  "assets_with_tradfi_market": 494,
+  "venues": [
+   {
+    "name": "Binance",
+    "listings": 697
+   },
+   {
+    "name": "Bybit",
+    "listings": 29
+   },
+   {
+    "name": "OKX",
+    "listings": 17
+   }
+  ],
+  "venue_concentration": {
+   "total": 743.0,
+   "hhi": 8820.6,
+   "effective_n": 1.13,
+   "verdict": "highly concentrated",
+   "top1": 0.9381,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 3,
+   "leaders": [
+    {
+     "key": "Binance",
+     "label": "Binance",
+     "value": 697.0,
+     "share": 0.9381
+    },
+    {
+     "key": "Bybit",
+     "label": "Bybit",
+     "value": 29.0,
+     "share": 0.039
+    },
+    {
+     "key": "OKX",
+     "label": "OKX",
+     "value": 17.0,
+     "share": 0.0229
+    }
+   ]
+  },
+  "note": "quotes/latest returns tradfi_markets[] beside tokens[]: the non-token venues that quote the asset, each with an exchange, a ticker and a market URL. These are exchange listings rather than the asset's primary market - a tokenised equity's entry points at a crypto exchange's stock product, not at the exchange the share itself trades on. Read it as 'is this asset quoted anywhere off chain', and read the venue split beside it: if one venue supplies nearly all of them, that is a second concentration sitting underneath the issuer one."
+ },
+ "market_pairs_probe": {
+  "available": false,
+  "sample_rwa_id": "1",
+  "rows": 0
+ },
+ "endpoints": {
+  "map": {
+   "path": "/v5/real-world-assets/map",
+   "tier": "Basic",
+   "credits": "free",
+   "why": "the canonical asset universe - rwa_id, asset class, and which assets have tokens at all"
+  },
+  "assets_list": {
+   "path": "/v5/real-world-assets/assets/list",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "asset-level tokenised market cap, used to reconcile the per-token totals against"
+  },
+  "quotes": {
+   "path": "/v5/real-world-assets/quotes/latest",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "the heart of it - tokens[] gives each token's own issuer and market cap; tradfi_markets[] says whether an underlying market exists"
+  },
+  "info": {
+   "path": "/v5/real-world-assets/info",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "descriptive metadata on the largest assets - industry, primary exchange, SEC CIK where the asset is an equity"
+  },
+  "issuers_list": {
+   "path": "/v5/real-world-assets/issuers/list",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "the issuer directory - name, website and declared token count for all 25"
+  },
+  "issuer": {
+   "path": "/v5/real-world-assets/issuers",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "each issuer's declared token count, cross-checked against what the token data actually attributes to them"
+  },
+  "market_pairs": {
+   "path": "/v5/real-world-assets/market-pairs/list",
+   "tier": "Growth",
+   "credits": "1 per call",
+   "why": "venue depth per asset; probed every run so the plan gate is recorded from evidence"
+  },
+  "crypto_info": {
+   "path": "/v2/cryptocurrency/info",
+   "tier": "Basic",
+   "credits": "1 per 100 ids",
+   "why": "the only route to a chain - no RWA endpoint carries one, so each token's crypto_id is taken across to the main cryptocurrency family for its platform"
+  }
+ },
+ "api": {
+  "calls": 50,
+  "credits": 50,
+  "refused": [
+   {
+    "path": "/v5/real-world-assets/market-pairs/list",
+    "params": {
+     "rwa_id": "1"
+    },
+    "reason": "1006: Your API Key subscription plan doesn't support this endpoint."
+   }
+  ]
+ },
+ "synthetic": true,
+ "synthetic_note": "SYNTHETIC FIXTURE - generated by tests/make_fixture.py to develop and review the dashboard while pro-api.coinmarketcap.com was unreachable from the build environment. Issuer names are invented. No figure here is market data and none of it came from the CoinMarketCap API."
+}

@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backstop — issuer concentration in tokenised real-world assets</title>
+<meta name="description" content="How concentrated is the tokenised real-world-asset market by issuer? Built on the CoinMarketCap Real World Assets API.">
+<style>
+/* ---------------------------------------------------------------------------
+   Tokens. Light values on :root, dark values declared twice: once under the
+   media query (OS setting) and once under [data-theme="dark"] (the toggle), so
+   the toggle wins both ways.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --page:        #f9f9f7;
+  --surface-1:   #fcfcfb;
+  --ink:         #0b0b0b;
+  --ink-2:       #52514e;
+  --muted:       #898781;
+  --grid:        #e1e0d9;
+  --baseline:    #c3c2b7;
+  --border:      rgba(11,11,11,0.10);
+  --wash:        rgba(11,11,11,0.035);
+  --series-1:    #2a78d6;
+  --series-2:    #eb6834;
+  --good:        #0ca30c;
+  --warning:     #fab219;
+  --critical:    #d03b3b;
+  --good-ink:    #006300;
+  --warn-ink:    #7a5200;
+  --crit-ink:    #a52424;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page:      #0d0d0d;
+    --surface-1: #1a1a19;
+    --ink:       #ffffff;
+    --ink-2:     #c3c2b7;
+    --muted:     #898781;
+    --grid:      #2c2c2a;
+    --baseline:  #383835;
+    --border:    rgba(255,255,255,0.10);
+    --wash:      rgba(255,255,255,0.04);
+    --series-1:  #3987e5;
+    --series-2:  #d95926;
+    --good-ink:  #0ca30c;
+    --warn-ink:  #fab219;
+    --crit-ink:  #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page:      #0d0d0d;
+  --surface-1: #1a1a19;
+  --ink:       #ffffff;
+  --ink-2:     #c3c2b7;
+  --muted:     #898781;
+  --grid:      #2c2c2a;
+  --baseline:  #383835;
+  --border:    rgba(255,255,255,0.10);
+  --wash:      rgba(255,255,255,0.04);
+  --series-1:  #3987e5;
+  --series-2:  #d95926;
+  --good-ink:  #0ca30c;
+  --warn-ink:  #fab219;
+  --crit-ink:  #e66767;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px 72px; }
+
+/* ---- header --------------------------------------------------------------- */
+header { padding: 40px 0 8px; }
+.eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted); margin: 0 0 10px;
+}
+h1 { font-size: clamp(26px, 4.2vw, 36px); line-height: 1.15; margin: 0 0 12px; font-weight: 640; letter-spacing: -0.015em; }
+.standfirst { margin: 0; max-width: 62ch; color: var(--ink-2); font-size: 16px; }
+.toprow { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
+.toprow > div:first-child { flex: 1 1 480px; min-width: 0; }
+.themebtn {
+  flex: none; font: inherit; font-size: 13px; color: var(--ink-2);
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 11px; cursor: pointer;
+}
+.themebtn:hover { background: var(--wash); }
+
+/* ---- banner --------------------------------------------------------------- */
+.banner {
+  display: none; gap: 12px; align-items: flex-start;
+  border: 1px solid var(--border); border-left: 3px solid var(--warning);
+  background: var(--surface-1); border-radius: 10px;
+  padding: 14px 16px; margin: 24px 0 0; font-size: 14px; color: var(--ink-2);
+}
+.banner.on { display: flex; }
+.banner strong { color: var(--ink); }
+.banner .ico { flex: none; font-weight: 700; color: var(--warn-ink); }
+
+/* ---- cards ---------------------------------------------------------------- */
+.card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px; margin-top: 16px;
+}
+.card > h2 {
+  font-size: 15px; font-weight: 640; margin: 0 0 4px; letter-spacing: -0.005em;
+}
+.card > .sub { margin: 0 0 18px; font-size: 13px; color: var(--ink-2); max-width: 74ch; }
+.grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+/* ---- hero + tiles --------------------------------------------------------- */
+.hero { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; }
+.heroblock { min-width: 210px; }
+.herolabel { font-size: 13px; color: var(--ink-2); margin: 0 0 2px; }
+.heroval { font-size: clamp(44px, 8vw, 64px); font-weight: 650; line-height: 1; letter-spacing: -0.03em; }
+.bigval  { font-size: 34px; font-weight: 640; line-height: 1.1; letter-spacing: -0.02em; }
+.herosub { font-size: 13px; color: var(--muted); margin: 8px 0 0; max-width: 42ch; }
+
+/* Status: the coloured dot and the glyph carry the state; the words stay in a
+   text token, so nothing rests on hue and nothing rests on shape alone. */
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 5px 12px 5px 9px; font-size: 13px; font-weight: 600;
+  background: var(--page); color: var(--ink);
+}
+.chip .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.bandtag { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.bandtag .gly, .chip .gly { font-size: 11px; line-height: 1; flex: none; }
+.band-good    .gly, .band-good    .dot { color: var(--good);     background-color: initial; }
+.band-warning .gly, .band-warning .dot { color: var(--warning);  background-color: initial; }
+.band-crit    .gly, .band-crit    .dot { color: var(--critical); background-color: initial; }
+.band-none    .gly, .band-none    .dot { color: var(--baseline); background-color: initial; }
+.chip.band-good    .dot { background-color: var(--good); }
+.chip.band-warning .dot { background-color: var(--warning); }
+.chip.band-crit    .dot { background-color: var(--critical); }
+.chip.band-none    .dot { background-color: var(--baseline); }
+
+.tiles { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border);
+         border-radius: 10px; overflow: hidden; grid-template-columns: repeat(2, 1fr); margin-top: 22px; }
+/* Five tiles in a two-column grid leaves a hole, which the 1px gap renders as a
+   grey block. Let the last tile span the row instead. */
+.tiles > .tile:last-child { grid-column: 1 / -1; }
+@media (min-width: 720px) {
+  .tiles { grid-template-columns: repeat(5, 1fr); }
+  .tiles > .tile:last-child { grid-column: auto; }
+}
+.tile { background: var(--surface-1); padding: 14px 16px; }
+.tile .tl { font-size: 12px; color: var(--ink-2); margin: 0 0 6px; }
+.tile .tv { font-size: 21px; font-weight: 640; letter-spacing: -0.015em; }
+.tile .tn { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+
+/* ---- scope selector ------------------------------------------------------- */
+.filterrow {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-top: 24px; padding: 12px 14px; background: var(--surface-1);
+  border: 1px solid var(--border); border-radius: 10px;
+}
+.filterrow label { font-size: 13px; color: var(--ink-2); }
+.filterrow select {
+  font: inherit; font-size: 13px; color: var(--ink); background: var(--page);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; max-width: 100%;
+}
+.scopenote { font-size: 12.5px; color: var(--muted); }
+
+/* ---- charts --------------------------------------------------------------- */
+figure { margin: 0; }
+figcaption { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+.gridline { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.axisline { stroke: var(--baseline); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.catlab { font-size: 12px; fill: var(--ink-2); }
+.tiplab { font-size: 11.5px; fill: var(--ink-2); font-weight: 600; }
+.refline { stroke: var(--baseline); stroke-width: 1; }
+.reflab { font-size: 11px; fill: var(--muted); }
+.hit { fill: transparent; cursor: default; }
+
+.legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 0 0 14px; padding: 0; list-style: none; font-size: 12.5px; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.legend .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+
+.tooltip {
+  position: fixed; z-index: 20; pointer-events: none; opacity: 0;
+  transition: opacity .08s linear;
+  background: var(--surface-1); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 9px;
+  box-shadow: 0 6px 22px rgba(0,0,0,.14);
+  padding: 9px 11px; font-size: 12.5px; max-width: 260px;
+}
+.tooltip.on { opacity: 1; }
+.tooltip .tt-t { font-weight: 640; margin-bottom: 4px; }
+.tooltip .tt-r { display: flex; justify-content: space-between; gap: 14px; color: var(--ink-2); }
+.tooltip .tt-r b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---- tables --------------------------------------------------------------- */
+.tablewrap { overflow-x: auto; margin: 0 -4px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+caption { text-align: left; font-size: 12.5px; color: var(--muted); padding: 0 4px 10px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+th { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:hover { background: var(--wash); }
+tbody tr:last-child td { border-bottom: 0; }
+td a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--border); }
+td a:hover { border-bottom-color: var(--ink-2); }
+.wrapcell { white-space: normal; min-width: 180px; color: var(--ink-2); }
+
+/* HHI meter: fixed 0–10000 track with the guideline thresholds marked. The fill
+   carries the band; the band is also named in text, so colour never carries it
+   alone. */
+.meter { display: flex; align-items: center; gap: 9px; }
+.meter .track {
+  position: relative; width: 108px; height: 7px; border-radius: 4px;
+  background: var(--grid); flex: none; overflow: hidden;
+}
+.meter .fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px 2px 2px 4px; }
+.meter .thr { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--baseline); }
+.meter .bandtxt { font-size: 11.5px; color: var(--ink-2); }
+
+details.tableview { margin-top: 14px; }
+details.tableview > summary {
+  cursor: pointer; font-size: 12.5px; color: var(--ink-2);
+  padding: 5px 0; list-style: none; display: inline-flex; gap: 6px; align-items: center;
+}
+details.tableview > summary::-webkit-details-marker { display: none; }
+details.tableview > summary::before { content: "▸"; color: var(--muted); font-size: 10px; }
+details.tableview[open] > summary::before { content: "▾"; }
+
+/* ---- method / footer ------------------------------------------------------ */
+.kv { display: grid; grid-template-columns: 1fr; gap: 10px 26px; font-size: 13px; }
+@media (min-width: 720px) { .kv { grid-template-columns: repeat(2, 1fr); } }
+.kv div { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.kv dt, .kv .k { color: var(--ink-2); }
+.kv .v { font-variant-numeric: tabular-nums; text-align: right; }
+footer { margin-top: 28px; font-size: 12.5px; color: var(--muted); }
+footer a { color: var(--ink-2); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.err { color: var(--crit-ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="toprow">
+      <div>
+        <p class="eyebrow">Backstop · CoinMarketCap Real World Assets API</p>
+        <h1>How few issuers is the tokenised asset market made of?</h1>
+        <p class="standfirst">
+          The tokenised asset universe is published as a list of assets. Every one of
+          those tokens was minted by somebody. Backstop rebuilds the market along that
+          axis and measures, by value, how concentrated it is.
+        </p>
+        <p class="standfirst" style="margin-top:10px;font-size:14px">
+          <strong>Issuer</strong> here means the name CoinMarketCap attributes a token
+          to. Its issuer record carries a name, a website and a token roster — not
+          custody, jurisdiction or a legal entity — so nothing below says who is
+          <em>liable</em> for a token, only whose name is on it.
+        </p>
+      </div>
+      <button class="themebtn" id="themebtn" type="button" aria-live="polite">Theme: auto</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner">
+    <span class="ico" aria-hidden="true">!</span>
+    <span id="bannertext"></span>
+  </div>
+
+  <div class="banner on" id="scopebanner" style="border-left-color:var(--series-1)">
+    <span class="ico" aria-hidden="true" style="color:var(--series-1)">i</span>
+    <span id="scopebannertext"></span>
+  </div>
+
+  <!-- headline ------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-headline">
+    <h2 id="h-headline">Concentration headline</h2>
+    <p class="sub" id="scopedesc">Across the whole tokenised real-world-asset market, weighted by tokenised market capitalisation.</p>
+
+    <div class="hero">
+      <div class="heroblock">
+        <p class="herolabel">Effective number of issuers</p>
+        <div class="heroval" id="hero-eff">—</div>
+        <p class="herosub" id="hero-effsub"></p>
+      </div>
+      <div class="heroblock">
+        <p class="herolabel">Herfindahl-Hirschman Index</p>
+        <div class="bigval" id="hero-hhi">—</div>
+        <p class="herosub" id="hero-hhisub"><span id="hhichip"></span></p>
+      </div>
+    </div>
+
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <!-- scope ---------------------------------------------------------------- -->
+  <div class="filterrow">
+    <label for="scope">Scope</label>
+    <select id="scope"></select>
+    <span class="scopenote" id="scopecount"></span>
+  </div>
+
+  <div class="grid2">
+    <!-- ranked issuers -->
+    <section class="card" aria-labelledby="h-rank">
+      <h2 id="h-rank">Largest issuers by tokenised market cap</h2>
+      <p class="sub" id="ranksub">Bars are one colour: length carries the value, so hue has nothing to say.</p>
+      <figure>
+        <svg id="chart-bars" role="img" aria-labelledby="h-rank barsdesc"></svg>
+        <desc id="barsdesc" class="sr"></desc>
+        <figcaption id="barscap"></figcaption>
+      </figure>
+      <details class="tableview">
+        <summary>View as table</summary>
+        <div class="tablewrap"><table id="barstable"></table></div>
+      </details>
+    </section>
+
+    <!-- lorenz -->
+    <section class="card" aria-labelledby="h-lorenz">
+      <h2 id="h-lorenz">How fast the market adds up</h2>
+      <p class="sub">
+        Issuers ranked largest first, against the share of market cap they cumulatively
+        account for. The straight hairline is what perfect equality would look like;
+        the gap between the two is the concentration.
+      </p>
+      <figure>
+        <svg id="chart-lorenz" role="img" aria-labelledby="h-lorenz lorenzdesc"></svg>
+        <desc id="lorenzdesc" class="sr"></desc>
+        <figcaption id="lorenzcap">Whole market — not affected by the scope selector.</figcaption>
+      </figure>
+      <details class="tableview">
+        <summary>View as table</summary>
+        <div class="tablewrap"><table id="lorenztable"></table></div>
+      </details>
+    </section>
+  </div>
+
+  <!-- chains ----------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-chains">
+    <h2 id="h-chains">Issuer concentration within each chain</h2>
+    <p class="sub">
+      No Real World Assets endpoint carries a chain. Each token does carry a
+      <code>crypto_id</code>, so Backstop takes it across to
+      <code>/v2/cryptocurrency/info</code> for the platform — the only route to this view.
+      Each row is a separate market: concentration among the issuers <em>inside</em>
+      that chain, not the share the chain holds.
+    </p>
+    <div class="tablewrap"><table id="chaintable"></table></div>
+    <p class="sub" id="chainnote" style="margin:14px 0 0"></p>
+  </section>
+
+  <!-- top assets ------------------------------------------------------------ -->
+  <section class="card" aria-labelledby="h-assets">
+    <h2 id="h-assets">The largest assets, and who mints them</h2>
+    <p class="sub" id="assetsub"></p>
+    <div class="tablewrap"><table id="assettable"></table></div>
+  </section>
+
+  <!-- classes -------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-classes">
+    <h2 id="h-classes">Issuer concentration within each asset class</h2>
+    <p class="sub">A class served by a single issuer scores 10,000 by definition — read the index next to the issuer count, never on its own.</p>
+    <div class="tablewrap"><table id="classtable"></table></div>
+  </section>
+
+  <!-- tradfi --------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-tradfi">
+    <h2 id="h-tradfi">Is the asset quoted anywhere off-chain?</h2>
+    <p class="sub">
+      <code>quotes/latest</code> returns <code>tradfi_markets</code> beside
+      <code>tokens</code>: the non-token venues quoting the asset, each with an
+      exchange, a ticker and a market URL. These are exchange listings rather than the
+      asset's primary market — a tokenised equity's entry points at a crypto exchange's
+      stock product, not at the exchange the share itself trades on. Read it as
+      <em>is this asset quoted anywhere off-chain</em>, then read the venue split
+      beside it.
+    </p>
+    <ul class="legend" id="tradfilegend"></ul>
+    <figure>
+      <svg id="chart-tradfi" role="img" aria-labelledby="h-tradfi tradfidesc" style="max-width:560px"></svg>
+      <desc id="tradfidesc" class="sr"></desc>
+      <figcaption id="tradficap"></figcaption>
+    </figure>
+    <div id="venueblock" style="margin-top:22px"></div>
+  </section>
+
+  <!-- issuers -------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-issuers">
+    <h2 id="h-issuers">Every issuer</h2>
+    <p class="sub">The full directory, largest first. This is the table view for both charts above — every value in them is readable here.</p>
+    <details class="tableview" id="issuerdetails">
+      <summary id="issuersummary">Show every issuer</summary>
+      <div class="tablewrap"><table id="issuertable"></table></div>
+    </details>
+  </section>
+
+  <!-- method --------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-method">
+    <h2 id="h-method">Method, coverage and cost</h2>
+    <p class="sub" id="methodsub"></p>
+    <div class="kv" id="methodkv"></div>
+    <h2 style="margin-top:26px">CoinMarketCap endpoints used</h2>
+    <p class="sub">Declared once in the pipeline and rendered here from the snapshot, so this list cannot drift from the code.</p>
+    <div class="tablewrap"><table id="endpointtable"></table></div>
+    <div id="refused"></div>
+  </section>
+
+  <footer>
+    <p id="footline"></p>
+    <p>
+      Backstop is an independent hackathon entry. It is not affiliated with or endorsed by
+      CoinMarketCap, and nothing here is investment advice.
+    </p>
+  </footer>
+</div>
+
+<div class="tooltip" id="tt" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ===========================================================================
+   Formatting
+   =========================================================================== */
+const fmtUSD = (v) => {
+  if (v == null || !isFinite(v)) return "—";
+  const a = Math.abs(v);
+  if (a >= 1e12) return "$" + (v / 1e12).toFixed(2) + "T";
+  if (a >= 1e9)  return "$" + (v / 1e9).toFixed(2) + "B";
+  if (a >= 1e6)  return "$" + (v / 1e6).toFixed(1) + "M";
+  if (a >= 1e3)  return "$" + (v / 1e3).toFixed(0) + "K";
+  return "$" + v.toFixed(0);
+};
+/* Axis ticks want $5B, not $5.00B - trailing zeros are noise on a scale. */
+const fmtAxis = (v) => {
+  if (!isFinite(v)) return "";
+  if (v === 0) return "0";
+  const a = Math.abs(v);
+  const trim = (x, d) => Number(x.toFixed(d)).toString();
+  if (a >= 1e12) return "$" + trim(v / 1e12, 1) + "T";
+  if (a >= 1e9)  return "$" + trim(v / 1e9, 1) + "B";
+  if (a >= 1e6)  return "$" + trim(v / 1e6, 1) + "M";
+  if (a >= 1e3)  return "$" + trim(v / 1e3, 0) + "K";
+  return "$" + trim(v, 0);
+};
+const fmtPct = (v, dp = 1) => (v == null || !isFinite(v)) ? "—" : (v * 100).toFixed(dp) + "%";
+const fmtNum = (v, dp = 0) =>
+  (v == null || !isFinite(v)) ? "—" : v.toLocaleString("en-GB", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* HHI band -> status token + glyph. The glyph and the band name travel with the
+   colour so the state never rests on hue alone. */
+function band(hhi) {
+  if (hhi == null) return { cls: "band-none", gly: "–", name: "no data", fill: "var(--baseline)" };
+  if (hhi >= 2500) return { cls: "band-crit", gly: "▲", name: "highly concentrated", fill: "var(--critical)" };
+  if (hhi >= 1500) return { cls: "band-warning", gly: "◆", name: "moderately concentrated", fill: "var(--warning)" };
+  return { cls: "band-good", gly: "●", name: "unconcentrated", fill: "var(--good)" };
+}
+const chipHTML = (hhi) => {          /* the headline badge */
+  const b = band(hhi);
+  return `<span class="chip ${b.cls}"><span class="dot"></span><span class="gly" aria-hidden="true">${b.gly}</span>${esc(b.name)}</span>`;
+};
+const bandTag = (hhi) => {           /* the compact in-table form */
+  const b = band(hhi);
+  return `<span class="bandtag ${b.cls}"><span class="gly" aria-hidden="true">${b.gly}</span>${esc(b.name)}</span>`;
+};
+
+/* ===========================================================================
+   Tooltip
+   =========================================================================== */
+const tt = document.getElementById("tt");
+function showTip(evt, title, rows) {
+  tt.innerHTML = `<div class="tt-t">${esc(title)}</div>` +
+    rows.map(([k, v]) => `<div class="tt-r"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("");
+  tt.classList.add("on");
+  moveTip(evt);
+}
+function moveTip(evt) {
+  const pad = 14, r = tt.getBoundingClientRect();
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  if (x + r.width > innerWidth - 8) x = evt.clientX - r.width - pad;
+  if (y + r.height > innerHeight - 8) y = evt.clientY - r.height - pad;
+  tt.style.left = Math.max(8, x) + "px";
+  tt.style.top = Math.max(8, y) + "px";
+}
+const hideTip = () => tt.classList.remove("on");
+
+/* ===========================================================================
+   Tiny SVG helper
+   =========================================================================== */
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(tag, attrs = {}, text) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) if (attrs[k] != null) n.setAttribute(k, attrs[k]);
+  if (text != null) n.textContent = text;
+  return n;
+}
+function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
+/* Clean axis ticks: 1 / 2 / 5 × 10^n covering [0, max]. */
+function ticks(max, target = 4) {
+  if (!(max > 0)) return [0];
+  const raw = max / target, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => raw <= s) || 10 * mag;
+  const out = [];
+  for (let v = 0; v <= max + step; v += step) { out.push(v); if (v >= max) break; }
+  return out;
+}
+
+/* ===========================================================================
+   Charts
+   =========================================================================== */
+
+/* Horizontal ranked bars. One hue for every bar (length is the encoding);
+   tips laballed selectively; axis ticks carry the rest; hover for all. */
+function drawBars(svg, rows, total) {
+  clear(svg);
+  const W = Math.max(300, Math.round(svg.clientWidth || 520));
+  const narrow = W < 520;
+  const BAR = 18, BAND = narrow ? 28 : 30, PAD_T = 8, PAD_B = 34;
+  const LABW = narrow ? 118 : 148, PAD_R = narrow ? 46 : 58;
+  const MAXCHARS = narrow ? 16 : 22;
+  const n = rows.length;
+  const H = PAD_T + n * BAND + PAD_B;
+  const plotW = Math.max(90, W - LABW - PAD_R);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("height", H);
+
+  // The axis domain runs to the tick ABOVE the largest bar, so no bar ever
+  // extends past the last gridline with nothing to read it against.
+  const max = Math.max(...rows.map((r) => r.value), 0);
+  const tk = ticks(max, narrow ? 2 : 4);
+  const domain = Math.max(max, tk[tk.length - 1]);
+  const x = (v) => (domain > 0 ? (v / domain) * plotW : 0);
+  const g = el("g");
+
+  for (const t of tk) {
+    const px = LABW + x(t);
+    g.appendChild(el("line", { class: "gridline", x1: px, x2: px, y1: PAD_T, y2: PAD_T + n * BAND }));
+    g.appendChild(el("text", { class: "tick", x: px, y: PAD_T + n * BAND + 16, "text-anchor": "middle" },
+      fmtAxis(t)));
+  }
+  g.appendChild(el("line", { class: "axisline", x1: LABW, x2: LABW, y1: PAD_T, y2: PAD_T + n * BAND }));
+
+  rows.forEach((r, i) => {
+    const yTop = PAD_T + i * BAND + (BAND - BAR) / 2;
+    const w = Math.max(r.value > 0 ? 2 : 0, x(r.value));
+    // 4px rounded data-end, square against the baseline.
+    const rad = Math.min(4, w);
+    const d = `M${LABW} ${yTop} H${LABW + Math.max(0, w - rad)}` +
+              (w > rad ? ` a${rad} ${rad} 0 0 1 ${rad} ${rad}` : "") +
+              ` V${yTop + BAR - rad}` +
+              (w > rad ? ` a${rad} ${rad} 0 0 1 ${-rad} ${rad}` : "") +
+              ` H${LABW} Z`;
+    g.appendChild(el("path", { d, fill: "var(--series-1)" }));
+
+    const name = r.label.length > MAXCHARS ? r.label.slice(0, MAXCHARS - 1) + "…" : r.label;
+    g.appendChild(el("text", { class: "catlab", x: LABW - 10, y: yTop + BAR / 2 + 4, "text-anchor": "end" }, name));
+
+    // Label the three extremes only; the axis and the tooltip carry the rest.
+    if (i < 3) {
+      g.appendChild(el("text", { class: "tiplab", x: LABW + w + 8, y: yTop + BAR / 2 + 4 },
+        fmtPct(total > 0 ? r.value / total : null)));
+    }
+
+    // Hit area spans the whole band (>=24px tall) so hover is not a pinpoint task.
+    const hit = el("rect", { class: "hit", x: 0, y: PAD_T + i * BAND, width: W, height: BAND });
+    const rowsTip = [["Tokenised market cap", fmtUSD(r.value)], ["Share of scope", fmtPct(total > 0 ? r.value / total : null, 2)]];
+    if (r.assets != null) rowsTip.push(["Assets issued", fmtNum(r.assets)]);
+    hit.addEventListener("mouseenter", (e) => showTip(e, r.label, rowsTip));
+    hit.addEventListener("mousemove", moveTip);
+    hit.addEventListener("mouseleave", hideTip);
+    g.appendChild(hit);
+  });
+
+  svg.appendChild(g);
+}
+
+/* Cumulative-share curve with the equality diagonal as a reference hairline. */
+function drawLorenz(svg, issuers) {
+  clear(svg);
+  const W = Math.max(300, Math.round(svg.clientWidth || 480));
+  const PAD_L = W < 480 ? 40 : 46, PAD_R = 16, PAD_T = 12, PAD_B = 40;
+  const H = W < 480 ? 280 : 360;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("height", H);
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
+
+  const vals = issuers.map((d) => d.market_cap).filter((v) => v > 0).sort((a, b) => b - a);
+  const total = vals.reduce((a, b) => a + b, 0);
+  const g = el("g");
+
+  if (!vals.length || total <= 0) {
+    g.appendChild(el("text", { class: "tick", x: W / 2, y: H / 2, "text-anchor": "middle" },
+      "No issuer values resolved."));
+    svg.appendChild(g);
+    return { pts: [] };
+  }
+
+  const pts = [{ i: 0, fx: 0, fy: 0 }];
+  let run = 0;
+  vals.forEach((v, i) => {
+    run += v;
+    pts.push({ i: i + 1, fx: (i + 1) / vals.length, fy: run / total });
+  });
+  const X = (f) => PAD_L + f * plotW;
+  const Y = (f) => PAD_T + (1 - f) * plotH;
+
+  for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    g.appendChild(el("line", { class: "gridline", x1: PAD_L, x2: PAD_L + plotW, y1: Y(t), y2: Y(t) }));
+    g.appendChild(el("text", { class: "tick", x: PAD_L - 9, y: Y(t) + 4, "text-anchor": "end" }, (t * 100) + "%"));
+  }
+  for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    g.appendChild(el("text", { class: "tick", x: X(t), y: PAD_T + plotH + 18, "text-anchor": "middle" },
+      Math.round(t * vals.length)));
+  }
+  g.appendChild(el("text", { class: "tick", x: PAD_L + plotW / 2, y: PAD_T + plotH + 34, "text-anchor": "middle" },
+    "issuers, largest first"));
+  g.appendChild(el("line", { class: "axisline", x1: PAD_L, x2: PAD_L + plotW, y1: Y(0), y2: Y(0) }));
+
+  // equality reference
+  g.appendChild(el("line", { class: "refline", x1: X(0), y1: Y(0), x2: X(1), y2: Y(1) }));
+  // Sit the reference label in the empty triangle BELOW the diagonal, so it
+  // never overprints either line.
+  if (W >= 420) {
+    g.appendChild(el("text", { class: "reflab", x: X(0.74), y: Y(0.60) + 6 }, "perfect equality"));
+  } else {
+    g.appendChild(el("text", { class: "reflab", x: X(0.5), y: Y(0.16) }, "perfect equality"));
+  }
+
+  const line = pts.map((p) => `${X(p.fx)} ${Y(p.fy)}`).join(" L ");
+  g.appendChild(el("path", { d: `M${PAD_L} ${Y(0)} L ${line} L ${X(1)} ${Y(0)} Z`, fill: "var(--series-1)", "fill-opacity": 0.1 }));
+  g.appendChild(el("path", { d: `M ${line}`, fill: "none", stroke: "var(--series-1)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+
+  // endpoint marker with a 2px surface ring
+  g.appendChild(el("circle", { cx: X(1), cy: Y(1), r: 5, fill: "var(--series-1)", stroke: "var(--surface-1)", "stroke-width": 2 }));
+
+  const cross = el("line", { class: "refline", y1: PAD_T, y2: PAD_T + plotH, opacity: 0 });
+  const dot = el("circle", { r: 4.5, fill: "var(--series-1)", stroke: "var(--surface-1)", "stroke-width": 2, opacity: 0 });
+  g.appendChild(cross); g.appendChild(dot);
+
+  const hit = el("rect", { class: "hit", x: PAD_L, y: PAD_T, width: plotW, height: plotH });
+  hit.addEventListener("mousemove", (e) => {
+    const bb = svg.getBoundingClientRect();
+    const fx = Math.min(1, Math.max(0, ((e.clientX - bb.left) / bb.width * W - PAD_L) / plotW));
+    const k = Math.max(1, Math.min(pts.length - 1, Math.round(fx * vals.length)));
+    const p = pts[k];
+    cross.setAttribute("x1", X(p.fx)); cross.setAttribute("x2", X(p.fx)); cross.setAttribute("opacity", 1);
+    dot.setAttribute("cx", X(p.fx)); dot.setAttribute("cy", Y(p.fy)); dot.setAttribute("opacity", 1);
+    showTip(e, `Top ${k} issuer${k === 1 ? "" : "s"}`, [
+      ["Cumulative share", fmtPct(p.fy, 1)],
+      ["Cumulative cap", fmtUSD(p.fy * total)],
+      ["Share of issuers", fmtPct(p.fx, 1)],
+    ]);
+  });
+  hit.addEventListener("mouseleave", () => { cross.setAttribute("opacity", 0); dot.setAttribute("opacity", 0); hideTip(); });
+  g.appendChild(hit);
+
+  svg.appendChild(g);
+  return { pts, total, n: vals.length };
+}
+
+/* Two-segment part-to-whole bar. Two series, so a legend is present; segments
+   are separated by a 2px surface gap, never a stroke. */
+function drawTradfi(svg, withMkt, withoutMkt) {
+  clear(svg);
+  const W = Math.min(560, Math.max(260, Math.round(svg.clientWidth || 560))), H = 46, BAR = 20, GAP = 2, Y = 8;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("height", H);
+  const total = withMkt + withoutMkt;
+  const g = el("g");
+  if (total <= 0) {
+    g.appendChild(el("text", { class: "tick", x: 0, y: 24 }, "No assets checked."));
+    svg.appendChild(g); return;
+  }
+  const wA = Math.max(0, (withMkt / total) * W - (withoutMkt > 0 ? GAP / 2 : 0));
+  const wB = Math.max(0, (withoutMkt / total) * W - (withMkt > 0 ? GAP / 2 : 0));
+
+  const seg = (x, w, fill, label, count) => {
+    if (w <= 0) return;
+    const rad = Math.min(4, w / 2);
+    g.appendChild(el("rect", { x, y: Y, width: w, height: BAR, rx: rad, fill }));
+    // Counts, not rounded percentages: 63.5% and 36.5% both round up and the
+    // two labels then appear to sum to 101%.
+    const txt = fmtNum(count);
+    if (w > 54) {
+      const t = el("text", { x: x + 9, y: Y + BAR / 2 + 4, "font-size": 12, "font-weight": 600, fill: "#ffffff" }, txt);
+      g.appendChild(t);
+    }
+    const hit = el("rect", { class: "hit", x, y: 0, width: w, height: H });
+    hit.addEventListener("mouseenter", (e) => showTip(e, label, [["Assets", fmtNum(count)], ["Share of checked", fmtPct(count / total, 1)]]));
+    hit.addEventListener("mousemove", moveTip);
+    hit.addEventListener("mouseleave", hideTip);
+    g.appendChild(hit);
+  };
+  seg(0, wA, "var(--series-1)", "Has a traditional market reference", withMkt);
+  seg(wA + GAP, wB, "var(--series-2)", "No traditional market reference", withoutMkt);
+
+  svg.appendChild(g);
+}
+
+/* ===========================================================================
+   Tables
+   =========================================================================== */
+function meterHTML(hhi) {
+  const b = band(hhi);
+  const pct = hhi == null ? 0 : Math.min(100, (hhi / 10000) * 100);
+  return `<div class="meter">
+    <span class="track" role="img" aria-label="HHI ${hhi == null ? "unavailable" : fmtNum(hhi)} of 10,000">
+      <span class="fill" style="width:${pct}%;background:${b.fill}"></span>
+      <span class="thr" style="left:15%"></span><span class="thr" style="left:25%"></span>
+    </span>
+    <span class="bandtxt">${hhi == null ? "—" : fmtNum(hhi)}</span>
+  </div>`;
+}
+
+/* A plain proportion meter - one hue, no status banding. Used where the value is
+   a share of a whole rather than a state. */
+function shareMeter(share) {
+  if (share == null) return "—";
+  const pct = Math.max(0, Math.min(100, share * 100));
+  return `<div class="meter">
+    <span class="track" role="img" aria-label="${fmtPct(share, 1)} of this asset">
+      <span class="fill" style="width:${pct}%;background:var(--series-1)"></span>
+    </span>
+    <span class="bandtxt">${fmtPct(share, 1)}</span>
+  </div>`;
+}
+
+function renderTable(node, cols, rows, caption) {
+  node.innerHTML =
+    (caption ? `<caption>${caption}</caption>` : "") +   /* trusted, authored here */
+    "<thead><tr>" + cols.map((c) => `<th class="${c.num ? "num" : ""}">${esc(c.h)}</th>`).join("") + "</tr></thead>" +
+    "<tbody>" + rows.map((r) =>
+      "<tr>" + cols.map((c) => {
+        const v = c.get(r);
+        return `<td class="${c.num ? "num" : ""}${c.wrap ? " wrapcell" : ""}">${c.raw ? v : esc(v)}</td>`;
+      }).join("") + "</tr>").join("") + "</tbody>";
+}
+
+/* ===========================================================================
+   Render
+   =========================================================================== */
+let SNAP = null;
+
+function scopeOptions(s) {
+  const out = [{ id: "all", label: "Whole market" }];
+  for (const c of majorChains(s)) out.push({ id: "chain:" + c, label: "Chain — " + c });
+  for (const c of Object.keys(s.by_asset_class || {})) out.push({ id: "class:" + c, label: "Asset class — " + c });
+  return out;
+}
+
+/* A token with no platform is a native asset, so its own name becomes its chain.
+   That leaves a tail of one-token pseudo-chains. Show the chains carrying real
+   weight and fold the rest, rather than padding a table with noise. */
+const CHAIN_FLOOR = 0.0025;   // 0.25% of attributed market
+function majorChains(s) {
+  const total = (s.overall && s.overall.total) || 0;
+  return Object.entries(s.by_chain || {})
+    .filter(([, v]) => total > 0 && v.total / total >= CHAIN_FLOOR)
+    .map(([k]) => k);
+}
+
+function blockFor(id) {
+  if (id === "all") {
+    return { block: SNAP.overall, label: "the whole tokenised real-world-asset market", full: true };
+  }
+  const kind = id.split(":")[0];
+  const key = id.split(":").slice(1).join(":");
+  if (kind === "chain") {
+    return { block: (SNAP.by_chain || {})[key], label: "tokens issued on " + key, full: false };
+  }
+  return { block: (SNAP.by_asset_class || {})[key], label: "the " + key + " asset class", full: false };
+}
+
+function renderScope(id) {
+  const { block, label, full } = blockFor(id);
+  if (!block) return;
+
+  document.getElementById("scopedesc").textContent =
+    `Across ${label}, weighted by tokenised market capitalisation.`;
+  document.getElementById("hero-eff").textContent = block.effective_n == null ? "—" : fmtNum(block.effective_n, 2);
+  document.getElementById("hero-effsub").textContent = block.effective_n == null
+    ? "No issuer values resolved in this scope."
+    : `${fmtNum(block.n)} issuers are present, but the distribution behaves like ${fmtNum(block.effective_n, 2)} of equal size.`;
+  document.getElementById("hero-hhi").textContent = block.hhi == null ? "—" : fmtNum(block.hhi, 1);
+  document.getElementById("hhichip").innerHTML = chipHTML(block.hhi);
+
+  const tiles = [
+    { l: "Top issuer", v: fmtPct(block.top1), n: "share of scope" },
+    { l: "Top 3", v: fmtPct(block.top3), n: "combined share" },
+    { l: "Top 5", v: fmtPct(block.top5), n: "combined share" },
+    { l: "Issuers with value", v: fmtNum(block.n), n: "resolved to market cap" },
+    { l: "Tokenised cap in scope", v: fmtUSD(block.total), n: "sum of matched assets" },
+  ];
+  document.getElementById("tiles").innerHTML = tiles.map((t) =>
+    `<div class="tile"><p class="tl">${esc(t.l)}</p><div class="tv">${esc(t.v)}</div><div class="tn">${esc(t.n)}</div></div>`).join("");
+
+  // Bar rows: the full issuer list when scope is the whole market, otherwise the
+  // scope's ranked leaders plus an explicit remainder.
+  let rows, note;
+  if (full) {
+    const all = SNAP.issuers.filter((r) => r.market_cap > 0);
+    const head = all.slice(0, 14).map((r) => ({ label: r.name, value: r.market_cap, assets: r.assets }));
+    const tail = all.slice(14).reduce((a, r) => a + r.market_cap, 0);
+    if (tail > 0) head.push({ label: `Other (${all.length - 14} issuers)`, value: tail });
+    rows = head;
+    note = `Top 14 of ${fmtNum(all.length)} issuers; the remainder is folded into a single bar rather than given its own colour.`;
+  } else {
+    const leaders = (block.leaders || []).map((l) => ({ label: l.label, value: l.value }));
+    const shown = leaders.reduce((a, r) => a + r.value, 0);
+    const rest = Math.max(0, block.total - shown);
+    rows = leaders.slice();
+    if (rest > 1 && block.n > leaders.length) rows.push({ label: `Other (${fmtNum(block.n - leaders.length)} issuers)`, value: rest });
+    note = `Ranked leaders within this scope, with the remainder folded into one bar.`;
+  }
+
+  document.getElementById("barscap").textContent = note;
+  document.getElementById("barsdesc").textContent =
+    `Horizontal bar chart of the largest issuers by tokenised market cap. Leader ${rows[0] ? rows[0].label : "n/a"} at ${rows[0] ? fmtPct(rows[0].value / block.total) : "n/a"} of the scope.`;
+  document.getElementById("scopecount").textContent =
+    `${fmtNum(block.n)} issuers · ${fmtUSD(block.total)} tokenised cap · HHI ${block.hhi == null ? "—" : fmtNum(block.hhi, 1)}`;
+
+  drawBars(document.getElementById("chart-bars"), rows, block.total);
+  renderTable(document.getElementById("barstable"), [
+    { h: "#", num: true, get: (r) => fmtNum(r._i) },
+    { h: "Issuer", get: (r) => r.label },
+    { h: "Tokenised cap", num: true, get: (r) => fmtUSD(r.value) },
+    { h: "Share", num: true, get: (r) => fmtPct(block.total > 0 ? r.value / block.total : null, 2) },
+  ], rows.map((r, i) => ({ ...r, _i: i + 1 })), "Same values as the chart above.");
+  window.__barRows = rows;
+  window.__barTotal = block.total;
+}
+
+function renderStatic() {
+  const s = SNAP;
+
+  // What the figures do and do not cover, stated before the figures, not after.
+  {
+    const c = s.coverage || {}, n = s.counts || {};
+    const zero = (s.issuers || []).filter((r) => r.placeholder).length;
+    const bits = [];
+    bits.push(`Concentration is measured by <strong>tokenised market cap</strong> over the ` +
+      `${fmtNum(n.issuers_with_value)} issuers carrying any, out of ${fmtNum(n.issuers_in_directory)} in CoinMarketCap's directory.`);
+    if (zero) bits.push(`${fmtNum(zero)} further ${zero === 1 ? "entry declares" : "entries declare"} tokens worth nothing and ${zero === 1 ? "is" : "are"} excluded.`);
+    if (c.tokens_without_market_cap) bits.push(`${fmtNum(c.tokens_without_market_cap)} of ${fmtNum(n.tokens_attributed)} tokens report no market cap at all, so every share below is a share of the value that <em>is</em> reported.`);
+    bits.push(c.issuers_outside_directory
+      ? `<strong>${fmtNum(c.issuers_outside_directory)} issuers appear on tokens but not in the directory</strong> — the directory is not a complete census.`
+      : `No issuer appeared on a token without also being in the directory in this run.`);
+    document.getElementById("scopebannertext").innerHTML = bits.join(" ");
+  }
+
+  if (s.synthetic) {
+    document.getElementById("banner").classList.add("on");
+    document.getElementById("bannertext").innerHTML =
+      `<strong>Synthetic data — not market data.</strong> ${esc(s.synthetic_note || "")}`;
+  }
+
+  // Lorenz
+  const lz = drawLorenz(document.getElementById("chart-lorenz"), s.issuers || []);
+  document.getElementById("lorenzdesc").textContent =
+    `Cumulative share curve over ${fmtNum(lz.n || 0)} issuers. Top issuer ${fmtPct(s.overall.top1)}, top 5 ${fmtPct(s.overall.top5)}.`;
+  const cum = [];
+  let run = 0;
+  (s.issuers || []).filter((r) => r.market_cap > 0).forEach((r, i) => {
+    run += r.market_cap;
+    if (i < 10 || (i + 1) % 10 === 0) cum.push({ k: i + 1, name: r.name, cap: r.market_cap, cs: run / s.overall.total });
+  });
+  renderTable(document.getElementById("lorenztable"), [
+    { h: "Top n", num: true, get: (r) => fmtNum(r.k) },
+    { h: "nth issuer", get: (r) => r.name },
+    { h: "Its cap", num: true, get: (r) => fmtUSD(r.cap) },
+    { h: "Cumulative share", num: true, get: (r) => fmtPct(r.cs, 2) },
+  ], cum, "Every issuer for the first ten, then every tenth.");
+
+  // chains
+  const mktTotal = s.overall.total || 0;
+  const major = new Set(majorChains(s));
+  const chainRows = Object.entries(s.by_chain || {})
+    .filter(([k]) => major.has(k)).map(([k, v]) => ({ k, ...v }));
+  const tailKeys = Object.keys(s.by_chain || {}).filter((k) => !major.has(k));
+  const tailTotal = tailKeys.reduce((a, k) => a + (s.by_chain[k].total || 0), 0);
+  renderTable(document.getElementById("chaintable"), [
+    { h: "Chain", get: (r) => r.k },
+    { h: "Tokenised cap", num: true, get: (r) => fmtUSD(r.total) },
+    { h: "Share", num: true, get: (r) => fmtPct(mktTotal > 0 ? r.total / mktTotal : null) },
+    { h: "Issuers", num: true, get: (r) => fmtNum(r.n) },
+    { h: "HHI", raw: true, get: (r) => meterHTML(r.hhi) },
+    { h: "Concentration", raw: true, get: (r) => bandTag(r.hhi) },
+    { h: "Effective", num: true, get: (r) => r.effective_n == null ? "—" : fmtNum(r.effective_n, 2) },
+    { h: "Top issuer", num: true, get: (r) => fmtPct(r.top1) },
+  ], chainRows,
+  "Ordered by tokenised cap. HHI runs 0–10,000 with the 1,500 and 2,500 guideline thresholds marked on each track; <em>effective</em> is the number of equal-sized issuers that would give the same figure.");
+  const cm = s.chain_mix || {};
+  const unplaced = (s.coverage || {}).value_without_a_chain || 0;
+  document.getElementById("chainnote").innerHTML =
+    `Measured <em>across</em> chains rather than within them, the market scores an HHI of ` +
+    `<strong>${cm.hhi == null ? "—" : fmtNum(cm.hhi, 1)}</strong> — ${esc(cm.verdict || "")}, ` +
+    `behaving like ${cm.effective_n == null ? "—" : fmtNum(cm.effective_n, 2)} equal-sized chains. ` +
+    (tailKeys.length
+      ? `A further ${fmtNum(tailKeys.length)} hold under ${fmtPct(CHAIN_FLOOR, 2)} each ` +
+        `(${fmtUSD(tailTotal)} between them) and are left out of the table above. `
+      : "") +
+    (unplaced > 0
+      ? `${fmtUSD(unplaced)} sits on tokens whose id the cryptocurrency endpoint did not return, and is excluded from this view.`
+      : "");
+
+  // largest assets and their issuer split - the illustration of why the value
+  // is attributed per token rather than per asset
+  const ta = s.top_assets || [];
+  const shared = ta.filter((a) => a.issuers > 1).length;
+  document.getElementById("assetsub").innerHTML =
+    `A tokenised asset is not one thing. <strong>${fmtNum(shared)} of these ${fmtNum(ta.length)}</strong> ` +
+    `are minted by more than one issuer, each with its own token and its own market cap. ` +
+    `That is why Backstop attributes value per token and never credits an asset's whole ` +
+    `cap to every issuer that touches it — doing so would count the same money several times.`;
+  renderTable(document.getElementById("assettable"), [
+    { h: "Asset", raw: true, get: (r) => `${esc(r.name || r.symbol)} <span style="color:var(--muted)">${esc(r.symbol)}</span>` },
+    { h: "Class", get: (r) => r.asset_class },
+    { h: "Cap", num: true, get: (r) => fmtUSD(r.tokenized_market_cap) },
+    { h: "Issuers", num: true, get: (r) => fmtNum(r.issuers) },
+    { h: "Largest issuer", get: (r) => r.top_issuer || "—" },
+    { h: "Its share", raw: true, get: (r) => shareMeter(r.top_issuer_share) },
+    { h: "Underlying", raw: true, get: (r) => r.tradfi_markets > 0
+        ? `<span class="bandtag band-good"><span class="gly" aria-hidden="true">●</span>${fmtNum(r.tradfi_markets)}</span>`
+        : `<span class="bandtag band-none"><span class="gly" aria-hidden="true">–</span>none</span>` },
+    { h: "Industry", get: (r) => r.industry || r.primary_exchange || "—" },
+  ], ta, "The 25 largest by tokenised market cap. <em>Its share</em> is the largest issuer's portion of that one asset; <em>underlying</em> counts the traditional markets <code>quotes/latest</code> reports for it. Industry and exchange come from the <code>info</code> endpoint.");
+
+  // classes
+  const classRows = Object.entries(s.by_asset_class || {})
+    .map(([k, v]) => ({ k, ...v }))
+    .sort((a, b) => (b.total || 0) - (a.total || 0));
+  renderTable(document.getElementById("classtable"), [
+    { h: "Asset class", get: (r) => r.k },
+    { h: "Tokenised cap", num: true, get: (r) => fmtUSD(r.total) },
+    { h: "Share", num: true, get: (r) => fmtPct(s.overall.total > 0 ? r.total / s.overall.total : null) },
+    { h: "Issuers", num: true, get: (r) => fmtNum(r.n) },
+    { h: "HHI", raw: true, get: (r) => meterHTML(r.hhi) },
+    { h: "Concentration", raw: true, get: (r) => bandTag(r.hhi) },
+    { h: "Effective", num: true, get: (r) => r.effective_n == null ? "—" : fmtNum(r.effective_n, 2) },
+    { h: "Top issuer", num: true, get: (r) => fmtPct(r.top1) },
+  ], classRows, "Ordered by tokenised cap.");
+
+  // tradfi
+  const tf = s.tradfi_reference || {};
+  const withM = tf.assets_with_tradfi_market || 0;
+  const without = Math.max(0, (tf.assets_checked || 0) - withM);
+  document.getElementById("tradfilegend").innerHTML = [
+    ["Quoted at a non-token venue", "var(--series-1)"],
+    ["No venue listed", "var(--series-2)"],
+  ].map(([l, c]) => `<li><span class="sw" style="background:${c}"></span>${esc(l)}</li>`).join("");
+  drawTradfi(document.getElementById("chart-tradfi"), withM, without);
+  document.getElementById("tradfidesc").textContent =
+    `Of ${fmtNum(tf.assets_checked || 0)} assets checked, ${fmtNum(withM)} are quoted at a non-token venue and ${fmtNum(without)} are not.`;
+  document.getElementById("tradficap").textContent = tf.assets_checked
+    ? `${fmtNum(withM)} of ${fmtNum(tf.assets_checked)} assets (${fmtPct(withM / tf.assets_checked)}) are quoted at one or more non-token venues.`
+    : "No assets were checked in this run.";
+
+  // venues - the second concentration, sitting underneath the issuer one
+  const venues = tf.venues || [];
+  const vTotal = venues.reduce((a, v) => a + v.listings, 0);
+  const vc = tf.venue_concentration || {};
+  document.getElementById("venueblock").innerHTML = venues.length
+    ? `<h2 style="font-size:15px;font-weight:640;margin:0 0 4px">And where are they quoted?</h2>
+       <p class="sub">Every listing above, by venue. ${venues.length === 1
+         ? "There is only one."
+         : `The leader carries ${fmtPct(venues[0].listings / vTotal)} of them.`}
+         As a market of its own that scores an HHI of <strong>${vc.hhi == null ? "—" : fmtNum(vc.hhi, 1)}</strong>
+         — ${esc(vc.verdict || "")}.</p>
+       <div class="tablewrap"><table id="venuetable"></table></div>`
+    : `<p class="sub">No venues were returned for any asset in this run.</p>`;
+  if (venues.length) {
+    renderTable(document.getElementById("venuetable"), [
+      { h: "Venue", get: (r) => r.name },
+      { h: "Listings", num: true, get: (r) => fmtNum(r.listings) },
+      { h: "Share", raw: true, get: (r) => shareMeter(vTotal > 0 ? r.listings / vTotal : null) },
+    ], venues, "Counted across every asset checked; an asset may be listed at more than one venue.");
+  }
+
+  // issuers
+  let acc = 0;
+  const irows = (s.issuers || []).map((r, i) => {
+    acc += r.market_cap;
+    return { ...r, _i: i + 1, _cum: s.overall.total > 0 ? acc / s.overall.total : null };
+  });
+  renderTable(document.getElementById("issuertable"), [
+    { h: "#", num: true, get: (r) => fmtNum(r._i) },
+    { h: "Issuer", raw: true, get: (r) => r.site ? `<a href="${esc(r.site)}" rel="nofollow noopener external" target="_blank">${esc(r.name)}</a>` : esc(r.name) },
+    { h: "Tokenised cap", num: true, get: (r) => fmtUSD(r.market_cap) },
+    { h: "Share", num: true, get: (r) => fmtPct(s.overall.total > 0 ? r.market_cap / s.overall.total : null, 2) },
+    { h: "Cumulative", num: true, get: (r) => fmtPct(r._cum, 2) },
+    { h: "Assets", num: true, get: (r) => fmtNum(r.assets) },
+    { h: "Tokens", raw: true, get: (r) => r.declared_tokens != null && r.declared_tokens !== r.attributed_tokens
+        ? `${fmtNum(r.attributed_tokens)} <span style="color:var(--muted)">of ${fmtNum(r.declared_tokens)} declared</span>`
+        : fmtNum(r.attributed_tokens) },
+    { h: "No cap reported", num: true, get: (r) => fmtNum(r.tokens_without_cap || 0) },
+    { h: "Quoted off-chain", num: true, get: (r) => fmtNum(r.assets_with_tradfi_market) },
+    { h: "Chains", wrap: true, get: (r) => {
+        const cs = r.chains || [];
+        return cs.slice(0, 3).join(", ") + (cs.length > 3 ? ` +${cs.length - 3}` : "");
+      } },
+    { h: "In directory", raw: true, get: (r) => r.in_directory
+        ? `<span class="bandtag band-good"><span class="gly" aria-hidden="true">●</span>yes</span>`
+        : `<span class="bandtag band-warning"><span class="gly" aria-hidden="true">◆</span>no</span>` },
+    { h: "Classes", wrap: true, get: (r) => (r.classes || []).join(", ") },
+  ], irows, "Every issuer with at least one attributed token, largest first. <em>Tokens</em> compares what the token data attributes to an issuer against the count that issuer declares through the issuers endpoint.");
+  document.getElementById("issuersummary").textContent =
+    `Show all ${fmtNum(irows.length)} issuers`;
+
+  // method
+  const m = s.method || {}, c = s.coverage || {}, api = s.api || {}, n = s.counts || {};
+  document.getElementById("methodsub").textContent = m.metric
+    ? `${m.metric}. ${m.scale}.` : "";
+  const rec = c.reconciliation || {};
+  const plan = s.plan || {};
+  const kv = [
+    ["Snapshot generated", new Date(s.generated_at).toUTCString()],
+    ["Assets in the map", fmtNum(n.assets_mapped)],
+    ["Of those, tokenised", fmtNum(n.assets_tokenised)],
+    ["Assets quoted this run", fmtNum(n.assets_quoted) + (c.assets_fully_quoted ? "" : " (partial run)")],
+    ["Tokens attributed to an issuer", fmtNum(n.tokens_attributed)],
+    ["Issuers in the directory", fmtNum(n.issuers_in_directory)],
+    ["Issuers carrying value", fmtNum(n.issuers_with_value)],
+    ["Tokens with no issuer", `${fmtNum(c.tokens_without_issuer)} (${fmtUSD(c.value_without_issuer)})`],
+    ["Tokens reporting no market cap", fmtNum(c.tokens_without_market_cap)],
+    ["Issuers seen outside the directory", fmtNum(c.issuers_outside_directory)],
+    ["Aggregate placeholders, not issuers", fmtNum(c.placeholder_issuers)],
+    ["Chains resolved", fmtNum(c.chains_resolved)],
+    ["Value on tokens with no chain", fmtUSD(c.value_without_a_chain)],
+    ["Token caps vs asset caps", rec.ratio == null ? "—" :
+      `${fmtNum(rec.ratio, 3)}× over ${fmtNum(rec.assets_compared)} assets`],
+    ["API calls", fmtNum(api.calls)],
+    ["Credits spent", fmtNum(api.credits) + (plan.credit_limit_monthly ? ` of ${fmtNum(plan.credit_limit_monthly)}/month` : "")],
+    ["Rate limit", plan.rate_limit_minute ? `${fmtNum(plan.rate_limit_minute)} requests/minute` : "—"],
+    ["Growth-tier endpoint reachable", s.market_pairs_probe ? (s.market_pairs_probe.available ? "yes" : "no — plan-gated, recorded from the live response") : "not probed"],
+  ];
+  document.getElementById("methodkv").innerHTML = kv.map(([k, v]) =>
+    `<div><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join("") +
+    (c.note ? `<div style="grid-column:1/-1;border-bottom:0"><span class="k">${esc(c.note)}</span></div>` : "");
+
+  renderTable(document.getElementById("endpointtable"), [
+    { h: "Endpoint", get: (r) => r.v.path },
+    { h: "Min tier", get: (r) => r.v.tier },
+    { h: "Credits", get: (r) => r.v.credits },
+    { h: "Why Backstop calls it", wrap: true, get: (r) => r.v.why },
+  ], Object.entries(s.endpoints || {}).map(([k, v]) => ({ k, v })));
+
+  const ref = (api.refused || []);
+  document.getElementById("refused").innerHTML = ref.length
+    ? `<p class="sub" style="margin-top:18px">Calls the API refused during this run, reported rather than hidden:</p><ul class="sub">` +
+      ref.map((r) => `<li><code>${esc(r.path)}</code> — ${esc(r.reason)}</li>`).join("") + "</ul>"
+    : `<p class="sub" style="margin-top:18px">No calls were refused during this run.</p>`;
+
+  document.getElementById("footline").innerHTML =
+    `Data from the CoinMarketCap Real World Assets API, refreshed by a scheduled job. Snapshot ` +
+    `<time datetime="${esc(s.generated_at)}">${esc(new Date(s.generated_at).toUTCString())}</time>. ` +
+    `Source and method: <a href="https://github.com/mistryrajan87-lang/backstop" rel="noopener">github.com/mistryrajan87-lang/backstop</a>.`;
+}
+
+/* ===========================================================================
+   Theme toggle: auto -> light -> dark
+   =========================================================================== */
+(function theme() {
+  const btn = document.getElementById("themebtn");
+  const order = ["auto", "light", "dark"];
+  let i = 0;
+  try { const st = localStorage.getItem("backstop-theme"); if (st && order.includes(st)) i = order.indexOf(st); } catch (e) {}
+  const apply = () => {
+    const t = order[i];
+    if (t === "auto") document.documentElement.setAttribute("data-theme", "auto");
+    else document.documentElement.setAttribute("data-theme", t);
+    btn.textContent = "Theme: " + t;
+    try { localStorage.setItem("backstop-theme", t); } catch (e) {}
+    if (SNAP) redraw();
+  };
+  btn.addEventListener("click", () => { i = (i + 1) % order.length; apply(); });
+  apply();
+})();
+
+function redraw() {
+  if (!SNAP) return;
+  if (window.__barRows) drawBars(document.getElementById("chart-bars"), window.__barRows, window.__barTotal);
+  drawLorenz(document.getElementById("chart-lorenz"), SNAP.issuers || []);
+  const tf = SNAP.tradfi_reference || {};
+  drawTradfi(document.getElementById("chart-tradfi"),
+    tf.assets_with_tradfi_market || 0,
+    Math.max(0, (tf.assets_checked || 0) - (tf.assets_with_tradfi_market || 0)));
+}
+
+let rt;
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(redraw, 120); });
+
+/* ===========================================================================
+   Boot
+   =========================================================================== */
+(async function boot() {
+  try {
+    const r = await fetch("data/snapshot.json", { cache: "no-cache" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    SNAP = await r.json();
+  } catch (e) {
+    // Two honest cases land here: the scheduled refresh has not run yet, so the
+    // snapshot does not exist; or the page was opened from the filesystem, where
+    // fetch cannot read a neighbouring file. Say which, rather than "error".
+    const missing = /404|not found/i.test(e.message || "");
+    const local = location.protocol === "file:";
+    document.getElementById("banner").classList.add("on");
+    document.getElementById("bannertext").innerHTML = local
+      ? `<strong>Opened from the filesystem.</strong> The page reads its data from ` +
+        `<code>data/snapshot.json</code>, which a browser will not fetch over <code>file://</code>. ` +
+        `Serve the folder over HTTP — <code>python -m http.server -d docs 8000</code> — and reload.`
+      : missing
+        ? `<strong>No snapshot published yet.</strong> The scheduled job writes ` +
+          `<code>docs/data/snapshot.json</code> on its first run; until then there is nothing to show. ` +
+          `Everything else on this page — the method, the endpoints, the code — is in ` +
+          `<a href="https://github.com/mistryrajan87-lang/backstop" rel="noopener">the repository</a>.`
+        : `<strong>Could not load the snapshot.</strong> <span class="err">${esc(e.message)}</span>`;
+    // Hide the sections that would otherwise render empty.
+    document.querySelectorAll(".card, .filterrow").forEach((n) => { n.style.display = "none"; });
+    return;
+  }
+  const sel = document.getElementById("scope");
+  sel.innerHTML = scopeOptions(SNAP).map((o) => `<option value="${esc(o.id)}">${esc(o.label)}</option>`).join("");
+  sel.addEventListener("change", () => renderScope(sel.value));
+  renderStatic();
+  renderScope("all");
+})();
+</script>
+</body>
+</html>

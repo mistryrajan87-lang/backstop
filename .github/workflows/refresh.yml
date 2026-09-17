@@ -1,0 +1,109 @@
+# Backstop data refresh.
+#
+# The dashboard is a static page; this is the only moving part. It runs the
+# pipeline on GitHub's runners, where the CoinMarketCap API is reachable and the
+# key can live as an encrypted repository secret, then commits the resulting
+# snapshot back to docs/data/ for GitHub Pages to serve.
+#
+# The key is never written into the repository, never echoed, and never appears
+# in a URL - fetch_snapshot.py reads it from the environment and sends it in the
+# X-CMC_PRO_API_KEY header.
+name: Refresh snapshot
+
+on:
+  schedule:
+    # 05:40 UTC daily. Off the hour on purpose: scheduled runs queue heavily at
+    # :00 and GitHub drops them under load.
+    - cron: "40 5 * * *"
+  # Manual run - used for the first fill, for the demo, and after any change to
+  # the pipeline. Deliberately not wired to `push`: every run spends credits, and
+  # a push trigger turns ordinary iteration into an unmetered spend.
+  workflow_dispatch:
+
+permissions:
+  contents: write             # the job commits the snapshot back
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false   # never interrupt a run mid-way through its credits
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify the aggregation maths before spending any credits
+        run: python tests/test_aggregation.py
+
+      - name: Fail early if the secret is missing
+        env:
+          CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
+        run: |
+          if [ -z "$CMC_API_KEY" ]; then
+            echo "::error::Repository secret CMC_API_KEY is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          echo "CMC_API_KEY is present (${#CMC_API_KEY} characters)."
+
+      # ~150 credits of the 15,000 monthly allowance per run: the map is free,
+      # the asset sweep is one credit per 250, quotes batch 100 assets per credit,
+      # and the chain lookup batches 100 ids per credit.
+      - name: Build the snapshot
+        env:
+          CMC_API_KEY: ${{ secrets.CMC_API_KEY }}
+        run: python scripts/fetch_snapshot.py --out docs/data/snapshot.json
+
+      - name: Sanity-check the snapshot before publishing it
+        run: |
+          python - <<'PY'
+          import json, sys
+          s = json.load(open("docs/data/snapshot.json"))
+          if s.get("synthetic"):
+              sys.exit("Refusing to publish: snapshot is flagged synthetic.")
+          o, c = s["overall"], s["coverage"]
+          if not o.get("n"):
+              sys.exit("Refusing to publish: no issuer resolved to any value.")
+          if o["hhi"] is None or not (0 < o["hhi"] <= 10000):
+              sys.exit(f"Refusing to publish: HHI out of range ({o['hhi']}).")
+          for k in ("top1", "top3", "top5"):
+              if not (0 <= o[k] <= 1.0000001):
+                  sys.exit(f"Refusing to publish: {k} out of range ({o[k]}).")
+          if o["top1"] > o["top3"] + 1e-9 or o["top3"] > o["top5"] + 1e-9:
+              sys.exit("Refusing to publish: top-N shares are not monotonic.")
+          # The per-token totals must land near CoinMarketCap's own asset-level
+          # figure. If they do not, the attribution is wrong and the page would
+          # publish a confident wrong number.
+          r = c["reconciliation"]
+          if r["ratio"] is not None and not (0.5 <= r["ratio"] <= 2.0):
+              sys.exit(f"Refusing to publish: token caps are {r['ratio']}x the "
+                       f"asset caps over {r['assets_compared']} assets.")
+          if not c["assets_fully_quoted"]:
+              print(f"::warning::Partial run - {c['quote_batches_run']} of "
+                    f"{c['quote_batches_total']} quote batches. The page says so.")
+          print(f"OK - {o['n']} issuers, HHI {o['hhi']} ({o['verdict']}), "
+                f"reconciliation {r['ratio']}, "
+                f"{c['tokens_without_market_cap']} tokens with no cap, "
+                f"{s['api']['credits']} credits")
+          PY
+
+      - name: Commit the snapshot
+        run: |
+          git config user.name  "backstop-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/snapshot.json
+          if git diff --staged --quiet; then
+            echo "No change in the snapshot; nothing to commit."
+          else
+            git commit -m "data: refresh RWA issuer snapshot"
+            git push
+          fi
