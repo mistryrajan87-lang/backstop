@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-18T00:02:24+00:00",
+ "generated_at": "2026-09-18T00:20:29+00:00",
  "method": {
   "metric": "Herfindahl-Hirschman Index over issuer shares of tokenised market cap",
   "scale": "0-10000; 1500 and 2500 are the 2010 US Horizontal Merger Guidelines thresholds for moderate and high concentration",
@@ -28,19 +28,66 @@
   "placeholder_issuers": 6,
   "reconciliation": {
    "assets_compared": 790,
-   "sum_of_token_caps": 7424293176.879999,
-   "sum_of_asset_caps": 7318884333.399444,
-   "difference": 105408843.48055553,
-   "ratio": 1.0144,
+   "sum_of_token_caps": 7316316967.309999,
+   "sum_of_asset_caps": 7319797508.4775715,
+   "difference": -3480541.1675720215,
+   "ratio": 0.9995,
+   "assets_compared_note": "the ratio covers only assets both endpoints price",
    "assets_off_by_over_1pct": 1,
    "worst_assets": [
     {
-     "rwa_id": "250",
-     "symbol": "OPENAI",
-     "name": "OpenAI",
-     "asset_cap": 3043934.469818035,
-     "token_sum": 3087849.06,
-     "ratio": 1.0144
+     "rwa_id": "187",
+     "symbol": "ANTHROPIC",
+     "name": "Anthropic",
+     "asset_cap": 7458815.894534472,
+     "token_sum": 7578626.1,
+     "ratio": 1.0161
+    }
+   ],
+   "assets_priced_only_by_tokens": 6,
+   "value_priced_only_by_tokens": 105893192.25,
+   "token_only_examples": [
+    {
+     "rwa_id": "6918",
+     "symbol": "EWG",
+     "name": "iShares MSCI Germany ETF",
+     "asset_cap": 0.0,
+     "token_sum": 56880853.08
+    },
+    {
+     "rwa_id": "5407",
+     "symbol": "NLR",
+     "name": "VanEck Uranium and Nuclear ETF",
+     "asset_cap": 0.0,
+     "token_sum": 47813995.73
+    },
+    {
+     "rwa_id": "7950",
+     "symbol": "VOO",
+     "name": "Vanguard S&P 500 ETF",
+     "asset_cap": 0.0,
+     "token_sum": 816526.53
+    },
+    {
+     "rwa_id": "5920",
+     "symbol": "VUG",
+     "name": "Vanguard Growth ETF",
+     "asset_cap": 0.0,
+     "token_sum": 275906.98
+    },
+    {
+     "rwa_id": "3133",
+     "symbol": "RCAT",
+     "name": "Red Cat Holdings, Inc.",
+     "asset_cap": 0.0,
+     "token_sum": 105878.53
+    },
+    {
+     "rwa_id": "353",
+     "symbol": "ECHO",
+     "name": "Echostar Corporation",
+     "asset_cap": 0.0,
+     "token_sum": 31.4
     }
    ]
   },
@@ -77,100 +124,100 @@
   "credit_limit_monthly": 15000,
   "rate_limit_minute": 50,
   "credit_limit_monthly_reset_timestamp": "2026-10-01T00:00:00.000Z",
-  "credits_used_this_month": 91,
-  "credits_left_this_month": 14909
+  "credits_used_this_month": 164,
+  "credits_left_this_month": 14836
  },
  "overall": {
-  "total": 7424293176.879999,
-  "hhi": 2342.7,
+  "total": 7422210159.56,
+  "hhi": 2342.0,
   "effective_n": 4.27,
   "verdict": "moderately concentrated",
-  "top1": 0.3668,
-  "top3": 0.739,
+  "top1": 0.3667,
+  "top3": 0.7391,
   "top5": 0.9412,
   "n": 15,
   "leaders": [
    {
     "key": "68904e9cabae9b5b9fb358ac",
     "label": "Tether Holdings",
-    "value": 2723402211.45,
-    "share": 0.3668
+    "value": 2721552226.6,
+    "share": 0.3667
    },
    {
     "key": "68904c24abae9b5b9fb35815",
     "label": "Paxos",
-    "value": 1886555867.07,
+    "value": 1886110856.89,
     "share": 0.2541
    },
    {
     "key": "688ca4ccabae9b5b9fb3167a",
     "label": "Ondo Assets",
-    "value": 876960723.4099995,
-    "share": 0.1181
+    "value": 878147239.0200002,
+    "share": 0.1183
    },
    {
     "key": "6a2aed5097c45356b1a5f710",
     "label": "bStocks",
-    "value": 754830671.5,
-    "share": 0.1017
+    "value": 754191025.1400005,
+    "share": 0.1016
    },
    {
     "key": "6878977dcbbf471de3366e85",
     "label": "Backed Assets",
-    "value": 746320434.9699996,
+    "value": 746143442.3199999,
     "share": 0.1005
    },
    {
     "key": "6a465832fbe3004b1a0ea2dd",
     "label": "Robinhood",
-    "value": 129473455.08000001,
+    "value": 129449597.85000002,
     "share": 0.0174
    },
    {
     "key": "6a43600c282e7240b76c8bbb",
     "label": "Reality",
-    "value": 125839866.78999998,
+    "value": 125746646.39,
     "share": 0.0169
    },
    {
     "key": "6a436076282e7240b76c8bf9",
     "label": "Republic",
-    "value": 73335391.45,
+    "value": 73288606.26,
     "share": 0.0099
    },
    {
     "key": "68905a7babae9b5b9fb35a8d",
     "label": "Matrixdock",
-    "value": 47570351.48,
+    "value": 47610274.24,
     "share": 0.0064
    },
    {
     "key": "68904cceabae9b5b9fb35839",
     "label": "Comtech Gold",
-    "value": 19685848.36,
+    "value": 19685103.36,
     "share": 0.0027
    },
    {
     "key": "6a2d54b697c45356b1a634f4",
     "label": "Backpack",
-    "value": 17787998.14,
+    "value": 17770901.65,
     "share": 0.0024
    },
    {
     "key": "689612983f270c6ff4781b96",
     "label": "PreStocks Assets",
-    "value": 16060080.81,
+    "value": 16043996.48,
     "share": 0.0022
    }
   ]
  },
  "by_chain": {
   "Ethereum": {
-   "total": 5530918733.579999,
-   "hhi": 3804.9,
+   "total": 5529889987.91,
+   "hhi": 3803.3,
    "effective_n": 2.63,
    "verdict": "highly concentrated",
-   "top1": 0.4893,
+   "top1": 0.4891,
    "top3": 0.9874,
    "top5": 0.999,
    "n": 6,
@@ -178,44 +225,44 @@
     {
      "key": "68904e9cabae9b5b9fb358ac",
      "label": "Tether Holdings",
-     "value": 2706260100.41,
-     "share": 0.4893
+     "value": 2704480499.49,
+     "share": 0.4891
     },
     {
      "key": "68904c24abae9b5b9fb35815",
      "label": "Paxos",
-     "value": 1886555867.07,
+     "value": 1886110856.89,
      "share": 0.3411
     },
     {
      "key": "688ca4ccabae9b5b9fb3167a",
      "label": "Ondo Assets",
-     "value": 868317185.1499995,
-     "share": 0.157
+     "value": 869502061.4000002,
+     "share": 0.1572
     },
     {
      "key": "68905a7babae9b5b9fb35a8d",
      "label": "Matrixdock",
-     "value": 47570351.48,
+     "value": 47610274.24,
      "share": 0.0086
     },
     {
      "key": "6878977dcbbf471de3366e85",
      "label": "Backed Assets",
-     "value": 16410616.889999999,
+     "value": 16381752.98,
      "share": 0.003
     },
     {
      "key": "68905b43abae9b5b9fb35a95",
      "label": "VNX",
-     "value": 5804612.58,
+     "value": 5804542.91,
      "share": 0.001
     }
    ]
   },
   "Solana": {
-   "total": 840989952.3599998,
-   "hhi": 7506.8,
+   "total": 840765144.07,
+   "hhi": 7507.6,
    "effective_n": 1.33,
    "verdict": "highly concentrated",
    "top1": 0.8615,
@@ -226,44 +273,44 @@
     {
      "key": "6878977dcbbf471de3366e85",
      "label": "Backed Assets",
-     "value": 724498391.3499998,
+     "value": 724351873.0500001,
      "share": 0.8615
     },
     {
      "key": "6a436076282e7240b76c8bf9",
      "label": "Republic",
-     "value": 73335391.45,
+     "value": 73288606.26,
      "share": 0.0872
     },
     {
      "key": "6a2d54b697c45356b1a634f4",
      "label": "Backpack",
-     "value": 17787998.14,
-     "share": 0.0212
+     "value": 17770901.65,
+     "share": 0.0211
     },
     {
      "key": "689612983f270c6ff4781b96",
      "label": "PreStocks Assets",
-     "value": 16060080.81,
+     "value": 16043996.48,
      "share": 0.0191
     },
     {
      "key": "688ca4ccabae9b5b9fb3167a",
      "label": "Ondo Assets",
-     "value": 8643538.26,
+     "value": 8645177.62,
      "share": 0.0103
     },
     {
      "key": "6a0be4e680ee5978ec4455ce",
      "label": "Tessera Assets",
-     "value": 664552.35,
+     "value": 664589.01,
      "share": 0.0008
     }
    ]
   },
   "BNB": {
-   "total": 756720741.95,
-   "hhi": 9950.2,
+   "total": 756080754.0300004,
+   "hhi": 9950.1,
    "effective_n": 1.01,
    "verdict": "highly concentrated",
    "top1": 0.9975,
@@ -274,19 +321,19 @@
     {
      "key": "6a2aed5097c45356b1a5f710",
      "label": "bStocks",
-     "value": 754830671.5,
+     "value": 754191025.1400005,
      "share": 0.9975
     },
     {
      "key": "6878977dcbbf471de3366e85",
      "label": "Backed Assets",
-     "value": 1890070.45,
+     "value": 1889728.89,
      "share": 0.0025
     }
    ]
   },
   "Robinhood": {
-   "total": 129473455.08000001,
+   "total": 129449597.85000002,
    "hhi": 10000.0,
    "effective_n": 1.0,
    "verdict": "highly concentrated",
@@ -298,13 +345,13 @@
     {
      "key": "6a465832fbe3004b1a0ea2dd",
      "label": "Robinhood",
-     "value": 129473455.08000001,
+     "value": 129449597.85000002,
      "share": 1.0
     }
    ]
   },
   "Arbitrum": {
-   "total": 125839866.78999998,
+   "total": 125746646.39,
    "hhi": 10000.0,
    "effective_n": 1.0,
    "verdict": "highly concentrated",
@@ -316,13 +363,13 @@
     {
      "key": "6a43600c282e7240b76c8bbb",
      "label": "Reality",
-     "value": 125839866.78999998,
+     "value": 125746646.39,
      "share": 1.0
     }
    ]
   },
   "XDC Network": {
-   "total": 19685848.36,
+   "total": 19685103.36,
    "hhi": 10000.0,
    "effective_n": 1.0,
    "verdict": "highly concentrated",
@@ -334,13 +381,13 @@
     {
      "key": "68904cceabae9b5b9fb35839",
      "label": "Comtech Gold",
-     "value": 19685848.36,
+     "value": 19685103.36,
      "share": 1.0
     }
    ]
   },
   "Hyperliquid": {
-   "total": 17143222.48,
+   "total": 17072838.55,
    "hhi": 9998.7,
    "effective_n": 1.0,
    "verdict": "highly concentrated",
@@ -352,7 +399,7 @@
     {
      "key": "68904e9cabae9b5b9fb358ac",
      "label": "Tether Holdings",
-     "value": 17142111.04,
+     "value": 17071727.11,
      "share": 0.9999
     },
     {
@@ -364,7 +411,7 @@
    ]
   },
   "OKB": {
-   "total": 3521356.28,
+   "total": 3520087.4000000004,
    "hhi": 10000.0,
    "effective_n": 1.0,
    "verdict": "highly concentrated",
@@ -376,15 +423,15 @@
     {
      "key": "6878977dcbbf471de3366e85",
      "label": "Backed Assets",
-     "value": 3521356.28,
+     "value": 3520087.4000000004,
      "share": 1.0
     }
    ]
   }
  },
  "chain_mix": {
-  "total": 7424293176.879999,
-  "hhi": 5788.1,
+  "total": 7422210159.559999,
+  "hhi": 5789.1,
   "effective_n": 1.73,
   "verdict": "highly concentrated",
   "top1": 0.745,
@@ -395,144 +442,144 @@
    {
     "key": "Ethereum",
     "label": "Ethereum",
-    "value": 5530918733.58,
+    "value": 5529889987.909999,
     "share": 0.745
    },
    {
     "key": "Solana",
     "label": "Solana",
-    "value": 840989952.3599997,
+    "value": 840765144.07,
     "share": 0.1133
    },
    {
     "key": "BNB",
     "label": "BNB",
-    "value": 756720741.9499999,
+    "value": 756080754.0300006,
     "share": 0.1019
    },
    {
     "key": "Robinhood",
     "label": "Robinhood",
-    "value": 129473455.08000001,
+    "value": 129449597.85000002,
     "share": 0.0174
    },
    {
     "key": "Arbitrum",
     "label": "Arbitrum",
-    "value": 125839866.78999998,
+    "value": 125746646.39,
     "share": 0.0169
    },
    {
     "key": "XDC Network",
     "label": "XDC Network",
-    "value": 19685848.36,
+    "value": 19685103.36,
     "share": 0.0027
    },
    {
     "key": "Hyperliquid",
     "label": "Hyperliquid",
-    "value": 17143222.48,
+    "value": 17072838.55,
     "share": 0.0023
    },
    {
     "key": "OKB",
     "label": "OKB",
-    "value": 3521356.28,
+    "value": 3520087.4000000004,
     "share": 0.0005
    }
   ]
  },
  "asset_mix": {
-  "total": 7318884333.399444,
-  "hhi": 4150.2,
+  "total": 7319797508.4775715,
+  "hhi": 4151.6,
   "effective_n": 2.41,
   "verdict": "highly concentrated",
-  "top1": 0.6399,
-  "top3": 0.7115,
+  "top1": 0.64,
+  "top3": 0.7116,
   "top5": 0.7551,
   "n": 292,
   "leaders": [
    {
     "key": "1",
     "label": "GOLD",
-    "value": 4683348486.268469,
-    "share": 0.6399
+    "value": 4684757040.361277,
+    "share": 0.64
    },
    {
     "key": "115",
     "label": "CRCL",
-    "value": 306848338.20194894,
+    "value": 306813947.0029023,
     "share": 0.0419
    },
    {
     "key": "9",
     "label": "SPCX",
-    "value": 217226718.15682536,
+    "value": 217090239.00707623,
     "share": 0.0297
    },
    {
     "key": "114",
     "label": "MSTR",
-    "value": 173361882.76155424,
+    "value": 173239485.35161301,
     "share": 0.0237
    },
    {
     "key": "86",
     "label": "SPY",
-    "value": 145797618.327255,
+    "value": 145616360.4573263,
     "share": 0.0199
    },
    {
     "key": "2",
     "label": "NVDA",
-    "value": 133501065.92078432,
+    "value": 133480706.04559197,
     "share": 0.0182
    },
    {
     "key": "118",
     "label": "QQQ",
-    "value": 132881492.42950147,
-    "share": 0.0182
+    "value": 132848061.0247369,
+    "share": 0.0181
    },
    {
     "key": "12",
     "label": "MU",
-    "value": 122144910.81528273,
+    "value": 122134681.6042537,
     "share": 0.0167
    },
    {
     "key": "14",
     "label": "TSLA",
-    "value": 115343302.71759243,
+    "value": 115346156.359752,
     "share": 0.0158
    },
    {
     "key": "4",
     "label": "GOOGL",
-    "value": 99666666.92855507,
+    "value": 99691451.47641487,
     "share": 0.0136
    },
    {
     "key": "48",
     "label": "SNDK",
-    "value": 76313616.73293777,
+    "value": 76254166.16826124,
     "share": 0.0104
    },
    {
     "key": "141",
     "label": "IVV",
-    "value": 69604544.382835,
-    "share": 0.0095
+    "value": 70635999.76174983,
+    "share": 0.0096
    }
   ]
  },
  "by_asset_class": {
   "commodity": {
-   "total": 4683018890.94,
-   "hhi": 5006.1,
+   "total": 4680763004.0,
+   "hhi": 5005.6,
    "effective_n": 2.0,
    "verdict": "highly concentrated",
-   "top1": 0.5815,
+   "top1": 0.5814,
    "top3": 0.9946,
    "top5": 1.0,
    "n": 5,
@@ -540,38 +587,38 @@
     {
      "key": "68904e9cabae9b5b9fb358ac",
      "label": "Tether Holdings",
-     "value": 2723402211.45,
-     "share": 0.5815
+     "value": 2721552226.6,
+     "share": 0.5814
     },
     {
      "key": "68904c24abae9b5b9fb35815",
      "label": "Paxos",
-     "value": 1886555867.07,
+     "value": 1886110856.89,
      "share": 0.4029
     },
     {
      "key": "68905a7babae9b5b9fb35a8d",
      "label": "Matrixdock",
-     "value": 47570351.48,
+     "value": 47610274.24,
      "share": 0.0102
     },
     {
      "key": "68904cceabae9b5b9fb35839",
      "label": "Comtech Gold",
-     "value": 19685848.36,
+     "value": 19685103.36,
      "share": 0.0042
     },
     {
      "key": "68905b43abae9b5b9fb35a95",
      "label": "VNX",
-     "value": 5804612.58,
+     "value": 5804542.91,
      "share": 0.0012
     }
    ]
   },
   "stock": {
-   "total": 1999663134.8999996,
-   "hhi": 2442.3,
+   "total": 1999277713.0500002,
+   "hhi": 2442.5,
    "effective_n": 4.09,
    "verdict": "moderately concentrated",
    "top1": 0.3073,
@@ -582,55 +629,55 @@
     {
      "key": "6a2aed5097c45356b1a5f710",
      "label": "bStocks",
-     "value": 614570014.0300001,
+     "value": 614390447.7500002,
      "share": 0.3073
     },
     {
      "key": "688ca4ccabae9b5b9fb3167a",
      "label": "Ondo Assets",
-     "value": 552976878.3899999,
-     "share": 0.2765
+     "value": 553087293.0999999,
+     "share": 0.2766
     },
     {
      "key": "6878977dcbbf471de3366e85",
      "label": "Backed Assets",
-     "value": 514695743.3999996,
+     "value": 514526449.1399999,
      "share": 0.2574
     },
     {
      "key": "6a43600c282e7240b76c8bbb",
      "label": "Reality",
-     "value": 116335173.10999998,
+     "value": 116270347.44999999,
      "share": 0.0582
     },
     {
      "key": "6a465832fbe3004b1a0ea2dd",
      "label": "Robinhood",
-     "value": 93236191.78000002,
+     "value": 93233970.77000003,
      "share": 0.0466
     },
     {
      "key": "6a436076282e7240b76c8bf9",
      "label": "Republic",
-     "value": 73335391.45,
+     "value": 73288606.26,
      "share": 0.0367
     },
     {
      "key": "6a2d54b697c45356b1a634f4",
      "label": "Backpack",
-     "value": 17787998.14,
+     "value": 17770901.65,
      "share": 0.0089
     },
     {
      "key": "689612983f270c6ff4781b96",
      "label": "PreStocks Assets",
-     "value": 16060080.81,
+     "value": 16043996.48,
      "share": 0.008
     },
     {
      "key": "6a0be4e680ee5978ec4455ce",
      "label": "Tessera Assets",
-     "value": 664552.35,
+     "value": 664589.01,
      "share": 0.0003
     },
     {
@@ -642,43 +689,43 @@
    ]
   },
   "etf": {
-   "total": 741611151.04,
-   "hhi": 3267.2,
+   "total": 742169442.51,
+   "hhi": 3272.5,
    "effective_n": 3.06,
    "verdict": "highly concentrated",
-   "top1": 0.4369,
-   "top3": 0.9383,
+   "top1": 0.438,
+   "top3": 0.9384,
    "top5": 1.0,
    "n": 5,
    "leaders": [
     {
      "key": "688ca4ccabae9b5b9fb3167a",
      "label": "Ondo Assets",
-     "value": 323983845.0199999,
-     "share": 0.4369
+     "value": 325059945.92,
+     "share": 0.438
     },
     {
      "key": "6878977dcbbf471de3366e85",
      "label": "Backed Assets",
-     "value": 231624691.57,
-     "share": 0.3123
+     "value": 231616993.17999998,
+     "share": 0.3121
     },
     {
      "key": "6a2aed5097c45356b1a5f710",
      "label": "bStocks",
-     "value": 140260657.47000003,
-     "share": 0.1891
+     "value": 139800577.39000002,
+     "share": 0.1884
     },
     {
      "key": "6a465832fbe3004b1a0ea2dd",
      "label": "Robinhood",
-     "value": 36237263.300000004,
-     "share": 0.0489
+     "value": 36215627.080000006,
+     "share": 0.0488
     },
     {
      "key": "6a43600c282e7240b76c8bbb",
      "label": "Reality",
-     "value": 9504693.68,
+     "value": 9476298.94,
      "share": 0.0128
     }
    ]
@@ -693,8 +740,8 @@
    "tokens": 2,
    "tokens_without_cap": 0,
    "assets": 1,
-   "market_cap": 2723402211.45,
-   "volume_24h": 257082163.62642196,
+   "market_cap": 2721552226.6,
+   "volume_24h": 256531955.84590253,
    "classes": [
     "commodity"
    ],
@@ -715,8 +762,8 @@
    "tokens": 1,
    "tokens_without_cap": 0,
    "assets": 1,
-   "market_cap": 1886555867.07,
-   "volume_24h": 209488120.61638507,
+   "market_cap": 1886110856.89,
+   "volume_24h": 207105458.16422302,
    "classes": [
     "commodity"
    ],
@@ -736,8 +783,8 @@
    "tokens": 214,
    "tokens_without_cap": 4,
    "assets": 213,
-   "market_cap": 876960723.4099995,
-   "volume_24h": 317127646.93710077,
+   "market_cap": 878147239.0200002,
+   "volume_24h": 317020885.16315037,
    "classes": [
     "etf",
     "stock"
@@ -759,8 +806,8 @@
    "tokens": 77,
    "tokens_without_cap": 0,
    "assets": 77,
-   "market_cap": 754830671.5,
-   "volume_24h": 552122725.6393329,
+   "market_cap": 754191025.1400005,
+   "volume_24h": 549109291.7894549,
    "classes": [
     "etf",
     "stock"
@@ -781,8 +828,8 @@
    "tokens": 772,
    "tokens_without_cap": 625,
    "assets": 660,
-   "market_cap": 746320434.9699996,
-   "volume_24h": 196694845.4316746,
+   "market_cap": 746143442.3199999,
+   "volume_24h": 196040547.4453838,
    "classes": [
     "etf",
     "stock"
@@ -806,8 +853,8 @@
    "tokens": 106,
    "tokens_without_cap": 7,
    "assets": 106,
-   "market_cap": 129473455.08000001,
-   "volume_24h": 228368677.0455816,
+   "market_cap": 129449597.85000002,
+   "volume_24h": 226639656.19592333,
    "classes": [
     "etf",
     "stock"
@@ -828,8 +875,8 @@
    "tokens": 71,
    "tokens_without_cap": 0,
    "assets": 71,
-   "market_cap": 125839866.78999998,
-   "volume_24h": 14776023.985736916,
+   "market_cap": 125746646.39,
+   "volume_24h": 14807026.066967603,
    "classes": [
     "etf",
     "stock"
@@ -850,8 +897,8 @@
    "tokens": 1,
    "tokens_without_cap": 0,
    "assets": 1,
-   "market_cap": 73335391.45,
-   "volume_24h": 45884.35566142,
+   "market_cap": 73288606.26,
+   "volume_24h": 46274.59519745,
    "classes": [
     "stock"
    ],
@@ -871,8 +918,8 @@
    "tokens": 1,
    "tokens_without_cap": 0,
    "assets": 1,
-   "market_cap": 47570351.48,
-   "volume_24h": 591232.08256199,
+   "market_cap": 47610274.24,
+   "volume_24h": 590007.29854707,
    "classes": [
     "commodity"
    ],
@@ -892,8 +939,8 @@
    "tokens": 1,
    "tokens_without_cap": 0,
    "assets": 1,
-   "market_cap": 19685848.36,
-   "volume_24h": 871779.81506698,
+   "market_cap": 19685103.36,
+   "volume_24h": 871923.61781656,
    "classes": [
     "commodity"
    ],
@@ -913,8 +960,8 @@
    "tokens": 5,
    "tokens_without_cap": 0,
    "assets": 5,
-   "market_cap": 17787998.14,
-   "volume_24h": 6308874.4784515705,
+   "market_cap": 17770901.65,
+   "volume_24h": 6166504.04609227,
    "classes": [
     "stock"
    ],
@@ -934,8 +981,8 @@
    "tokens": 3,
    "tokens_without_cap": 0,
    "assets": 3,
-   "market_cap": 16060080.81,
-   "volume_24h": 2307550.71428738,
+   "market_cap": 16043996.48,
+   "volume_24h": 2342659.68350873,
    "classes": [
     "stock"
    ],
@@ -955,8 +1002,8 @@
    "tokens": 1,
    "tokens_without_cap": 0,
    "assets": 1,
-   "market_cap": 5804612.58,
-   "volume_24h": 18944.58511188,
+   "market_cap": 5804542.91,
+   "volume_24h": 18956.70809672,
    "classes": [
     "commodity"
    ],
@@ -976,8 +1023,8 @@
    "tokens": 1,
    "tokens_without_cap": 0,
    "assets": 1,
-   "market_cap": 664552.35,
-   "volume_24h": 373051.65457992,
+   "market_cap": 664589.01,
+   "volume_24h": 366483.16709117,
    "classes": [
     "stock"
    ],
@@ -998,7 +1045,7 @@
    "tokens_without_cap": 0,
    "assets": 11,
    "market_cap": 1111.44,
-   "volume_24h": 3579.47933887,
+   "volume_24h": 3579.74030748,
    "classes": [
     "etf",
     "stock"
@@ -1020,7 +1067,7 @@
    "tokens_without_cap": 3,
    "assets": 122,
    "market_cap": 0.0,
-   "volume_24h": 4585409.123517649,
+   "volume_24h": 4571091.46611676,
    "classes": [
     "commodity",
     "etf",
@@ -1061,7 +1108,7 @@
    "tokens_without_cap": 0,
    "assets": 1,
    "market_cap": 0.0,
-   "volume_24h": 107872.56065349,
+   "volume_24h": 107323.08329675,
    "classes": [
     "commodity"
    ],
@@ -1135,7 +1182,7 @@
    "name": "Gold",
    "symbol": "GOLD",
    "asset_class": "commodity",
-   "tokenized_market_cap": 4683348486.268469,
+   "tokenized_market_cap": 4684757040.361277,
    "tokens": 6,
    "issuers": 6,
    "tradfi_markets": 0,
@@ -1143,31 +1190,31 @@
    "primary_exchange": "",
    "cik": "",
    "top_issuer": "Tether Holdings",
-   "top_issuer_share": 0.5815,
+   "top_issuer_share": 0.5809,
    "split": [
     {
      "issuer": "Tether Holdings",
-     "market_cap": 2723402211.45,
-     "share": 0.5815
+     "market_cap": 2721552226.6,
+     "share": 0.5809
     },
     {
      "issuer": "Paxos",
-     "market_cap": 1886555867.07,
-     "share": 0.4028
+     "market_cap": 1886110856.89,
+     "share": 0.4026
     },
     {
      "issuer": "Matrixdock",
-     "market_cap": 47570351.48,
+     "market_cap": 47610274.24,
      "share": 0.0102
     },
     {
      "issuer": "Comtech Gold",
-     "market_cap": 19685848.36,
+     "market_cap": 19685103.36,
      "share": 0.0042
     },
     {
      "issuer": "VNX",
-     "market_cap": 5804612.58,
+     "market_cap": 5804542.91,
      "share": 0.0012
     },
     {
@@ -1182,7 +1229,7 @@
    "name": "Circle Internet Group Inc",
    "symbol": "CRCL",
    "asset_class": "stock",
-   "tokenized_market_cap": 306848338.20194894,
+   "tokenized_market_cap": 306813947.0029023,
    "tokens": 6,
    "issuers": 6,
    "tradfi_markets": 1,
@@ -1190,31 +1237,31 @@
    "primary_exchange": "New York Stock Exchange",
    "cik": "0001876042",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.3596,
+   "top_issuer_share": 0.3597,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 110345837.18,
-     "share": 0.3596
+     "market_cap": 110350675.77,
+     "share": 0.3597
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 102006868.49,
-     "share": 0.3324
+     "market_cap": 102022021.27,
+     "share": 0.3325
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 75228658.9,
-     "share": 0.2452
+     "market_cap": 75201029.59,
+     "share": 0.2451
     },
     {
      "issuer": "Reality",
-     "market_cap": 14168126.05,
-     "share": 0.0462
+     "market_cap": 14151657.59,
+     "share": 0.0461
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 5110016.47,
+     "market_cap": 5109790.72,
      "share": 0.0167
     },
     {
@@ -1229,7 +1276,7 @@
    "name": "SpaceX",
    "symbol": "SPCX",
    "asset_class": "stock",
-   "tokenized_market_cap": 217226718.15682536,
+   "tokenized_market_cap": 217090239.00707623,
    "tokens": 10,
    "issuers": 10,
    "tradfi_markets": 1,
@@ -1241,32 +1288,32 @@
    "split": [
     {
      "issuer": "Republic",
-     "market_cap": 73335391.45,
+     "market_cap": 73288606.26,
      "share": 0.3376
     },
     {
      "issuer": "bStocks",
-     "market_cap": 70153936.92,
+     "market_cap": 70121651.81,
      "share": 0.323
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 40425470.44,
+     "market_cap": 40409473.35,
      "share": 0.1861
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 10401453.17,
+     "market_cap": 10398372.72,
      "share": 0.0479
     },
     {
      "issuer": "Reality",
-     "market_cap": 10140325.24,
+     "market_cap": 10132598.85,
      "share": 0.0467
     },
     {
      "issuer": "Backpack",
-     "market_cap": 6716603.53,
+     "market_cap": 6712988.97,
      "share": 0.0309
     },
     {
@@ -1276,7 +1323,7 @@
     },
     {
      "issuer": "Tessera Assets",
-     "market_cap": 664552.35,
+     "market_cap": 664589.01,
      "share": 0.0031
     }
    ]
@@ -1286,7 +1333,7 @@
    "name": "MicroStrategy Inc",
    "symbol": "MSTR",
    "asset_class": "stock",
-   "tokenized_market_cap": 173361882.76155424,
+   "tokenized_market_cap": 173239485.35161301,
    "tokens": 6,
    "issuers": 6,
    "tradfi_markets": 1,
@@ -1298,27 +1345,27 @@
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 76314826.69,
+     "market_cap": 76265208.3,
      "share": 0.4402
     },
     {
      "issuer": "bStocks",
-     "market_cap": 56696800.4,
-     "share": 0.327
+     "market_cap": 56687267.97,
+     "share": 0.3272
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 25636805.85,
+     "market_cap": 25625887.6,
      "share": 0.1479
     },
     {
      "issuer": "Reality",
-     "market_cap": 10851721.3,
+     "market_cap": 10844840.72,
      "share": 0.0626
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 3870395.65,
+     "market_cap": 3870023.51,
      "share": 0.0223
     },
     {
@@ -1333,7 +1380,7 @@
    "name": "SPDR S&P 500 ETF Trust",
    "symbol": "SPY",
    "asset_class": "etf",
-   "tokenized_market_cap": 145797618.327255,
+   "tokenized_market_cap": 145616360.4573263,
    "tokens": 8,
    "issuers": 8,
    "tradfi_markets": 1,
@@ -1341,31 +1388,31 @@
    "primary_exchange": "NYSE Arca, Inc.",
    "cik": "0000884394",
    "top_issuer": "Backed Assets",
-   "top_issuer_share": 0.4252,
+   "top_issuer_share": 0.4263,
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 61994544.3,
-     "share": 0.4252
+     "market_cap": 62082035.94,
+     "share": 0.4263
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 45121299.25,
-     "share": 0.3095
+     "market_cap": 45128536.52,
+     "share": 0.3099
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 23299510.71,
-     "share": 0.1598
+     "market_cap": 23278506.19,
+     "share": 0.1599
     },
     {
      "issuer": "bStocks",
-     "market_cap": 14209132.36,
+     "market_cap": 14197675.35,
      "share": 0.0975
     },
     {
      "issuer": "Reality",
-     "market_cap": 1071520.23,
+     "market_cap": 1069289.2,
      "share": 0.0073
     },
     {
@@ -1390,7 +1437,7 @@
    "name": "Nvidia Corp",
    "symbol": "NVDA",
    "asset_class": "stock",
-   "tokenized_market_cap": 133501065.92078432,
+   "tokenized_market_cap": 133480706.04559197,
    "tokens": 7,
    "issuers": 7,
    "tradfi_markets": 1,
@@ -1398,31 +1445,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001045810",
    "top_issuer": "Backed Assets",
-   "top_issuer_share": 0.3106,
+   "top_issuer_share": 0.3105,
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 41465134.64,
-     "share": 0.3106
+     "market_cap": 41451688.940000005,
+     "share": 0.3105
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 36861852.86,
+     "market_cap": 36854899.48,
      "share": 0.2761
     },
     {
      "issuer": "bStocks",
-     "market_cap": 30038454.85,
-     "share": 0.225
+     "market_cap": 30011018.34,
+     "share": 0.2248
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 20494329.28,
-     "share": 0.1535
+     "market_cap": 20504450.65,
+     "share": 0.1536
     },
     {
      "issuer": "Reality",
-     "market_cap": 4660562.01,
+     "market_cap": 4657963.29,
      "share": 0.0349
     },
     {
@@ -1442,7 +1489,7 @@
    "name": "Invesco QQQ Trust",
    "symbol": "QQQ",
    "asset_class": "etf",
-   "tokenized_market_cap": 132881492.42950147,
+   "tokenized_market_cap": 132848061.0247369,
    "tokens": 7,
    "issuers": 7,
    "tradfi_markets": 1,
@@ -1450,31 +1497,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001067839",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.42,
+   "top_issuer_share": 0.4202,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 55811043.16,
-     "share": 0.42
+     "market_cap": 55818116.42,
+     "share": 0.4202
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 36851402.79,
-     "share": 0.2773
+     "market_cap": 36821362.0,
+     "share": 0.2772
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 32389150.45,
-     "share": 0.2437
+     "market_cap": 32390183.24,
+     "share": 0.2438
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 5042236.98,
+     "market_cap": 5041431.27,
      "share": 0.0379
     },
     {
      "issuer": "Reality",
-     "market_cap": 2774920.07,
+     "market_cap": 2774608.45,
      "share": 0.0209
     },
     {
@@ -1494,7 +1541,7 @@
    "name": "Micron Technology Inc",
    "symbol": "MU",
    "asset_class": "stock",
-   "tokenized_market_cap": 122144910.81528273,
+   "tokenized_market_cap": 122134681.6042537,
    "tokens": 7,
    "issuers": 7,
    "tradfi_markets": 1,
@@ -1502,37 +1549,37 @@
    "primary_exchange": "Nasdaq",
    "cik": "0000723125",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.3623,
+   "top_issuer_share": 0.3624,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 44254614.29,
-     "share": 0.3623
+     "market_cap": 44257709.62,
+     "share": 0.3624
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 39126143.16,
-     "share": 0.3203
+     "market_cap": 39155727.95,
+     "share": 0.3206
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 18024380.81,
+     "market_cap": 18025946.48,
      "share": 0.1476
     },
     {
      "issuer": "Reality",
-     "market_cap": 8962054.67,
-     "share": 0.0734
+     "market_cap": 8971045.5,
+     "share": 0.0735
     },
     {
      "issuer": "Backpack",
-     "market_cap": 6890975.45,
-     "share": 0.0564
+     "market_cap": 6878314.77,
+     "share": 0.0563
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 4841050.97,
-     "share": 0.0396
+     "market_cap": 4849710.52,
+     "share": 0.0397
     },
     {
      "issuer": "NA (Derivatives)",
@@ -1546,7 +1593,7 @@
    "name": "Tesla, Inc.",
    "symbol": "TSLA",
    "asset_class": "stock",
-   "tokenized_market_cap": 115343302.71759243,
+   "tokenized_market_cap": 115346156.359752,
    "tokens": 8,
    "issuers": 8,
    "tradfi_markets": 1,
@@ -1554,32 +1601,32 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001318605",
    "top_issuer": "Backed Assets",
-   "top_issuer_share": 0.6112,
+   "top_issuer_share": 0.6114,
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 70495344.6,
-     "share": 0.6112
+     "market_cap": 70525336.79,
+     "share": 0.6114
     },
     {
      "issuer": "bStocks",
-     "market_cap": 19530637.21,
+     "market_cap": 19532295.21,
      "share": 0.1693
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 16607415.97,
+     "market_cap": 16610642.43,
      "share": 0.144
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 4662993.97,
-     "share": 0.0404
+     "market_cap": 4649421.01,
+     "share": 0.0403
     },
     {
      "issuer": "Reality",
-     "market_cap": 4054123.25,
-     "share": 0.0351
+     "market_cap": 4056137.03,
+     "share": 0.0352
     },
     {
      "issuer": "Hyperliquid Assets",
@@ -1603,7 +1650,7 @@
    "name": "Alphabet Inc Class A",
    "symbol": "GOOGL",
    "asset_class": "stock",
-   "tokenized_market_cap": 99666666.92855507,
+   "tokenized_market_cap": 99691451.47641487,
    "tokens": 8,
    "issuers": 8,
    "tradfi_markets": 1,
@@ -1611,31 +1658,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001652044",
    "top_issuer": "Backed Assets",
-   "top_issuer_share": 0.3549,
+   "top_issuer_share": 0.3547,
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 35375558.42,
-     "share": 0.3549
+     "market_cap": 35359381.86,
+     "share": 0.3547
     },
     {
      "issuer": "bStocks",
-     "market_cap": 27424001.98,
-     "share": 0.2752
+     "market_cap": 27401344.76,
+     "share": 0.2749
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 19944051.009999998,
-     "share": 0.2001
+     "market_cap": 19942441.31,
+     "share": 0.2
     },
     {
      "issuer": "Reality",
-     "market_cap": 11657120.86,
-     "share": 0.117
+     "market_cap": 11658852.84,
+     "share": 0.1169
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 5296850.64,
+     "market_cap": 5297471.45,
      "share": 0.0531
     },
     {
@@ -1660,7 +1707,7 @@
    "name": "SanDisk Corp",
    "symbol": "SNDK",
    "asset_class": "stock",
-   "tokenized_market_cap": 76313616.73293777,
+   "tokenized_market_cap": 76254166.16826124,
    "tokens": 7,
    "issuers": 7,
    "tradfi_markets": 1,
@@ -1668,36 +1715,36 @@
    "primary_exchange": "",
    "cik": "",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.5869,
+   "top_issuer_share": 0.5866,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 44784729.96,
-     "share": 0.5869
+     "market_cap": 44729837.42,
+     "share": 0.5866
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 16006097.59,
-     "share": 0.2097
+     "market_cap": 15977214.33,
+     "share": 0.2095
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 6305761.87,
-     "share": 0.0826
+     "market_cap": 6308864.25,
+     "share": 0.0827
     },
     {
      "issuer": "Reality",
-     "market_cap": 5693221.3,
+     "market_cap": 5686197.14,
      "share": 0.0746
     },
     {
      "issuer": "Backpack",
-     "market_cap": 1888327.08,
-     "share": 0.0247
+     "market_cap": 1887570.82,
+     "share": 0.0248
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 1643095.1,
+     "market_cap": 1642316.83,
      "share": 0.0215
     },
     {
@@ -1712,7 +1759,7 @@
    "name": "iShares Core S&P 500 ETF",
    "symbol": "IVV",
    "asset_class": "etf",
-   "tokenized_market_cap": 69604544.382835,
+   "tokenized_market_cap": 70635999.76174983,
    "tokens": 1,
    "issuers": 1,
    "tradfi_markets": 1,
@@ -1724,7 +1771,7 @@
    "split": [
     {
      "issuer": "Ondo Assets",
-     "market_cap": 69604640.75,
+     "market_cap": 70636081.78,
      "share": 1.0
     }
    ]
@@ -1734,7 +1781,7 @@
    "name": "Intel Corp",
    "symbol": "INTC",
    "asset_class": "stock",
-   "tokenized_market_cap": 54704770.41801222,
+   "tokenized_market_cap": 54630441.76104601,
    "tokens": 6,
    "issuers": 6,
    "tradfi_markets": 1,
@@ -1742,31 +1789,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0000050863",
    "top_issuer": "Ondo Assets",
-   "top_issuer_share": 0.3465,
+   "top_issuer_share": 0.3463,
    "split": [
     {
      "issuer": "Ondo Assets",
-     "market_cap": 18954103.75,
-     "share": 0.3465
+     "market_cap": 18921138.91,
+     "share": 0.3463
     },
     {
      "issuer": "bStocks",
-     "market_cap": 13595321.25,
-     "share": 0.2485
+     "market_cap": 13571214.87,
+     "share": 0.2484
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 13161755.62,
-     "share": 0.2406
+     "market_cap": 13140784.670000002,
+     "share": 0.2405
     },
     {
      "issuer": "Reality",
-     "market_cap": 7244880.84,
-     "share": 0.1324
+     "market_cap": 7242490.72,
+     "share": 0.1326
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 1738909.27,
+     "market_cap": 1736107.81,
      "share": 0.0318
     },
     {
@@ -1781,7 +1828,7 @@
    "name": "Coinbase Global, Inc.",
    "symbol": "COIN",
    "asset_class": "stock",
-   "tokenized_market_cap": 42597032.09099286,
+   "tokenized_market_cap": 42554622.52537855,
    "tokens": 7,
    "issuers": 7,
    "tradfi_markets": 1,
@@ -1789,32 +1836,32 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001679788",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.3809,
+   "top_issuer_share": 0.3813,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 16226242.31,
-     "share": 0.3809
+     "market_cap": 16228132.18,
+     "share": 0.3813
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 12040711.09,
+     "market_cap": 12031252.25,
      "share": 0.2827
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 8748874.89,
-     "share": 0.2054
+     "market_cap": 8751356.41,
+     "share": 0.2056
     },
     {
      "issuer": "Reality",
-     "market_cap": 3064508.74,
-     "share": 0.0719
+     "market_cap": 3064521.96,
+     "share": 0.072
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 2511004.24,
-     "share": 0.0589
+     "market_cap": 2512593.37,
+     "share": 0.059
     },
     {
      "issuer": "Dinari Assets",
@@ -1833,7 +1880,7 @@
    "name": "Marvell Technology Inc",
    "symbol": "MRVL",
    "asset_class": "stock",
-   "tokenized_market_cap": 38617982.65468919,
+   "tokenized_market_cap": 38600289.80870597,
    "tokens": 5,
    "issuers": 5,
    "tradfi_markets": 1,
@@ -1841,31 +1888,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001835632",
    "top_issuer": "Ondo Assets",
-   "top_issuer_share": 0.4502,
+   "top_issuer_share": 0.4509,
    "split": [
     {
      "issuer": "Ondo Assets",
-     "market_cap": 17384910.98,
-     "share": 0.4502
+     "market_cap": 17405845.93,
+     "share": 0.4509
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 7756856.25,
-     "share": 0.2009
+     "market_cap": 7731255.28,
+     "share": 0.2003
     },
     {
      "issuer": "bStocks",
-     "market_cap": 7653074.92,
-     "share": 0.1982
+     "market_cap": 7637951.57,
+     "share": 0.1979
     },
     {
      "issuer": "Reality",
-     "market_cap": 5403833.34,
+     "market_cap": 5399342.15,
      "share": 0.1399
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 421143.85,
+     "market_cap": 421117.59,
      "share": 0.0109
     }
    ]
@@ -1875,7 +1922,7 @@
    "name": "SK Hynix",
    "symbol": "SKHY",
    "asset_class": "stock",
-   "tokenized_market_cap": 35788198.05752057,
+   "tokenized_market_cap": 35781358.71743636,
    "tokens": 5,
    "issuers": 5,
    "tradfi_markets": 0,
@@ -1883,26 +1930,26 @@
    "primary_exchange": "",
    "cik": "",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.681,
+   "top_issuer_share": 0.6809,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 24370984.71,
-     "share": 0.681
+     "market_cap": 24363067.64,
+     "share": 0.6809
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 7661461.91,
-     "share": 0.2141
+     "market_cap": 7664615.59,
+     "share": 0.2142
     },
     {
      "issuer": "Backpack",
-     "market_cap": 2292092.08,
-     "share": 0.064
+     "market_cap": 2292027.09,
+     "share": 0.0641
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 1453476.93,
+     "market_cap": 1453523.52,
      "share": 0.0406
     },
     {
@@ -1917,7 +1964,7 @@
    "name": "Apple Inc.",
    "symbol": "AAPL",
    "asset_class": "stock",
-   "tokenized_market_cap": 35512968.52370666,
+   "tokenized_market_cap": 35520556.22920649,
    "tokens": 8,
    "issuers": 8,
    "tradfi_markets": 1,
@@ -1925,31 +1972,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0000320193",
    "top_issuer": "Backed Assets",
-   "top_issuer_share": 0.3958,
+   "top_issuer_share": 0.3961,
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 14054995.86,
-     "share": 0.3958
+     "market_cap": 14068460.58,
+     "share": 0.3961
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 9003423.22,
+     "market_cap": 9002725.14,
      "share": 0.2535
     },
     {
      "issuer": "bStocks",
-     "market_cap": 6442277.99,
+     "market_cap": 6442494.6,
      "share": 0.1814
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 5195534.44,
+     "market_cap": 5195914.75,
      "share": 0.1463
     },
     {
      "issuer": "Reality",
-     "market_cap": 817509.24,
+     "market_cap": 817886.87,
      "share": 0.023
     },
     {
@@ -1974,7 +2021,7 @@
    "name": "Meta Platforms, Inc.",
    "symbol": "META",
    "asset_class": "stock",
-   "tokenized_market_cap": 30719438.633804996,
+   "tokenized_market_cap": 30730524.235410567,
    "tokens": 7,
    "issuers": 7,
    "tradfi_markets": 1,
@@ -1986,27 +2033,27 @@
    "split": [
     {
      "issuer": "Ondo Assets",
-     "market_cap": 11410783.77,
+     "market_cap": 11416949.05,
      "share": 0.3715
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 10185221.86,
-     "share": 0.3316
+     "market_cap": 10187152.83,
+     "share": 0.3315
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 4155550.26,
-     "share": 0.1353
+     "market_cap": 4167742.4,
+     "share": 0.1356
     },
     {
      "issuer": "bStocks",
-     "market_cap": 3957791.95,
-     "share": 0.1288
+     "market_cap": 3960767.97,
+     "share": 0.1289
     },
     {
      "issuer": "Reality",
-     "market_cap": 1003505.09,
+     "market_cap": 1003465.22,
      "share": 0.0327
     },
     {
@@ -2026,7 +2073,7 @@
    "name": "Hims & Hers Health Inc",
    "symbol": "HIMS",
    "asset_class": "stock",
-   "tokenized_market_cap": 30703552.7305879,
+   "tokenized_market_cap": 30713120.61397911,
    "tokens": 4,
    "issuers": 4,
    "tradfi_markets": 1,
@@ -2034,21 +2081,21 @@
    "primary_exchange": "New York Stock Exchange",
    "cik": "0001773751",
    "top_issuer": "Ondo Assets",
-   "top_issuer_share": 0.9609,
+   "top_issuer_share": 0.9607,
    "split": [
     {
      "issuer": "Ondo Assets",
-     "market_cap": 29501919.23,
-     "share": 0.9609
+     "market_cap": 29504702.66,
+     "share": 0.9607
     },
     {
      "issuer": "bStocks",
-     "market_cap": 766557.08,
+     "market_cap": 766839.04,
      "share": 0.025
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 435087.78,
+     "market_cap": 435081.27,
      "share": 0.0142
     },
     {
@@ -2063,7 +2110,7 @@
    "name": "Direxion Daily Semiconductor Bull 3X ETF",
    "symbol": "SOXL",
    "asset_class": "etf",
-   "tokenized_market_cap": 29082164.40171656,
+   "tokenized_market_cap": 28855846.11991823,
    "tokens": 3,
    "issuers": 3,
    "tradfi_markets": 1,
@@ -2071,21 +2118,21 @@
    "primary_exchange": "",
    "cik": "",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.6884,
+   "top_issuer_share": 0.6885,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 20019317.11,
-     "share": 0.6884
+     "market_cap": 19868042.14,
+     "share": 0.6885
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 6892720.44,
-     "share": 0.237
+     "market_cap": 6843270.53,
+     "share": 0.2372
     },
     {
      "issuer": "Reality",
-     "market_cap": 2160622.23,
+     "market_cap": 2145394.4,
      "share": 0.0743
     }
    ]
@@ -2095,7 +2142,7 @@
    "name": "Broadcom Inc",
    "symbol": "AVGO",
    "asset_class": "stock",
-   "tokenized_market_cap": 26651505.576466095,
+   "tokenized_market_cap": 26618910.66943281,
    "tokens": 6,
    "issuers": 6,
    "tradfi_markets": 1,
@@ -2103,31 +2150,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001730168",
    "top_issuer": "bStocks",
-   "top_issuer_share": 0.4152,
+   "top_issuer_share": 0.415,
    "split": [
     {
      "issuer": "bStocks",
-     "market_cap": 11065969.26,
-     "share": 0.4152
+     "market_cap": 11047850.28,
+     "share": 0.415
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 6250011.880000001,
+     "market_cap": 6243056.630000001,
      "share": 0.2345
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 4854712.64,
-     "share": 0.1822
+     "market_cap": 4855515.58,
+     "share": 0.1824
     },
     {
      "issuer": "Reality",
-     "market_cap": 4273869.78,
+     "market_cap": 4270562.29,
      "share": 0.1604
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 206663.56,
+     "market_cap": 206654.56,
      "share": 0.0078
     },
     {
@@ -2142,7 +2189,7 @@
    "name": "iShares Silver Trust",
    "symbol": "SLV",
    "asset_class": "etf",
-   "tokenized_market_cap": 26488133.728342842,
+   "tokenized_market_cap": 26470290.5138672,
    "tokens": 5,
    "issuers": 5,
    "tradfi_markets": 1,
@@ -2150,16 +2197,16 @@
    "primary_exchange": "NYSE Arca, Inc.",
    "cik": "0001330568",
    "top_issuer": "Ondo Assets",
-   "top_issuer_share": 0.959,
+   "top_issuer_share": 0.9602,
    "split": [
     {
      "issuer": "Ondo Assets",
-     "market_cap": 25402352.53,
-     "share": 0.959
+     "market_cap": 25416990.63,
+     "share": 0.9602
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 1085980.6,
+     "market_cap": 1085805.06,
      "share": 0.041
     },
     {
@@ -2184,7 +2231,7 @@
    "name": "Robinhood Markets Inc",
    "symbol": "HOOD",
    "asset_class": "stock",
-   "tokenized_market_cap": 24698008.979238268,
+   "tokenized_market_cap": 24715769.09160911,
    "tokens": 6,
    "issuers": 6,
    "tradfi_markets": 1,
@@ -2196,23 +2243,23 @@
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 12051414.66,
+     "market_cap": 12062444.24,
      "share": 0.488
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 5390719.34,
-     "share": 0.2183
+     "market_cap": 5386522.72,
+     "share": 0.2179
     },
     {
      "issuer": "bStocks",
-     "market_cap": 5304342.05,
-     "share": 0.2148
+     "market_cap": 5300591.2,
+     "share": 0.2145
     },
     {
      "issuer": "Reality",
-     "market_cap": 1952144.33,
-     "share": 0.079
+     "market_cap": 1950292.94,
+     "share": 0.0789
     },
     {
      "issuer": "NA (Derivatives)",
@@ -2231,7 +2278,7 @@
    "name": "Microsoft Corp",
    "symbol": "MSFT",
    "asset_class": "stock",
-   "tokenized_market_cap": 22724268.340661924,
+   "tokenized_market_cap": 22715028.527583513,
    "tokens": 8,
    "issuers": 8,
    "tradfi_markets": 1,
@@ -2239,32 +2286,32 @@
    "primary_exchange": "Nasdaq",
    "cik": "0000789019",
    "top_issuer": "Ondo Assets",
-   "top_issuer_share": 0.3499,
+   "top_issuer_share": 0.3502,
    "split": [
     {
      "issuer": "Ondo Assets",
-     "market_cap": 7951318.63,
-     "share": 0.3499
+     "market_cap": 7953688.16,
+     "share": 0.3502
     },
     {
      "issuer": "Backed Assets",
-     "market_cap": 7481633.8,
-     "share": 0.3292
+     "market_cap": 7493437.9,
+     "share": 0.3299
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 2984481.73,
-     "share": 0.1313
+     "market_cap": 2978088.19,
+     "share": 0.1311
     },
     {
      "issuer": "bStocks",
-     "market_cap": 2901069.74,
-     "share": 0.1277
+     "market_cap": 2902498.55,
+     "share": 0.1278
     },
     {
      "issuer": "Reality",
-     "market_cap": 1398837.48,
-     "share": 0.0616
+     "market_cap": 1400620.03,
+     "share": 0.0617
     },
     {
      "issuer": "Dinari Assets",
@@ -2288,7 +2335,7 @@
    "name": "Amazon.com Inc",
    "symbol": "AMZN",
    "asset_class": "stock",
-   "tokenized_market_cap": 20323630.61942407,
+   "tokenized_market_cap": 20312061.568303954,
    "tokens": 7,
    "issuers": 7,
    "tradfi_markets": 1,
@@ -2296,31 +2343,31 @@
    "primary_exchange": "Nasdaq",
    "cik": "0001018724",
    "top_issuer": "Backed Assets",
-   "top_issuer_share": 0.3914,
+   "top_issuer_share": 0.3912,
    "split": [
     {
      "issuer": "Backed Assets",
-     "market_cap": 7954713.16,
-     "share": 0.3914
+     "market_cap": 7945747.98,
+     "share": 0.3912
     },
     {
      "issuer": "Ondo Assets",
-     "market_cap": 6152898.32,
-     "share": 0.3027
+     "market_cap": 6150499.82,
+     "share": 0.3028
     },
     {
      "issuer": "Robinhood",
-     "market_cap": 3563620.18,
-     "share": 0.1753
+     "market_cap": 3551248.83,
+     "share": 0.1748
     },
     {
      "issuer": "bStocks",
-     "market_cap": 1860110.75,
-     "share": 0.0915
+     "market_cap": 1859687.61,
+     "share": 0.0916
     },
     {
      "issuer": "Reality",
-     "market_cap": 804839.33,
+     "market_cap": 804489.45,
      "share": 0.0396
     },
     {
@@ -2342,28 +2389,47 @@
   "venues": [
    {
     "name": "Binance",
-    "listings": 777
+    "listings": 777,
+    "share": 1.0
    }
   ],
-  "venue_concentration": {
-   "total": 777.0,
-   "hhi": 10000.0,
-   "effective_n": 1.0,
-   "verdict": "highly concentrated",
-   "top1": 1.0,
-   "top3": 1.0,
-   "top5": 1.0,
-   "n": 1,
-   "leaders": [
-    {
-     "key": "Binance",
-     "label": "Binance",
-     "value": 777.0,
-     "share": 1.0
-    }
-   ]
-  },
+  "distinct_venues": 1,
+  "total_listings": 777,
+  "venue_note": "Reported as a count, deliberately. When the field returns one venue, a concentration index over it is arithmetic rather than a finding - it can only be 10,000. The number worth quoting is how many listings came back and how many distinct venues they name.",
   "note": "quotes/latest returns tradfi_markets[] beside tokens[]: the non-token venues that quote the asset, each with an exchange, a ticker and a market URL. These are exchange listings rather than the asset's primary market - a tokenised equity's entry points at a crypto exchange's stock product, not at the exchange the share itself trades on. Read it as 'is this asset quoted anywhere off chain', and read the venue split beside it: if one venue supplies nearly all of them, that is a second concentration sitting underneath the issuer one."
+ },
+ "not_in_this_catalogue": {
+  "checked": [
+   "BUIDL",
+   "BENJI",
+   "USYC",
+   "OUSG",
+   "USDY",
+   "TBILL",
+   "JTRSY",
+   "USTBL",
+   "FOBXX",
+   "USTB",
+   "JAAA",
+   "BOXX"
+  ],
+  "absent": [
+   "BUIDL",
+   "BENJI",
+   "USYC",
+   "OUSG",
+   "USDY",
+   "TBILL",
+   "JTRSY",
+   "USTBL",
+   "FOBXX"
+  ],
+  "present": [
+   "USTB",
+   "JAAA",
+   "BOXX"
+  ],
+  "note": "Tickers a reader arriving from an RWA league table would expect. Looked up by symbol in CoinMarketCap's own RWA map on this run. Absent here means absent from this catalogue - not absent from the world, and not a claim about the products themselves."
  },
  "market_pairs_probe": {
   "available": false,
