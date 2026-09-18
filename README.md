@@ -89,11 +89,25 @@ deliberately: an HHI over a single-entry field can only return 10,000, which is
 arithmetic wearing the clothes of a finding. And it says nothing about where these
 assets are actually priced — only what one API field returns.
 
-**Some names are simply not here.** Every run looks up a list of tickers a reader
-arriving from an RWA league table would expect — BUIDL, BENJI, USYC, OUSG, USTB
-and others — by symbol in CoinMarketCap's own RWA map, and publishes which were
-absent. That list is the fastest way to see why this catalogue should not be
-compared against an RWA TVL table.
+**Some names are simply not here, and the near-misses are instructive.** Every run
+looks up the tickers a reader arriving from an RWA league table would expect, by
+symbol, in CoinMarketCap's own RWA map. Nine are not in it at all: **BUIDL, BENJI,
+USYC, OUSG, USDY, TBILL, JTRSY, USTBL, FOBXX**.
+
+Three do match a row — and none of them is the product you would assume:
+
+| Ticker | What is actually in the map | State |
+|---|---|---|
+| `USTB` | Victory Portfolios II VictoryShares Short-Term Bond ETF | no tokens, carries nothing |
+| `JAAA` | Janus Henderson AAA CLO ETF | tokens, carries **$65,242** |
+| `BOXX` | Alpha Architect 1-3 Month Box ETF | no tokens, carries nothing |
+
+All three are conventional ETFs that happen to share a ticker with something an
+RWA reader might be thinking of — not the tokenised treasury funds themselves. So
+symbol matching finds them, and a careless lookup would report the treasury market
+as "partly present" when it is not present at all. The run reports three states
+separately — absent from the map, present but carrying nothing, present with value
+— because collapsing them would manufacture exactly that error.
 
 **A single snapshot is a photograph.** The scheduled job runs daily and appends one
 line per run to `docs/data/history.jsonl` — total cap, HHI, top-1 and top-5 share,
@@ -123,12 +137,27 @@ you publish them:
 - **The weighting.** Almost half the tokens report no market cap, 625 of them from
   one issuer. Any league table built on token *count* crowns the wrong name.
 
-**What it cannot do for you.** It will not help you choose a treasury product —
-that market is not in this catalogue. It will not help you price issuer default;
-CoinMarketCap gives a name and a roster, not custody or a legal claim. It will not
-tell you whether PAXG is safer than XAUt. And a single snapshot is a photograph,
-not a trend: the scheduled job commits one a day, so the history starts from the
-first run, not before it.
+**Three things it is not**, stated on the dashboard as well as here, because people
+land on a concentration chart and reach for it as a risk tool:
+
+- **Not a safety check.** Safe would mean reserves audited, the contract sound,
+  redemption possible. CoinMarketCap supplies a name, a ticker and a market-cap
+  field — no attestations, no custody, no redemption terms. Adding a concentration
+  index to that does not add safety.
+- **Not a map of who pays you back.** That is a legal question: which entity, in
+  which jurisdiction, under which document. The API's "issuer" is a label on a
+  token; for a fund the sponsor, the tokenisation agent and the fund vehicle are
+  three different answers, and this data distinguishes none of them.
+- **Not investment advice, and not a buy list.** One vendor's catalogue,
+  gold-heavy, missing the large treasury products, with almost half its tokens
+  unpriced. Not a portfolio view, and it should not be read as one.
+
+Answering any of those would need a different project entirely — issuer legal
+documents, attestations, redemption timelines, and sources well beyond
+CoinMarketCap.
+
+And a single snapshot is a photograph, not a trend: the scheduled job commits one
+a day, so the series starts from the first run, not before it.
 
 The honest pitch: *if you use CoinMarketCap to talk about tokenised real-world
 assets, this shows what that database actually contains. Use it to bound a claim.

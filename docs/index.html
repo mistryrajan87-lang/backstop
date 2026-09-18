@@ -228,6 +228,17 @@ td a:hover { border-bottom-color: var(--ink-2); }
 .meter .thr { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--baseline); }
 .meter .bandtxt { font-size: 11.5px; color: var(--ink-2); }
 
+.notlist {
+  margin: 20px 0 0; padding: 14px 16px 14px 18px; list-style: none;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--page);
+}
+.notlist li { font-size: 13px; color: var(--ink-2); padding-left: 16px; position: relative; }
+.notlist li + li { margin-top: 9px; }
+.notlist li::before {
+  content: "—"; position: absolute; left: 0; color: var(--muted);
+}
+.notlist strong { color: var(--ink); }
+
 details.tableview { margin-top: 14px; }
 details.tableview > summary {
   cursor: pointer; font-size: 12.5px; color: var(--ink-2);
@@ -282,6 +293,22 @@ footer a { color: var(--ink-2); }
     <h2 id="h-scope">What this measures, and what it does not</h2>
     <div class="kv" id="scopekv"></div>
     <p class="sub" id="scopeprose" style="margin:16px 0 0"></p>
+
+    <ul class="notlist">
+      <li><strong>Not a safety check.</strong> Safe would mean reserves audited, the
+        contract sound, redemption possible. CoinMarketCap supplies a name, a ticker
+        and a market-cap field — no attestations, no custody, no redemption terms.
+        Adding a concentration index to that does not add safety.</li>
+      <li><strong>Not a map of who pays you back.</strong> That is a legal question —
+        which entity, in which jurisdiction, under which document. The API's
+        &ldquo;issuer&rdquo; is a label on a token. For a fund, the sponsor, the
+        tokenisation agent and the fund vehicle are three different answers, and
+        this data distinguishes none of them.</li>
+      <li><strong>Not investment advice, and not a buy list.</strong> This is one
+        vendor's catalogue: gold-heavy, missing the large treasury products, with
+        almost half its tokens unpriced. It is not a portfolio view and should not
+        be read as one.</li>
+    </ul>
   </section>
 
   <!-- headline ------------------------------------------------------------- -->
