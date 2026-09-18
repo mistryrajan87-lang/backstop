@@ -55,7 +55,8 @@ jobs:
           fi
           echo "CMC_API_KEY is present (${#CMC_API_KEY} characters)."
 
-      # ~150 credits of the 15,000 monthly allowance per run: the map is free,
+      # 73 credits of the 15,000 monthly allowance per run (107 calls): the map is
+      # free,
       # the asset sweep is one credit per 250, quotes batch 100 assets per credit,
       # and the chain lookup batches 100 ids per credit.
       - name: Build the snapshot
@@ -125,11 +126,51 @@ jobs:
                 f"{s['api']['credits']} credits")
           PY
 
+      # Everything below runs only if the gate above passed. A refused run leaves
+      # the page, the archive and the repository exactly as it found them.
+
+      - name: Inline the snapshot into the page
+        run: python scripts/inline_snapshot.py docs
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # The aggregation tests check what the pipeline computes; these check what
+      # the page renders, against the same JSON. Three bugs shipped past 156
+      # aggregation checks because nothing looked at the DOM. playwright-core
+      # drives the runner's preinstalled Chrome, so no browser is downloaded.
+      - name: Check the rendered page against the snapshot
+        run: |
+          npm i --no-save playwright-core
+          node tests/test_page.js docs
+
+      # One file per run, kept forever. snapshot.json is overwritten and
+      # history.jsonl replaces same-day rows, so without this the evidence of a
+      # run is gone by the next one - and the video, the articles and the
+      # DoraHacks text have nothing stable to cite.
+      - name: Archive this run's snapshot under its own timestamp
+        run: |
+          python - <<'PY'
+          import json, pathlib, shutil
+          snap = json.load(open("docs/data/snapshot.json", encoding="utf-8"))
+          # Colons are illegal in Windows filenames and this repo is cloned on
+          # Windows, so the ISO stamp is flattened rather than used verbatim.
+          stamp = snap["generated_at"].replace("+00:00", "Z").replace(":", "-")
+          out = pathlib.Path("docs/data/snapshots") / f"{stamp}.json"
+          out.parent.mkdir(parents=True, exist_ok=True)
+          shutil.copyfile("docs/data/snapshot.json", out)
+          print(f"archived {out}")
+          PY
+
       - name: Commit the snapshot
         run: |
           git config user.name  "backstop-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/data/snapshot.json docs/data/history.jsonl
+          # index.html now carries the snapshot inside it, so it changes whenever
+          # the data does. Staging only the JSON would ship the previous run's
+          # baked hero - the page tests would catch it, but not before the commit.
+          git add docs/index.html docs/data/snapshot.json docs/data/history.jsonl docs/data/snapshots
           if git diff --staged --quiet; then
             echo "No change in the snapshot; nothing to commit."
           else
