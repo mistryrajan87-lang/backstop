@@ -13,6 +13,7 @@ probe2_output.json
 # session-to-session context - none of which belongs in a public repository.
 HANDOVER.md
 SUBMISSION-DRAFTS.md
+VIDEO-RUNSHEET.md
 
 # Never, under any circumstance.
 .env
