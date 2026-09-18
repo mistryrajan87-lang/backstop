@@ -785,6 +785,29 @@ def test_residuals_are_measured_not_asserted():
     check("the healthy asset is not flagged",
           all(w["symbol"] != "FINE" for w in rec["worst_assets"]), str(rec["worst_assets"]))
 
+    # An asset whose tokens report value while the asset-level figure is zero.
+    # It cannot be compared, so it must not quietly inflate the ratio - that is
+    # the blind spot that made a 17%-out tail look like a 1.4% wobble.
+    a_zero = asset(3, "ZEROCAP", "stock", 0.0)
+    snapz = run(FakeCMC([assets[0], a_zero], [issuer("a1", "Alpha")],
+                        {"1": [token("a1", "Alpha", "F1", 100.0)],
+                         "3": [token("a1", "Alpha", "Z1", 50.0)]}))
+    rz = snapz["coverage"]["reconciliation"]
+    check("the ratio covers only assets both endpoints price",
+          approx(rz["ratio"], 1.0, 1e-9), f"got {rz['ratio']}")
+    check("the uncomparable asset is counted separately",
+          rz["assets_priced_only_by_tokens"] == 1,
+          f"got {rz['assets_priced_only_by_tokens']}")
+    check("and its value is reported, not absorbed",
+          approx(rz["value_priced_only_by_tokens"], 50.0),
+          f"got {rz['value_priced_only_by_tokens']}")
+    check("and it is named", rz["token_only_examples"][0]["symbol"] == "ZEROCAP",
+          str(rz["token_only_examples"]))
+    check("it is not also counted as a >1% outlier",
+          all(w["symbol"] != "ZEROCAP" for w in rz["worst_assets"]), str(rz["worst_assets"]))
+    check("its value still counts toward the market total",
+          approx(snapz["overall"]["total"], 150.0), f"got {snapz['overall']['total']}")
+
     # crypto_ids the cryptocurrency endpoint never returns
     api = FakeCMC(assets, issuers, tokens, platforms={"10": "Ethereum"}, missing_ids={"11"})
     snap2 = run(api)

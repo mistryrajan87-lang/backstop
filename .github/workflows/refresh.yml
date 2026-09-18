@@ -104,6 +104,16 @@ jobs:
                         f"{r['assets_compared']} assets - outside the 0.98-1.02 band. "
                         f"Published, but do not quote the headline figures until you "
                         f"know why.")
+              if r["assets_off_by_over_1pct"]:
+                  worst = ", ".join(f"{w['symbol']} {w['ratio']}"
+                                    for w in r["worst_assets"][:5])
+                  print(f"::warning::{r['assets_off_by_over_1pct']} asset(s) reconcile "
+                        f"more than 1% out: {worst}")
+              if r.get("assets_priced_only_by_tokens"):
+                  print(f"::notice::{r['assets_priced_only_by_tokens']} asset(s) carry "
+                        f"${r['value_priced_only_by_tokens']:,.0f} on tokens while the "
+                        f"asset-level endpoint prices them at zero. Excluded from the "
+                        f"ratio, included in the market total, reported on the page.")
           else:
               print("::warning::No reconciliation ratio - nothing could be compared.")
           if not c["assets_fully_quoted"]:

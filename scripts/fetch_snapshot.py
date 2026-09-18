@@ -656,29 +656,45 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
     for l in links:
         summed_by_asset[l["rwa_id"]] += l["market_cap"]
     recon_assets = [rid for rid in summed_by_asset if rid in raw["quoted_caps"]]
-    token_total = sum(summed_by_asset[r] for r in recon_assets)
-    asset_total = sum(raw["quoted_caps"][r] for r in recon_assets)
 
-    # An aggregate ratio of 1.0 can hide one asset reconciling perfectly and
-    # another being badly wrong. Check every asset on its own and name the ones
-    # that miss, so a clean total cannot cover a broken join.
+    # Two different situations get conflated if this is done in one pass:
+    #
+    #   a) assets both endpoints price - these can be compared, and a ratio means
+    #      something;
+    #   b) assets whose tokens report a market cap while the asset-level figure is
+    #      zero or absent - these cannot be compared at all.
+    #
+    # Adding (b) into one ratio silently inflates it: the token side contributes
+    # value and the asset side contributes nothing. On the first runs that pushed
+    # the headline ratio to 1.0144 while every large asset reconciled at 1.0000,
+    # and a per-asset check that skipped cap <= 0 could not see why. So (b) is
+    # counted and reported as its own category, and the ratio is computed only
+    # over (a).
+    comparable = [rid for rid in recon_assets if raw["quoted_caps"][rid] > 0]
+    token_only = [rid for rid in recon_assets if raw["quoted_caps"][rid] <= 0
+                  and summed_by_asset[rid] > 0]
+
+    token_total = sum(summed_by_asset[r] for r in comparable)
+    asset_total = sum(raw["quoted_caps"][r] for r in comparable)
+    token_only_value = sum(summed_by_asset[r] for r in token_only)
+
+    def describe(rid: str) -> dict:
+        a = raw["assets_seen"].get(rid, {})
+        return {"rwa_id": rid, "symbol": text(a, "symbol"), "name": text(a, "name"),
+                "asset_cap": raw["quoted_caps"].get(rid, 0.0),
+                "token_sum": summed_by_asset[rid]}
+
+    # An aggregate ratio of 1.0 can still hide one asset reconciling perfectly and
+    # another being badly wrong, so every comparable asset is checked on its own.
     outliers = []
-    for rid in recon_assets:
-        cap = raw["quoted_caps"][rid]
-        if cap <= 0:
-            continue
-        ratio = summed_by_asset[rid] / cap
+    for rid in comparable:
+        ratio = summed_by_asset[rid] / raw["quoted_caps"][rid]
         if abs(ratio - 1.0) > 0.01:
-            a = raw["assets_seen"].get(rid, {})
-            outliers.append({
-                "rwa_id": rid,
-                "symbol": text(a, "symbol"),
-                "name": text(a, "name"),
-                "asset_cap": cap,
-                "token_sum": summed_by_asset[rid],
-                "ratio": round(ratio, 4),
-            })
+            outliers.append({**describe(rid), "ratio": round(ratio, 4)})
     outliers.sort(key=lambda o: -abs(o["ratio"] - 1.0))
+
+    token_only_rows = sorted((describe(r) for r in token_only),
+                             key=lambda o: -o["token_sum"])
 
     # The largest assets, and how their value splits across issuers - the single
     # clearest illustration of why per-asset attribution would have been wrong.
@@ -750,8 +766,12 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                 "sum_of_asset_caps": asset_total,
                 "difference": token_total - asset_total,
                 "ratio": round(token_total / asset_total, 4) if asset_total > 0 else None,
+                "assets_compared_note": "the ratio covers only assets both endpoints price",
                 "assets_off_by_over_1pct": len(outliers),
                 "worst_assets": outliers[:15],
+                "assets_priced_only_by_tokens": len(token_only),
+                "value_priced_only_by_tokens": token_only_value,
+                "token_only_examples": token_only_rows[:15],
             },
             "unmatched_crypto_ids": len(raw.get("unmatched_crypto_ids") or []),
             "null_caps_by_issuer": sorted(

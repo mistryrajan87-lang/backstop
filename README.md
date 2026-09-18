@@ -68,6 +68,39 @@ should not be called settled until it is explained.
 Binance. That is a real and total concentration *in what this field reports*. It
 is not a claim that Binance is where these assets are priced.
 
+## Who this is for
+
+The single useful thing Backstop does is stop someone reading CoinMarketCap's RWA
+catalogue as though it were the whole tokenised-asset market. That sounds modest.
+It is the entire benefit, and it is worth more than another metric.
+
+If you are about to cite this dataset, the page bounds five claims for you before
+you publish them:
+
+- **The size.** The map looks like ~7,800 assets. The live book is **790** and
+  about **$7.4bn**. Anything that opens "thousands of tokenised RWAs" is describing
+  the filing cabinet, not the market.
+- **The concentration.** Tether and Paxos at 62% is not "two firms captured RWAs".
+  It is "this catalogue is 63% tokenised gold, and those two mint the gold."
+- **The directory.** 25 rows, 21 that appear on a token, **15** that carry value,
+  six that declare tokens worth nothing. Counting issuers from `issuers/list` gives
+  you a padded number.
+- **The venue field.** All 777 off-chain listings are Binance. `tradfi_markets[]`
+  returns exchange listings, so do not read NYSE-style price discovery into it.
+- **The weighting.** Almost half the tokens report no market cap, 625 of them from
+  one issuer. Any league table built on token *count* crowns the wrong name.
+
+**What it cannot do for you.** It will not help you choose a treasury product —
+that market is not in this catalogue. It will not help you price issuer default;
+CoinMarketCap gives a name and a roster, not custody or a legal claim. It will not
+tell you whether PAXG is safer than XAUt. And a single snapshot is a photograph,
+not a trend: the scheduled job commits one a day, so the history starts from the
+first run, not before it.
+
+The honest pitch: *if you use CoinMarketCap to talk about tokenised real-world
+assets, this shows what that database actually contains. Use it to bound a claim.
+Do not use it as a map of on-chain Treasuries.*
+
 ## The question
 
 Every tokenised real-world asset was minted by somebody, and CoinMarketCap's
