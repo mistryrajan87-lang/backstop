@@ -204,7 +204,21 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .tooltip .tt-r b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ---- tables --------------------------------------------------------------- */
-.tablewrap { overflow-x: auto; margin: 0 -4px; }
+.tablewrap {
+  overflow-x: auto; margin: 0 -4px;
+  /* A data table wider than its card is legitimate; one that hides columns
+     behind an invisible scrollbar is not. Pure-CSS scroll shadows: the two
+     `local` layers ride the content and slide away at each end, the two
+     `scroll` layers stay put, so a shadow shows only while there is more
+     table in that direction. Grey rather than black so it survives dark mode. */
+  background:
+    linear-gradient(to right, var(--surface-1) 40%, rgba(0,0,0,0)) left center / 32px 100% no-repeat local,
+    linear-gradient(to left,  var(--surface-1) 40%, rgba(0,0,0,0)) right center / 32px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(128,128,128,.30), rgba(0,0,0,0)) left center / 12px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(128,128,128,.30), rgba(0,0,0,0)) right center / 12px 100% no-repeat scroll;
+}
+.tablewrap:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
+.tablenote { margin: 12px 4px 0; font-size: 12.5px; color: var(--muted); }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 caption { text-align: left; font-size: 12.5px; color: var(--muted); padding: 0 4px 10px; }
 th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
@@ -768,16 +782,62 @@ function shareMeter(share) {
   </div>`;
 }
 
-function renderTable(node, cols, rows, caption) {
+function renderTable(node, cols, rows, note) {
   node.innerHTML =
-    (caption ? `<caption>${caption}</caption>` : "") +   /* trusted, authored here */
     "<thead><tr>" + cols.map((c) => `<th class="${c.num ? "num" : ""}">${esc(c.h)}</th>`).join("") + "</tr></thead>" +
     "<tbody>" + rows.map((r) =>
       "<tr>" + cols.map((c) => {
         const v = c.get(r);
         return `<td class="${c.num ? "num" : ""}${c.wrap ? " wrapcell" : ""}">${c.raw ? v : esc(v)}</td>`;
       }).join("") + "</tr>").join("") + "</tbody>";
+
+  /* The note goes OUTSIDE the scrolling wrapper. As a <caption> it inherited the
+     table's width, so on any table wider than its card it was clipped mid-
+     sentence - and the note is the one place a reader finds out what the columns
+     mean. aria-describedby keeps it associated for screen readers. */
+  const wrap = node.closest(".tablewrap") || node;
+  const host = wrap.parentNode;
+  const noteId = node.id + "-note";
+  let p = host.querySelector("#" + CSS.escape(noteId));
+  if (note) {
+    if (!p) {
+      p = document.createElement("p");
+      p.className = "tablenote";
+      p.id = noteId;
+      host.insertBefore(p, wrap.nextSibling);
+    }
+    p.innerHTML = note;                 /* trusted, authored here */
+    node.setAttribute("aria-describedby", noteId);
+  } else if (p) {
+    p.remove();
+    node.removeAttribute("aria-describedby");
+  }
+
+  if (wrap !== node) markScrollable(wrap);
 }
+
+/* A table that scrolls sideways has to be reachable without a mouse, and has to
+   say so. A table that fits must NOT be a tab stop - an empty focus stop on every
+   table is worse than none. Whether it scrolls depends on the layout, so this is
+   re-run on resize rather than decided once. */
+function markScrollable(wrap) {
+  const scrolls = wrap.scrollWidth > wrap.clientWidth + 1;
+  if (scrolls) {
+    const sec = wrap.closest("section, details");
+    const head = sec && sec.querySelector("h2, summary");
+    wrap.setAttribute("tabindex", "0");
+    wrap.setAttribute("role", "region");
+    wrap.setAttribute("aria-label",
+      (head ? head.textContent.trim() + " — " : "") + "table, scroll sideways for more columns");
+  } else {
+    wrap.removeAttribute("tabindex");
+    wrap.removeAttribute("role");
+    wrap.removeAttribute("aria-label");
+  }
+}
+window.addEventListener("resize", () => {
+  document.querySelectorAll(".tablewrap").forEach(markScrollable);
+});
 
 /* ===========================================================================
    Render
