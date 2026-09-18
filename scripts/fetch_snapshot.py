@@ -505,6 +505,11 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
     # cannot move a concentration figure, and credits are finite.
     print("5/7 chain lookup via crypto_id ...")
     chain_of: dict[str, str] = {}
+    # The same call that yields the chain also carries the contract address and
+    # the issuer's own links. Backstop makes no reserve claim - it cannot, from
+    # these endpoints - but the address is the hook any future reserve check
+    # would start from, and discarding a field already paid for is wasteful.
+    token_ref: dict[str, dict] = {}
     unmatched_ids: list[str] = []
     if chain_lookup:
         want = sorted({l["crypto_id"] for l in links
@@ -523,10 +528,20 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
             for cid, rec in data.items():
                 if not isinstance(rec, dict):
                     continue
-                plat = rec.get("platform")
-                name = text(plat, "name") if isinstance(plat, dict) else ""
+                plat = rec.get("platform") if isinstance(rec.get("platform"), dict) else {}
+                name = text(plat, "name")
                 # A coin with no platform is its own chain, not an unknown.
                 chain_of[str(cid)] = name or (text(rec, "name") or "unknown")
+                urls = rec.get("urls") if isinstance(rec.get("urls"), dict) else {}
+                first = lambda k: (urls.get(k) or [None])[0] if isinstance(urls.get(k), list) else None
+                token_ref[str(cid)] = {
+                    "symbol": text(rec, "symbol"),
+                    "chain": chain_of[str(cid)],
+                    "contract": text(plat, "token_address"),
+                    "website": first("website"),
+                    "explorer": first("explorer"),
+                    "docs": first("technical_doc"),
+                }
         unmatched_ids = sorted(asked - set(chain_of))
         print(f"    {len(chain_of)} of {len(want)} valued tokens placed on a chain"
               + (f"; {len(unmatched_ids)} crypto_ids not returned" if unmatched_ids else ""))
@@ -594,7 +609,8 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
     return {"universe": universe, "tokenised": tokenised, "issuers": issuers,
             "links": links, "tradfi": tradfi, "tradfi_venues": dict(tradfi_venues),
             "null_caps": null_caps, "chain_of": chain_of,
-            "unmatched_crypto_ids": unmatched_ids, "cap_by_id": cap_by_id,
+            "unmatched_crypto_ids": unmatched_ids, "token_ref": token_ref,
+            "cap_by_id": cap_by_id,
             "expected_absent": absent, "expected_present": present,
             "quoted_caps": quoted_caps, "assets_seen": assets_seen,
             "declared": declared, "info": info, "market_pairs_probe": mp,
@@ -879,6 +895,25 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                     "the map and still carry nothing, which is its own kind of absence "
                     "and is reported separately.",
         },
+        # Contract addresses and issuer links for the tokens carrying the most
+        # value. Backstop makes NO reserve or backing claim - the RWA endpoints
+        # carry no attestation, no custody and no redemption terms, and a
+        # concentration index over them does not become one. This is only the
+        # starting point a reserve check would need: what is on chain, and where
+        # the issuer publishes.
+        "token_references": sorted(
+            ({**(raw.get("token_ref") or {}).get(l["crypto_id"] or "", {}),
+              "issuer": l["issuer_name"], "market_cap": l["market_cap"]}
+             for l in links
+             if l["crypto_id"] and (raw.get("token_ref") or {}).get(l["crypto_id"])
+             and l["market_cap"] > 0),
+            key=lambda r: -r["market_cap"])[:25],
+        "reserves_note": "Backstop does not and cannot verify reserves. These "
+                         "endpoints publish no attestation, no custodian and no "
+                         "redemption terms. What is listed here is the contract "
+                         "address and the issuer's own published links, which is "
+                         "where such a check would have to begin - against the "
+                         "issuer's reports, not against this API.",
         "market_pairs_probe": raw["market_pairs_probe"],
         "endpoints": ENDPOINTS,
         "api": {"calls": api.calls, "credits": api.credits, "refused": api.refused},
