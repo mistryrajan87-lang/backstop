@@ -57,11 +57,30 @@ all. The residue is not *missing* issuers. It is *empty* ones.
 `market_cap: null`. 625 of those 669 belong to one issuer, Backed Assets, whose
 $746m is computed from the minority of its tokens that report anything.
 
-**The reconciliation gap is unresolved.** Per-token caps sum to $105.6m more than
-CoinMarketCap's own asset-level figures for the same 790 assets — a ratio of
-**1.0144**. Gold reconciles at 1.0000 and so does every other asset in the top 25,
-so the gap lives in the tail. It is published, not smoothed, and the attribution
-should not be called settled until it is explained.
+**The reconciliation gap is resolved, and it was a data-quality finding.** The
+first runs showed per-token caps summing to ~$106m more than CoinMarketCap's own
+asset-level figures — a ratio of 1.0144 — while every asset in the top 25
+reconciled at 1.0000. Splitting the comparison found the cause: **six assets whose
+tokens report a market cap while the asset-level endpoint prices them at zero.**
+
+| | asset-level | sum of its tokens |
+|---|---|---|
+| EWG — iShares MSCI Germany ETF | $0 | **$56,880,853** |
+| NLR — VanEck Uranium and Nuclear ETF | $0 | **$47,813,996** |
+| VOO — Vanguard S&P 500 ETF | $0 | $816,527 |
+| VUG — Vanguard Growth ETF | $0 | $275,907 |
+| RCAT — Red Cat Holdings | $0 | $105,879 |
+| ECHO — EchoStar | $0 | $31 |
+
+Those six account for **$105.9m** of the $106m. They cannot be reconciled — one
+side of the comparison is missing — so they are excluded from the ratio and
+reported as their own category, while their value stays in the market total
+because it is real. Over the assets both endpoints price, the ratio is **0.9995**,
+and exactly one asset is more than 1% out (a pre-IPO wrapper, by $120k).
+
+That is the single most reusable thing here for anyone else building on these
+endpoints: `assets/list` and `quotes/latest` do not always agree that an asset has
+a price, and the disagreement is worth about 1.4% of the catalogue.
 
 **"All listings are Binance" is about a field, not about price discovery.**
 `tradfi_markets[]` returns exchange listings. Every one of the 777 it returned

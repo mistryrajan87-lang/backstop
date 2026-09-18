@@ -544,11 +544,26 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
     # Which of the names a reader will expect are simply not in this catalogue.
     expect = ["BUIDL", "BENJI", "USYC", "OUSG", "USTB", "JAAA", "USDY", "TBILL",
               "JTRSY", "USTBL", "BOXX", "FOBXX"]
-    have_symbols = {text(a, "symbol").upper() for a in universe if text(a, "symbol")}
-    absent = [t for t in expect if t not in have_symbols]
-    present = [t for t in expect if t in have_symbols]
+    by_symbol = {}
+    for a in universe:
+        sym = text(a, "symbol").upper()
+        if sym:
+            by_symbol.setdefault(sym, a)
+    absent = [t for t in expect if t not in by_symbol]
+    present = []
+    for t in expect:
+        a = by_symbol.get(t)
+        if not a:
+            continue
+        rid = ident(a, "rwa_id")
+        present.append({
+            "symbol": t,
+            "name": text(a, "name"),
+            "asset_type": text(a, "asset_type"),
+            "has_tokens": bool(a.get("has_tokens")),
+        })
     print(f"    of {len(expect)} expected treasury/credit tickers, "
-          f"{len(present)} present, {len(absent)} absent")
+          f"{len(present)} in the map, {len(absent)} not in it")
 
     print("7/7 descriptive metadata on the largest assets ...")
     by_cap = sorted(quoted_caps.items(), key=lambda kv: kv[1], reverse=True)[:info_sample]
@@ -735,6 +750,14 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                       for k, v in split[:8]],
         })
 
+    # Value attributed to each symbol, so a present-but-empty ticker can be told
+    # apart from a present-and-real one.
+    by_issuer_asset: dict[str, float] = defaultdict(float)
+    for l in links:
+        sym = (l.get("asset_symbol") or "").upper()
+        if sym:
+            by_issuer_asset[sym] += l["market_cap"]
+
     checked = len(raw["tradfi"])
     with_tradfi = sum(1 for v in raw["tradfi"].values() if v > 0)
     venues = sorted((raw.get("tradfi_venues") or {}).items(), key=lambda kv: -kv[1])
@@ -844,13 +867,17 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                     "underneath the issuer one.",
         },
         "not_in_this_catalogue": {
-            "checked": (raw.get("expected_absent") or []) + (raw.get("expected_present") or []),
             "absent": raw.get("expected_absent") or [],
-            "present": raw.get("expected_present") or [],
-            "note": "Tickers a reader arriving from an RWA league table would expect. "
-                    "Looked up by symbol in CoinMarketCap's own RWA map on this run. "
-                    "Absent here means absent from this catalogue - not absent from "
-                    "the world, and not a claim about the products themselves.",
+            "present": [
+                {**p, "attributed_value": by_issuer_asset.get(p["symbol"].upper(), 0.0)}
+                for p in (raw.get("expected_present") or [])
+            ],
+            "note": "Tickers a reader arriving from an RWA league table would expect, "
+                    "looked up by symbol in CoinMarketCap's own RWA map on this run. "
+                    "Absent means absent from this catalogue - not from the world, and "
+                    "not a judgement on the product. A ticker can also be present in "
+                    "the map and still carry nothing, which is its own kind of absence "
+                    "and is reported separately.",
         },
         "market_pairs_probe": raw["market_pairs_probe"],
         "endpoints": ENDPOINTS,
