@@ -15,6 +15,9 @@ HANDOVER.md
 SUBMISSION-DRAFTS.md
 VIDEO-RUNSHEET.md
 
+# Recorded footage - large, and the finished video lives on YouTube.
+video/
+
 # Never, under any circumstance.
 .env
 *.key

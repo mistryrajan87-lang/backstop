@@ -939,11 +939,25 @@ function renderStatic() {
     }
     const nic = s.not_in_this_catalogue;
     if (nic && (nic.absent || []).length) {
-      bits.push("<strong>Not in this catalogue on this run:</strong> " +
+      let line = "<strong>Not in this catalogue on this run:</strong> " +
         nic.absent.map(esc).join(", ") +
         ". Those were looked up by symbol in CoinMarketCap's own RWA map — absent " +
-        "here means absent from this join, not absent from the world." +
-        ((nic.present || []).length ? " Present: " + nic.present.map(esc).join(", ") + "." : ""));
+        "here means absent from this join, not absent from the world.";
+      // `present` carries an object per ticker, because matching a symbol is not
+      // the same as finding the product. Say what each row actually is.
+      const pres = (nic.present || []).map((p) =>
+        typeof p === "string" ? { symbol: p } : p);
+      if (pres.length) {
+        line += " Three tickers do match a row, and none is the product you would " +
+          "assume: " + pres.map((p) => {
+            const state = p.attributed_value
+              ? "carries " + fmtUSD(p.attributed_value)
+              : "carries nothing";
+            return "<strong>" + esc(p.symbol) + "</strong>" +
+              (p.name ? " is " + esc(p.name) : "") + " (" + state + ")";
+          }).join("; ") + ".";
+      }
+      bits.push(line);
     }
     document.getElementById("scopeprose").innerHTML = bits.join(" ");
   }
