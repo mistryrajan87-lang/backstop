@@ -135,6 +135,9 @@ ENDPOINTS: dict[str, dict[str, str]] = {
         "credits": "1 per call",
         "why": "venue depth per asset; probed every run so the plan gate is recorded from evidence",
     },
+    # Tickers a reader coming from an RWA league table will expect to find. They
+    # are looked up in the map by symbol on every run, so the absence list is
+    # evidence from this join rather than an assertion about the world.
     "crypto_info": {
         "path": "/v2/cryptocurrency/info",
         "tier": "Basic",
@@ -538,6 +541,15 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
         if isinstance(detail, dict):
             declared[iid] = int(num(detail, "num_tokens", "total_size"))
 
+    # Which of the names a reader will expect are simply not in this catalogue.
+    expect = ["BUIDL", "BENJI", "USYC", "OUSG", "USTB", "JAAA", "USDY", "TBILL",
+              "JTRSY", "USTBL", "BOXX", "FOBXX"]
+    have_symbols = {text(a, "symbol").upper() for a in universe if text(a, "symbol")}
+    absent = [t for t in expect if t not in have_symbols]
+    present = [t for t in expect if t in have_symbols]
+    print(f"    of {len(expect)} expected treasury/credit tickers, "
+          f"{len(present)} present, {len(absent)} absent")
+
     print("7/7 descriptive metadata on the largest assets ...")
     by_cap = sorted(quoted_caps.items(), key=lambda kv: kv[1], reverse=True)[:info_sample]
     info: dict[str, dict] = {}
@@ -568,6 +580,7 @@ def collect(api: CMC, *, max_assets: int, quote_batch: int, max_quote_calls: int
             "links": links, "tradfi": tradfi, "tradfi_venues": dict(tradfi_venues),
             "null_caps": null_caps, "chain_of": chain_of,
             "unmatched_crypto_ids": unmatched_ids, "cap_by_id": cap_by_id,
+            "expected_absent": absent, "expected_present": present,
             "quoted_caps": quoted_caps, "assets_seen": assets_seen,
             "declared": declared, "info": info, "market_pairs_probe": mp,
             "batches_run": len(batches), "batches_total":
@@ -725,7 +738,7 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
     checked = len(raw["tradfi"])
     with_tradfi = sum(1 for v in raw["tradfi"].values() if v > 0)
     venues = sorted((raw.get("tradfi_venues") or {}).items(), key=lambda kv: -kv[1])
-    venue_block = concentration_block({k: float(v) for k, v in venues})
+    venue_total = sum(v for _, v in venues)
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -810,8 +823,16 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
         "tradfi_reference": {
             "assets_checked": checked,
             "assets_with_tradfi_market": with_tradfi,
-            "venues": [{"name": k, "listings": v} for k, v in venues],
-            "venue_concentration": venue_block,
+            "venues": [{"name": k, "listings": v,
+                        "share": round(v / venue_total, 4) if venue_total else None}
+                       for k, v in venues],
+            "distinct_venues": len(venues),
+            "total_listings": venue_total,
+            "venue_note": "Reported as a count, deliberately. When the field returns "
+                          "one venue, a concentration index over it is arithmetic "
+                          "rather than a finding - it can only be 10,000. The number "
+                          "worth quoting is how many listings came back and how many "
+                          "distinct venues they name.",
             "note": "quotes/latest returns tradfi_markets[] beside tokens[]: the "
                     "non-token venues that quote the asset, each with an exchange, a "
                     "ticker and a market URL. These are exchange listings rather than "
@@ -822,10 +843,71 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                     "nearly all of them, that is a second concentration sitting "
                     "underneath the issuer one.",
         },
+        "not_in_this_catalogue": {
+            "checked": (raw.get("expected_absent") or []) + (raw.get("expected_present") or []),
+            "absent": raw.get("expected_absent") or [],
+            "present": raw.get("expected_present") or [],
+            "note": "Tickers a reader arriving from an RWA league table would expect. "
+                    "Looked up by symbol in CoinMarketCap's own RWA map on this run. "
+                    "Absent here means absent from this catalogue - not absent from "
+                    "the world, and not a claim about the products themselves.",
+        },
         "market_pairs_probe": raw["market_pairs_probe"],
         "endpoints": ENDPOINTS,
         "api": {"calls": api.calls, "credits": api.credits, "refused": api.refused},
     }
+
+
+def append_history(path: str, snap: dict) -> None:
+    """Append one compact line per run.
+
+    A single snapshot is a photograph. The scheduled job runs daily, so keeping a
+    handful of numbers per run costs nothing and turns the page into something
+    that can answer "is this catalogue changing" rather than only "what is it
+    now". One line is rewritten rather than appended if a run already exists for
+    the same day, so re-running does not double-count.
+    """
+    o, c = snap["overall"], snap["coverage"]
+    rec = c.get("reconciliation") or {}
+    top_asset = (snap.get("top_assets") or [{}])[0]
+    total = o.get("total") or 0.0
+    row = {
+        "date": snap["generated_at"][:10],
+        "generated_at": snap["generated_at"],
+        "total_cap": round(total, 2),
+        "assets_tokenised": snap["counts"].get("assets_tokenised"),
+        "issuers_with_value": o.get("n"),
+        "hhi": o.get("hhi"),
+        "effective_n": o.get("effective_n"),
+        "top1": o.get("top1"),
+        "top5": o.get("top5"),
+        "largest_asset": top_asset.get("symbol"),
+        "largest_asset_share": (round(top_asset.get("tokenized_market_cap", 0) / total, 4)
+                                if total > 0 else None),
+        "tokens_without_cap": c.get("tokens_without_market_cap"),
+        "reconciliation_ratio": rec.get("ratio"),
+        "credits": (snap.get("api") or {}).get("credits"),
+    }
+    existing: list[dict] = []
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    existing.append(json.loads(line))
+                except ValueError:
+                    continue
+    existing = [r for r in existing if r.get("date") != row["date"]]
+    existing.append(row)
+    existing.sort(key=lambda r: r.get("generated_at") or "")
+
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        for r in existing:
+            fh.write(json.dumps(r, separators=(",", ":")) + "\n")
+    print(f"  history: {len(existing)} run(s) in {path}")
 
 
 def main() -> None:
@@ -842,6 +924,8 @@ def main() -> None:
                     help="skip the crypto_id -> platform lookup that builds the chain view")
     ap.add_argument("--max-chain-calls", type=int, default=40,
                     help="ceiling on /v2/cryptocurrency/info calls")
+    ap.add_argument("--history", default="docs/data/history.jsonl",
+                    help="append-only series, one line per run; '' to skip")
     args = ap.parse_args()
 
     api = CMC(os.environ.get("CMC_API_KEY", "").strip())
@@ -853,6 +937,9 @@ def main() -> None:
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(snapshot, fh, indent=1)
+
+    if args.history:
+        append_history(args.history, snapshot)
 
     o, c = snapshot["overall"], snapshot["coverage"]
     print(f"\nwrote {args.out}")

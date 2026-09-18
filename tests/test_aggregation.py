@@ -25,8 +25,8 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from fetch_snapshot import (  # noqa: E402
-    CMC, ENDPOINTS, PARAM, asset_cap, build_snapshot, collect, concentration_block,
-    error_code, usd_quote,
+    CMC, ENDPOINTS, PARAM, append_history, asset_cap, build_snapshot, collect,
+    concentration_block, error_code, usd_quote,
 )
 
 FAILURES: list[str] = []
@@ -542,9 +542,16 @@ def test_venues_and_placeholders():
           t["venues"] and t["venues"][0]["name"] == "Binance", str(t["venues"]))
     check("three listings counted across two assets",
           t["venues"][0]["listings"] == 3, str(t["venues"]))
-    check("a single venue scores 10000 on venue concentration",
-          approx(t["venue_concentration"]["hhi"], 10000.0, 0.05),
-          f"got {t['venue_concentration']['hhi']}")
+    # Deliberately NOT an HHI: over a one-element array it can only be 10,000,
+    # which is arithmetic dressed as a finding. The count is the claim.
+    check("venues are reported as a count, not a concentration index",
+          "venue_concentration" not in t, "venue_concentration should be gone")
+    check("one distinct venue is recorded as such", t["distinct_venues"] == 1,
+          f"got {t.get('distinct_venues')}")
+    check("its share is 100%", approx(t["venues"][0]["share"], 1.0, 1e-9),
+          f"got {t['venues'][0].get('share')}")
+    check("the total listing count is kept", t["total_listings"] == 3,
+          f"got {t.get('total_listings')}")
     check("both assets have a listing", t["assets_with_tradfi_market"] == 2)
     check("the zero-value entity is flagged as a placeholder",
           rows["NA (Derivatives)"]["placeholder"] is True)
@@ -849,6 +856,52 @@ def test_residuals_are_measured_not_asserted():
           str(am["leaders"][:2]))
 
 
+# --------------------------------------------------------------------------- #
+# 14. The daily series. One snapshot is a photograph; the job runs every day.
+# --------------------------------------------------------------------------- #
+def test_history_series():
+    print("\n[14] the append-only history series")
+    import tempfile
+
+    assets = [asset(1, "GOLD", "commodity", 100.0)]
+    issuers = [issuer("a1", "Alpha")]
+    tokens = {"1": [token("a1", "Alpha", "T", 100.0)]}
+    snap = run(FakeCMC(assets, issuers, tokens))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "history.jsonl")
+        append_history(path, snap)
+        append_history(path, snap)                       # same day, re-run
+        rows = [json.loads(l) for l in open(path) if l.strip()]
+        check("a re-run on the same day replaces rather than duplicates",
+              len(rows) == 1, f"got {len(rows)} rows")
+
+        later = dict(snap, generated_at="2026-09-19T00:00:00+00:00")
+        append_history(path, later)
+        rows = [json.loads(l) for l in open(path) if l.strip()]
+        check("a later run appends", len(rows) == 2, f"got {len(rows)}")
+        check("rows are ordered oldest first",
+              rows[0]["generated_at"] < rows[1]["generated_at"], str([r["date"] for r in rows]))
+
+        r0 = rows[0]
+        for key in ("total_cap", "hhi", "effective_n", "top1", "top5",
+                    "assets_tokenised", "issuers_with_value", "tokens_without_cap",
+                    "reconciliation_ratio", "largest_asset_share", "credits"):
+            check(f"history carries {key}", key in r0, str(sorted(r0)))
+        check("the largest asset is named", r0["largest_asset"] == "GOLD",
+              str(r0.get("largest_asset")))
+        check("its share is a fraction of the total",
+              approx(r0["largest_asset_share"], 1.0, 1e-9), str(r0["largest_asset_share"]))
+
+        # a malformed line must not lose the series
+        with open(path, "a") as fh:
+            fh.write("not json\n")
+        append_history(path, dict(snap, generated_at="2026-09-20T00:00:00+00:00"))
+        rows = [json.loads(l) for l in open(path) if l.strip()]
+        check("a corrupt line is skipped without dropping good rows",
+              len(rows) == 3, f"got {len(rows)}")
+
+
 if __name__ == "__main__":
     test_per_token_attribution()
     test_reconciliation_gap()
@@ -863,6 +916,7 @@ if __name__ == "__main__":
     test_client_envelopes()
     test_end_to_end_through_real_client()
     test_residuals_are_measured_not_asserted()
+    test_history_series()
 
     print("\n" + "-" * 60)
     if FAILURES:

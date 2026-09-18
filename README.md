@@ -27,7 +27,7 @@ From the first production run — 107 calls, 73 credits, committed to
 | HHI over issuers, by value | **2,342.6** — 4.27 effective issuers |
 | Top 1 / 3 / 5 share | 36.7% / 73.9% / **94.1%** |
 | Tokens reporting no market cap | **669 of 1,428 (46.8%)** |
-| Off-chain listings, and where | 777 — **all Binance**, venue HHI 10,000 |
+| Off-chain listings, and where | 777 — **every one of them Binance** |
 | Chain concentration | Ethereum 74.5%; 1.73 effective chains |
 
 ## What this catalogue is, and what it is not
@@ -64,9 +64,23 @@ so the gap lives in the tail. It is published, not smoothed, and the attribution
 should not be called settled until it is explained.
 
 **"All listings are Binance" is about a field, not about price discovery.**
-`tradfi_markets[]` returns exchange listings. Every one of the 777 it returned is
-Binance. That is a real and total concentration *in what this field reports*. It
-is not a claim that Binance is where these assets are priced.
+`tradfi_markets[]` returns exchange listings. Every one of the 777 it returned
+names Binance. This is reported as a count rather than as a concentration index,
+deliberately: an HHI over a single-entry field can only return 10,000, which is
+arithmetic wearing the clothes of a finding. And it says nothing about where these
+assets are actually priced — only what one API field returns.
+
+**Some names are simply not here.** Every run looks up a list of tickers a reader
+arriving from an RWA league table would expect — BUIDL, BENJI, USYC, OUSG, USTB
+and others — by symbol in CoinMarketCap's own RWA map, and publishes which were
+absent. That list is the fastest way to see why this catalogue should not be
+compared against an RWA TVL table.
+
+**A single snapshot is a photograph.** The scheduled job runs daily and appends one
+line per run to `docs/data/history.jsonl` — total cap, HHI, top-1 and top-5 share,
+the largest asset's share, null-cap token count and the reconciliation ratio. The
+series starts from the first run, so it answers "is this catalogue changing" only
+going forward.
 
 ## Who this is for
 
