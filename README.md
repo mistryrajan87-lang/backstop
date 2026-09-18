@@ -10,25 +10,30 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 
 ## What it found
 
-From the first production run — 107 calls, 73 credits, committed to
-`docs/data/snapshot.json`:
+<!-- backstop:readme:start -->
+From the run of **Fri, 18 Sep 2026 05:50:35 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
+[`2026-09-18T05-50-35Z.json`](docs/data/snapshots/2026-09-18T05-50-35Z.json), and rewritten here by
+`scripts/inline_snapshot.py` each time the pipeline runs.
 
-> In CoinMarketCap's tokenised real-world-asset catalogue, **790 assets** carry
-> tokens, holding **$7.42bn** of reported market cap. **Fifteen** issuers hold all
-> of it. Tether and Paxos are **62%** between them, the top five **94%**. Almost
-> half the tokens — 669 of 1,428 — report no market cap at all. And every single
-> one of the 777 off-chain listings the API returns is Binance.
+> In CoinMarketCap's tokenised real-world-asset catalogue, **790 assets**
+> carry tokens, holding **$7.45bn** of reported market cap. **15**
+> issuers hold all of it. The top five hold **94.1%**. Almost half the
+> tokens — 669 of 1,428 — report
+> no market cap at all. And every one of the 777 off-chain
+> listings the API returns is Binance.
 
 | | |
 |---|---|
 | Assets in `map` / carrying tokens | 7,811 / **790** |
-| Reported tokenised cap | **$7.42bn** (token sum; asset-level sum $7.32bn — see below) |
+| Reported tokenised cap | **$7.45bn** |
 | Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
-| HHI over issuers, by value | **2,342.6** — 4.27 effective issuers |
-| Top 1 / 3 / 5 share | 36.7% / 73.9% / **94.1%** |
-| Tokens reporting no market cap | **669 of 1,428 (46.8%)** |
+| HHI over issuers, by value | **2,345.5** — 4.26 effective issuers |
+| Top 1 / 3 / 5 share | 36.7% / 74.0% / **94.1%** |
+| Largest single asset | Gold — 63.2% of the catalogue |
+| Tokens reporting no market cap | **669 of 1,428** |
 | Off-chain listings, and where | 777 — **every one of them Binance** |
-| Chain concentration | Ethereum 74.5%; 1.73 effective chains |
+| Chain concentration | Ethereum 74.6%; 1.72 effective chains |
+<!-- backstop:readme:end -->
 
 ## What this catalogue is, and what it is not
 
@@ -41,9 +46,9 @@ tokenised-treasury class at all** — no BUIDL, no BENJI, no OUSG. The instituti
 T-bill funds that dominate most RWA league tables are simply absent. What is here
 is tokenised gold plus equity and ETF wrappers.
 
-**The concentration is largely one asset.** Tokenised gold is **63.1%** of the
-whole catalogue. Tether's $2.72bn is two tokens on that one asset; Paxos's $1.89bn
-is one. So "two issuers are 62%" is, underneath, "tokenised gold is most of this
+**The concentration is largely one asset.** Tokenised gold is about **63%** of
+the whole catalogue. Tether's ~$2.7bn is two tokens on that one asset; Paxos's
+~$1.9bn is one. So "two issuers are 62%" is, underneath, "tokenised gold is most of this
 catalogue, and two firms mint most of the gold". Both statements are true; only
 the second is informative.
 
@@ -53,9 +58,9 @@ tokens and carry no value whatever (`NA (Derivatives)`, Dinari Assets, Kinesis
 Assets, XAGx, Token, Superstate Assets), and four more never appear on a token at
 all. The residue is not *missing* issuers. It is *empty* ones.
 
-**Every share is a share of the half that reports a cap.** 46.8% of tokens return
-`market_cap: null`. 625 of those 669 belong to one issuer, Backed Assets, whose
-$746m is computed from the minority of its tokens that report anything.
+**Every share is a share of the half that reports a cap.** Almost half the tokens
+return `market_cap: null` — 669 of 1,428. 625 of those belong to one issuer, Backed
+Assets, whose book is computed from the minority of its tokens that report anything.
 
 **The reconciliation gap is resolved, and it was a data-quality finding.** The
 first runs showed per-token caps summing to ~$106m more than CoinMarketCap's own
@@ -305,13 +310,16 @@ to end.
    but it is a cross-family join the RWA documentation never mentions.
 5. **`tradfi_markets` is not the underlying's market**, whatever the name suggests.
    Nvidia's entry is `{exchange: Binance, ticker: NVDA, market_url: …/stocks/EQ_NVDA}` —
-   Binance's tokenised-stock product, not the NYSE. Across a 100-asset sample, 97
-   assets carried a listing and **every single one was Binance**. Taken at face
+   Binance's tokenised-stock product, not the NYSE. Across the whole catalogue,
+   **777 of 790** assets carry an off-chain listing and **every one of the 777 is
+   Binance**. (An early 100-asset probe said 97 of 100; the catalogue-wide figure
+   replaced it and this line did not, for a while.) Taken at face
    value the field would support a claim about price discoverability that the data
    does not make; read correctly it reveals a second concentration, at the venue
    layer, which is a better finding than the one I expected.
-6. **About a fifth of tokens report `market_cap: null`** — 84 of 412 in that same
-   sample. They are real tokens with no reported value, so every share Backstop
+6. **Almost half the tokens report `market_cap: null`** — 669 of 1,428, and 625 of
+   those belong to a single issuer. They are real tokens with no reported value,
+   so every share Backstop
    publishes is a share of the value that *is* reported. Treating null as zero is
    arithmetically harmless and editorially misleading, so the count is published
    as its own line, overall and per issuer.
