@@ -19,6 +19,9 @@ ARTICLE-technical.md
 
 # Recorded footage - large, and the finished video lives on YouTube.
 video/
+# Where the desktop app drops files it delivers into the chat. Currently
+# holds a 15MB clip; nothing in here belongs in the repository.
+Claude outputs/
 
 # Never, under any circumstance.
 .env
