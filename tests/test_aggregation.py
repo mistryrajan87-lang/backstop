@@ -223,7 +223,12 @@ def test_per_token_attribution():
     issuers = [issuer("a1", "Alpha", 2), issuer("b2", "Bravo", 2),
                issuer("c3", "Charlie", 1), issuer("d4", "Delta", 1)]
     tokens = {
-        "1": [token("a1", "Alpha", "AGLD", 50.0), token("b2", "Bravo", "BGLD", 30.0),
+        # Alpha mints two gold tokens, as Tether does in the live data: 30 + 20.
+        # The totals are identical, so every figure below is unchanged - but the
+        # token count and the issuer count now differ, which is what makes the
+        # check meaningful.
+        "1": [token("a1", "Alpha", "AGLD", 30.0), token("a1", "Alpha", "AGLD2", 20.0),
+              token("b2", "Bravo", "BGLD", 30.0),
               token("c3", "Charlie", "CGLD", 20.0)],
         "2": [token("a1", "Alpha", "ATB", 40.0), token("d4", "Delta", "DTB", 20.0)],
         "3": [token("b2", "Bravo", "BST", 40.0)],
@@ -262,6 +267,10 @@ def test_per_token_attribution():
     # the top-assets breakdown is the illustration of the whole point
     gold = next(a for a in snap["top_assets"] if a["symbol"] == "GOLD")
     check("GOLD is shown as split across 3 issuers", gold["issuers"] == 3, f"got {gold['issuers']}")
+    check("and its token count counts TOKENS, not issuers counted twice",
+          gold["tokens"] == 4, f"got {gold['tokens']} (4 tokens, 3 issuers)")
+    check("the two tokens from one issuer roll up to that issuer once",
+          len(gold["split"]) == 3, f"got {len(gold['split'])} split rows")
     check("GOLD's top issuer holds 50%", approx(gold["top_issuer_share"], 0.5, 1e-9),
           f"got {gold['top_issuer_share']}")
     check("reconciliation ratio is 1.0",

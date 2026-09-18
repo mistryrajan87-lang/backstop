@@ -1030,6 +1030,7 @@ function renderStatic() {
     { h: "Asset", raw: true, get: (r) => `${esc(r.name || r.symbol)} <span style="color:var(--muted)">${esc(r.symbol)}</span>` },
     { h: "Class", get: (r) => r.asset_class },
     { h: "Cap", num: true, get: (r) => fmtUSD(r.tokenized_market_cap) },
+    { h: "Tokens", num: true, get: (r) => fmtNum(r.tokens) },
     { h: "Issuers", num: true, get: (r) => fmtNum(r.issuers) },
     { h: "Largest issuer", get: (r) => r.top_issuer || "—" },
     { h: "Its share", raw: true, get: (r) => shareMeter(r.top_issuer_share) },
@@ -1037,7 +1038,7 @@ function renderStatic() {
         ? `<span class="bandtag band-good"><span class="gly" aria-hidden="true">●</span>${fmtNum(r.tradfi_markets)}</span>`
         : `<span class="bandtag band-none"><span class="gly" aria-hidden="true">–</span>none</span>` },
     { h: "Industry", get: (r) => r.industry || r.primary_exchange || "—" },
-  ], ta, "The 25 largest by tokenised market cap. <em>Its share</em> is the largest issuer's portion of that one asset; <em>underlying</em> counts the traditional markets <code>quotes/latest</code> reports for it. Industry and exchange come from the <code>info</code> endpoint.");
+  ], ta, "The 25 largest by tokenised market cap. <em>Tokens</em> is how many separate tokens <code>quotes/latest</code> returns for the asset; <em>issuers</em> is how many distinct issuers are behind them — the two differ wherever one issuer mints more than one token, which is the case the per-token method exists for. <em>Its share</em> is the largest issuer's portion of that one asset; <em>underlying</em> counts the traditional markets <code>quotes/latest</code> reports for it. Industry and exchange come from the <code>info</code> endpoint.");
 
   // classes
   const classRows = Object.entries(s.by_asset_class || {})

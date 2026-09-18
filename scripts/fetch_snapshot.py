@@ -628,6 +628,7 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
 
     chain_of: dict[str, str] = raw.get("chain_of") or {}
     labels: dict[str, str] = {}
+    tokens_per_asset: dict[str, int] = defaultdict(int)
     by_issuer: dict[str, float] = defaultdict(float)
     class_issuer: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     chain_issuer: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
@@ -640,6 +641,7 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
     off_directory: set[str] = set()
 
     for l in links:
+        tokens_per_asset[l["rwa_id"]] += 1
         iid, cap = l["issuer_id"], l["market_cap"]
         if not iid:
             unattributed += cap
@@ -753,7 +755,7 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
             "symbol": text(a, "symbol"),
             "asset_class": text(a, "asset_type", default="unclassified"),
             "tokenized_market_cap": cap,
-            "tokens": len(asset_issuer.get(rid, {})),
+            "tokens": tokens_per_asset.get(rid, 0),
             "issuers": len(split),
             "tradfi_markets": raw["tradfi"].get(rid, 0),
             "industry": enrich.get("industry", ""),
