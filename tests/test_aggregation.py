@@ -264,6 +264,19 @@ def test_per_token_attribution():
     check("asset classes ordered by size, commodity first",
           list(cls.keys())[0] == "commodity", list(cls.keys()))
 
+    # Guard against this test quietly going vacuous again. It used to give every
+    # issuer exactly one token, so tokens == issuers whichever field the code
+    # read, and the token-count check below could not fail - which is how a field
+    # that published the issuer count under the name `tokens` survived. If a later
+    # edit flattens the fixture back to one token per issuer, this fails first and
+    # says why, instead of the suite passing while checking nothing.
+    fx_tokens = len(tokens["1"])
+    fx_issuers = len({t["issuer_id"] for t in tokens["1"]})
+    check("the GOLD fixture can tell tokens and issuers apart",
+          fx_tokens != fx_issuers,
+          f"fixture has {fx_tokens} tokens from {fx_issuers} issuers - equal counts "
+          "make the token-count check below unfalsifiable")
+
     # the top-assets breakdown is the illustration of the whole point
     gold = next(a for a in snap["top_assets"] if a["symbol"] == "GOLD")
     check("GOLD is shown as split across 3 issuers", gold["issuers"] == 3, f"got {gold['issuers']}")
