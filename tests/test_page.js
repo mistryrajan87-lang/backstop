@@ -231,7 +231,40 @@ function serve(dir) {
   check("the value lane says an unpriced token is not a missing dollar",
         /unknown rather than zero/i.test(lanes.valueText), lanes.valueText.slice(0, 80));
 
-  // 10. the page must not scroll sideways, at desktop or phone width
+  // 10. The delta strip is arithmetic on the archive, so it must agree with the
+  //     archive. It also has to disappear rather than invent a comparison when
+  //     there is only one run on record - the state this page was in on its
+  //     first morning.
+  const delta = await page.evaluate(() => {
+    const el = document.getElementById("histdata");
+    let rows = [];
+    try { rows = JSON.parse((el && el.textContent) || "[]"); } catch (e) { rows = []; }
+    const box = document.getElementById("deltastrip");
+    return { rows: rows.length, hidden: !box || box.hidden,
+             text: (box && box.innerText) || "",
+             last: rows[rows.length - 1] || null, prev: rows[rows.length - 2] || null };
+  });
+  check("the page carries the run history inline", delta.rows >= 1, `${delta.rows} rows`);
+  if (delta.rows < 2) {
+    check("with fewer than two runs the delta strip hides itself", delta.hidden,
+          "it rendered a comparison with nothing to compare against");
+  } else {
+    check("the delta strip is shown once there are two runs", !delta.hidden, "still hidden");
+    check("it names both dates it is comparing",
+          delta.text.includes(delta.prev.date) && delta.text.includes(delta.last.date),
+          `${delta.prev.date} -> ${delta.last.date}`);
+    const shownHHI = delta.text.replace(/,/g, "").includes(String(delta.last.hhi));
+    check("the HHI it shows is the latest row\'s own figure", shownHHI,
+          `looking for ${delta.last.hhi}`);
+    const move = Math.abs(delta.last.hhi - delta.prev.hhi).toFixed(1);
+    check("the move it shows is the difference between the two rows",
+          delta.text.replace(/,/g, "").includes(move), `looking for ${move}`);
+    const dir = delta.last.hhi > delta.prev.hhi ? "\\u2191" : "\\u2193";
+    check("the arrow points the way the index actually moved",
+          delta.text.includes(dir), `expected ${dir}`);
+  }
+
+  // 11. the page must not scroll sideways, at desktop or phone width
   for (const w of [1600, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
     await page.waitForTimeout(250);
