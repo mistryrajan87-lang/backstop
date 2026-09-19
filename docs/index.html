@@ -463,7 +463,7 @@ footer a { color: var(--ink-2); }
       <figure>
         <svg id="chart-lorenz" role="img" aria-labelledby="h-lorenz lorenzdesc"></svg>
         <desc id="lorenzdesc" class="sr"></desc>
-        <figcaption id="lorenzcap">Whole market — not affected by the scope selector.</figcaption>
+        <figcaption id="lorenzcap">The whole catalogue — this curve does not follow the scope selector.</figcaption>
       </figure>
       <details class="tableview">
         <summary>View as table</summary>
@@ -479,8 +479,11 @@ footer a { color: var(--ink-2); }
       No Real World Assets endpoint carries a chain. Each token does carry a
       <code>crypto_id</code>, so Backstop takes it across to
       <code>/v2/cryptocurrency/info</code> for the platform — the only route to this view.
-      Each row is a separate market: concentration among the issuers <em>inside</em>
-      that chain, not the share the chain holds.
+      Each row is one share vector, not a market: how the tokenised value sitting on
+      that chain divides between issuers, rather than the share the chain holds. It is
+      not a market in any sense that would license a competition reading — the field is
+      <code>platform</code>, it falls back to the token's own name when there is none,
+      and several rows are venues rather than chains.
     </p>
     <div class="tablewrap"><table id="chaintable"></table></div>
     <p class="sub" id="chainnote" style="margin:14px 0 0"></p>
