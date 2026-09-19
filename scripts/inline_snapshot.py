@@ -216,8 +216,28 @@ def main() -> None:
 | Tokens reporting no market cap | **{cov['tokens_without_market_cap']:,} of {c['tokens_attributed']:,}** |
 | Off-chain listings, and where | {tf.get('total_listings', 0):,} — **every one of them {venues[0]['venue'] if venues and 'venue' in venues[0] else (venues[0].get('name') if venues else 'one venue')}** |
 | Chain concentration | {chains.get('leaders', [{}])[0].get('label', '—')} {chains.get('top1', 0):.1%}; {chains.get('effective_n', '—')} effective chains |"""
+        # Two sentences in the prose quoted these counts by hand. They read "669 of
+        # 1,428" while the generated block three screens above said 670 of 1,435,
+        # from the same run - a README contradicting itself about precisely the
+        # drift this project exists to catch. Correcting the digits would have put
+        # them back on the same rot, so they are generated too, and the share is
+        # generated with them rather than left as a hand-written "almost half".
+        worst = max(snap.get("issuers") or [{}],
+                    key=lambda i: i.get("tokens_without_cap") or 0, default={})
+        n_null, n_tok = cov["tokens_without_market_cap"], c["tokens_attributed"]
+        nulls = (f"**{n_null:,} of {n_tok:,}** tokens"
+                 + (f" ({n_null / n_tok:.0%} of them)" if n_tok else "")
+                 + " return `market_cap: null`.")
+        if worst.get("tokens_without_cap"):
+            nulls += (f" {worst['tokens_without_cap']:,} of those belong to one issuer, "
+                      f"{worst.get('name') or worst.get('label')}, whose book is computed "
+                      f"from the minority of its tokens that report anything.")
+
         txt = readme.read_text(encoding="utf-8")
-        readme.write_text(region(txt, "readme", body, readme), encoding="utf-8", newline="")
+        txt = region(txt, "readme", body, readme)
+        txt = region(txt, "nullcaps", nulls, readme)
+        txt = region(txt, "nullcaps2", "   " + nulls, readme)
+        readme.write_text(txt, encoding="utf-8", newline="")
         print(f"rewrote the headline block in {readme}")
 
     print(f"inlined {SNAP} into {PAGE}")
