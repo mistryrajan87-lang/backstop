@@ -361,6 +361,9 @@ def asset_vol(asset: dict) -> float:
 # concentration maths
 # --------------------------------------------------------------------------- #
 
+COMMODITY_CLASS = "commodity"   # the asset_class the ex-commodity scope removes
+
+
 def concentration_block(weights: dict[str, float], labels: dict[str, str] | None = None) -> dict:
     """
     HHI and top-N concentration over a {key: value} weighting.
@@ -396,6 +399,12 @@ def concentration_block(weights: dict[str, float], labels: dict[str, str] | None
         "top3": round(sum(shares[:3]), 4),
         "top5": round(sum(shares[:5]), 4),
         "n": len(positive),
+        # The whole share vector, largest first. leaders[] stops at 12 for the
+        # charts, so it cannot be used to recompute anything: dropping the top
+        # issuer from a 15-issuer market and renormalising over 11 of the
+        # remaining 14 would quietly invent a different market. Six decimals is
+        # enough to reproduce hhi to a tenth.
+        "shares": [round(x, 6) for x in shares],
         "leaders": [
             {"key": k, "label": (labels or {}).get(k, k),
              "value": v, "share": round(v / total, 4)}
@@ -631,6 +640,11 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
     tokens_per_asset: dict[str, int] = defaultdict(int)
     by_issuer: dict[str, float] = defaultdict(float)
     class_issuer: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+    # Rebuilt from the tokens themselves rather than added up from the stock and
+    # ETF blocks. Those happen to sum to the same figure today because the
+    # catalogue has exactly three classes; the day CoinMarketCap adds a fourth,
+    # summing the ones you thought of drops it silently, and this does not.
+    ex_commodity_issuer: dict[str, float] = defaultdict(float)
     chain_issuer: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     chain_total: dict[str, float] = defaultdict(float)
     asset_issuer: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
@@ -652,6 +666,8 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
         labels[iid] = l["issuer_name"]
         by_issuer[iid] += cap
         class_issuer[l["asset_class"]][iid] += cap
+        if l["asset_class"] != COMMODITY_CLASS:
+            ex_commodity_issuer[iid] += cap
         asset_issuer[l["rwa_id"]][iid] += cap
 
         chain = chain_of.get(l["crypto_id"] or "")
@@ -791,6 +807,13 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                            "issuers that would produce the same HHI",
             "weight": "each token's own market cap in USD, from quotes/latest tokens[], "
                       "summed by issuer - never the asset's cap, which several issuers share",
+            "ex_commodity": f"the ex_commodity scope is rebuilt from every token whose "
+                            f"asset_class is not '{COMMODITY_CLASS}', not added up from the "
+                            "stock and ETF blocks - those two agree with it only while "
+                            "those are the only other classes in the catalogue",
+            "shares": "every block carries shares[]: the full list of participant shares, "
+                      "largest first, so a reader can recompute the index or ask what it "
+                      "would be without the largest holders",
         },
         "counts": {
             "assets_mapped": len(raw["universe"]),
@@ -854,6 +877,7 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
             {rid: (text(raw["assets_seen"].get(rid, {}), "symbol") or rid)
              for rid in raw["quoted_caps"]},
         ),
+        "ex_commodity": concentration_block(dict(ex_commodity_issuer), labels),
         "by_asset_class": {
             cls: concentration_block(dict(w), labels)
             for cls, w in sorted(class_issuer.items(),
