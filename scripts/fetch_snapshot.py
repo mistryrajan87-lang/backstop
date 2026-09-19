@@ -832,6 +832,15 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
             "shares": "every block carries shares[]: the full list of participant shares, "
                       "largest first, so a reader can recompute the index or ask what it "
                       "would be without the largest holders",
+            "asset_mix": "the one block NOT weighted by the token sum. asset_mix is over "
+                          "assets, weighted by each asset's own market cap from quotes/latest, "
+                          "so its denominator omits the assets the asset-level endpoint prices "
+                          "at zero while their tokens report a value "
+                          "(coverage.reconciliation.value_priced_only_by_tokens is exactly that "
+                          "gap). Its shares are therefore NOT comparable with the issuer, chain "
+                          "or class blocks, which all use the token sum: an asset's share of "
+                          "asset_mix and its share of overall.total are different denominators "
+                          "and neither is wrong",
         },
         "counts": {
             "assets_mapped": len(raw["universe"]),
