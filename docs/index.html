@@ -595,19 +595,21 @@ const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
    colour so the state never rests on hue alone. */
 function band(hhi) {
   if (hhi == null) return { cls: "band-none", gly: "–", name: "no data", fill: "var(--baseline)" };
-  /* Named for the scale, not as a verdict. The 1500/2500 marks are the 2010 US
-     Horizontal Merger Guidelines' thresholds for competing firms in one market;
-     borrowing them as a yardstick for issuer shares is an analogy, and calling a
-     catalogue "moderately concentrated" claimed more than the analogy earns. */
-  if (hhi >= 2500) return { cls: "band-crit", gly: "▲", name: "HMG high band", fill: "var(--critical)" };
-  if (hhi >= 1500) return { cls: "band-warning", gly: "◆", name: "HMG moderate band", fill: "var(--warning)" };
-  return { cls: "band-good", gly: "●", name: "below HMG bands", fill: "var(--good)" };
+  /* These name the SHAPE OF THE SHARE VECTOR and nothing else. They used to
+     carry the 2010 merger-guideline band names, which are defined for
+     substitutable products in a relevant market - not for CoinMarketCap issuer
+     labels spanning gold, tokenised equity and ETF wrappers. The index stays;
+     the borrowed verdict is gone. */
+  if (hhi >= 2500) return { cls: "band-crit", gly: "▲", name: "top-heavy", fill: "var(--critical)" };
+  if (hhi >= 1500) return { cls: "band-warning", gly: "◆", name: "uneven", fill: "var(--warning)" };
+  return { cls: "band-good", gly: "●", name: "broadly even", fill: "var(--good)" };
 }
 const chipHTML = (hhi) => {          /* the headline badge */
   const b = band(hhi);
-  const why = "Bands follow the 1,500 and 2,500 marks in the 2010 US Horizontal Merger "
-    + "Guidelines, which describe competing firms in a single market. Used here as a scale "
-    + "for issuer shares, not as a finding about competition.";
+  const why = "A description of this share vector, not a market measurement. The index is "
+    + "inverse-Simpson, valid on any set of shares; the 1,500 and 2,500 marks used in merger "
+    + "analysis are deliberately not applied, because these are CoinMarketCap issuer labels "
+    + "rather than firms shown to compete.";
   return `<span class="chip ${b.cls}" title="${esc(why)}"><span class="dot"></span><span class="gly" aria-hidden="true">${b.gly}</span>${esc(b.name)}</span>`;
 };
 const bandTag = (hhi) => {           /* the compact in-table form */
@@ -1257,7 +1259,7 @@ function renderStatic() {
   const unplaced = (s.coverage || {}).value_without_a_chain || 0;
   document.getElementById("chainnote").innerHTML =
     `Measured <em>across</em> chains rather than within them, the market scores an HHI of ` +
-    `<strong>${cm.hhi == null ? "—" : fmtNum(cm.hhi, 1)}</strong> — ${esc(cm.verdict || "")}, ` +
+    `<strong>${cm.hhi == null ? "—" : fmtNum(cm.hhi, 1)}</strong> — ${esc(cm.shape || cm.verdict || "")}, ` +
     `behaving like ${cm.effective_n == null ? "—" : fmtNum(cm.effective_n, 2)} equal-sized chains. ` +
     (tailKeys.length
       ? `A further ${fmtNum(tailKeys.length)} hold under ${fmtPct(CHAIN_FLOOR, 2)} each ` +
