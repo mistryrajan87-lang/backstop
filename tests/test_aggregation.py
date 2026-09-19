@@ -246,7 +246,7 @@ def test_per_token_attribution():
           f"got {rows['Bravo']['market_cap']}")
     check("HHI is 3450.0", approx(o["hhi"], 3450.0, 0.05), f"got {o['hhi']}")
     check("effective_n is 2.90", approx(o["effective_n"], 2.90, 0.005), f"got {o['effective_n']}")
-    check("verdict is highly concentrated", o["verdict"] == "highly concentrated", o["verdict"])
+    check("a lopsided vector reads as top-heavy", o["shape"] == "top-heavy", o["shape"])
     check("top1 is 0.45", approx(o["top1"], 0.45, 1e-9), f"got {o['top1']}")
     check("top3 is 0.90", approx(o["top3"], 0.90, 1e-9), f"got {o['top3']}")
     check("top5 is 1.00", approx(o["top5"], 1.00, 1e-9), f"got {o['top5']}")
@@ -439,7 +439,7 @@ def test_degenerate():
     snap = run(FakeCMC([], [], {}))
     check("empty run yields no HHI rather than 0.0", snap["overall"]["hhi"] is None,
           f"got {snap['overall']['hhi']}")
-    check("empty run reports the no-data verdict", snap["overall"]["verdict"] == "no data")
+    check("empty run reports the no-data shape", snap["overall"]["shape"] == "no data")
     check("empty run has no reconciliation ratio",
           snap["coverage"]["reconciliation"]["ratio"] is None)
 
@@ -458,7 +458,7 @@ def test_degenerate():
     check("ten equal participants score 1000", approx(b2["hhi"], 1000.0, 1e-6), f"got {b2['hhi']}")
     check("and an effective count of 10", approx(b2["effective_n"], 10.0, 1e-6),
           f"got {b2['effective_n']}")
-    check("ten equal participants read as unconcentrated", b2["verdict"] == "unconcentrated")
+    check("ten equal participants read as broadly even", b2["shape"] == "broadly even")
 
 
 # --------------------------------------------------------------------------- #
