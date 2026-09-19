@@ -176,7 +176,7 @@ function serve(dir) {
   check("the snapshot carries a share vector for every participant",
         Array.isArray(snap.overall.shares) && snap.overall.shares.length === snap.overall.n,
         `shares=${(snap.overall.shares || []).length} vs n=${snap.overall.n}`);
-  const shockBtns = await page.$(".shock button");
+  const shockBtns = await page.$$(".shock button");
   const shockShown = await page.evaluate(() => {
     const r = document.querySelector(".shock");
     return !!r && r.offsetParent !== null;
