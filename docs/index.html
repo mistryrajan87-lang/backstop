@@ -284,6 +284,10 @@ footer { margin-top: 28px; font-size: 12.5px; color: var(--muted); }
 footer a { color: var(--ink-2); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .err { color: var(--crit-ink); }
+.punchline { margin: 16px 0 0; font-size: 15px; line-height: 1.55; color: var(--ink); max-width: 68ch; }
+.punchline b { font-weight: 600; }
+.punchline .qual { display: block; margin-top: 7px; font-size: 12.5px; color: var(--muted); max-width: 76ch; }
+.scopefoot { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); max-width: 88ch; }
 </style>
 </head>
 <body>
@@ -355,6 +359,13 @@ footer a { color: var(--ink-2); }
       </div>
     </div>
 
+    <!-- The sentence a reader gets without knowing what an HHI is. Generated
+         from the snapshot by scripts/inline_snapshot.py - never typed, because
+         every number in it moves daily. -->
+    <!-- backstop:punchline:start -->
+    <p class="punchline" id="punchline">&mdash;</p>
+    <!-- backstop:punchline:end -->
+
     <!-- backstop:herofoot:start -->
 <p class="herofoot" id="herofoot">791 assets &middot; two endpoints &middot; 6 incomparable &middot; snapshot 12:45 UTC</p>
 <!-- backstop:herofoot:end -->
@@ -383,6 +394,10 @@ footer a { color: var(--ink-2); }
     <select id="scope"></select>
     <span class="scopenote" id="scopecount"></span>
   </div>
+  <p class="scopefoot">A token's chain is its <code>platform</code> in
+    <code>/v2/cryptocurrency/info</code>. Where the API reports no platform, the token's
+    own name stands in, so a few entries in this list are venues or issuers rather than
+    blockchains &mdash; the RWA endpoints carry no chain field of their own.</p>
 
   <div class="grid2">
     <!-- ranked issuers -->
@@ -458,7 +473,10 @@ footer a { color: var(--ink-2); }
       asset's primary market — a tokenised equity's entry points at a crypto exchange's
       stock product, not at the exchange the share itself trades on. Read it as
       <em>is this asset quoted anywhere off-chain</em>, then read the venue split
-      beside it.
+      beside it. A concentration index of 10,000 on that split is arithmetic rather
+      than a finding: nearly every listing the API returns names the same venue, so
+      there is nothing left for the index to measure. It is here for completeness,
+      and it is not the issuer result.
     </p>
     <ul class="legend" id="tradfilegend"></ul>
     <figure>
@@ -544,13 +562,20 @@ const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
    colour so the state never rests on hue alone. */
 function band(hhi) {
   if (hhi == null) return { cls: "band-none", gly: "–", name: "no data", fill: "var(--baseline)" };
-  if (hhi >= 2500) return { cls: "band-crit", gly: "▲", name: "highly concentrated", fill: "var(--critical)" };
-  if (hhi >= 1500) return { cls: "band-warning", gly: "◆", name: "moderately concentrated", fill: "var(--warning)" };
-  return { cls: "band-good", gly: "●", name: "unconcentrated", fill: "var(--good)" };
+  /* Named for the scale, not as a verdict. The 1500/2500 marks are the 2010 US
+     Horizontal Merger Guidelines' thresholds for competing firms in one market;
+     borrowing them as a yardstick for issuer shares is an analogy, and calling a
+     catalogue "moderately concentrated" claimed more than the analogy earns. */
+  if (hhi >= 2500) return { cls: "band-crit", gly: "▲", name: "HMG high band", fill: "var(--critical)" };
+  if (hhi >= 1500) return { cls: "band-warning", gly: "◆", name: "HMG moderate band", fill: "var(--warning)" };
+  return { cls: "band-good", gly: "●", name: "below HMG bands", fill: "var(--good)" };
 }
 const chipHTML = (hhi) => {          /* the headline badge */
   const b = band(hhi);
-  return `<span class="chip ${b.cls}"><span class="dot"></span><span class="gly" aria-hidden="true">${b.gly}</span>${esc(b.name)}</span>`;
+  const why = "Bands follow the 1,500 and 2,500 marks in the 2010 US Horizontal Merger "
+    + "Guidelines, which describe competing firms in a single market. Used here as a scale "
+    + "for issuer shares, not as a finding about competition.";
+  return `<span class="chip ${b.cls}" title="${esc(why)}"><span class="dot"></span><span class="gly" aria-hidden="true">${b.gly}</span>${esc(b.name)}</span>`;
 };
 const bandTag = (hhi) => {           /* the compact in-table form */
   const b = band(hhi);
@@ -884,7 +909,13 @@ let SNAP = null;
 function scopeOptions(s) {
   const out = [{ id: "all", label: "Whole market" }];
   for (const c of majorChains(s)) out.push({ id: "chain:" + c, label: "Chain — " + c });
-  for (const c of Object.keys(s.by_asset_class || {})) out.push({ id: "class:" + c, label: "Asset class — " + c });
+  /* Named for the question each one answers. "Asset class - stock" is inventory;
+     "Stocks only" is the answer to "isn't this just gold?", which is the first
+     thing anyone asks of a catalogue this commodity-heavy. */
+  const CLASS_LABEL = { commodity: "Commodities only", stock: "Stocks only — excludes commodities", etf: "ETFs only" };
+  for (const c of Object.keys(s.by_asset_class || {})) {
+    out.push({ id: "class:" + c, label: CLASS_LABEL[c] || ("Asset class — " + c) });
+  }
   return out;
 }
 
