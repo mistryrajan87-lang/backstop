@@ -34,13 +34,17 @@ equal-sized issuers that would produce the same concentration. Reported overall
 and within each asset class.
 
 HHI here is concentration of CoinMarketCap-attributed tokenised market cap. It is
-not a measure of issuance capacity, redemption liability or transfer-agent share,
-and the antitrust thresholds below do not turn it into a risk model. Below 1500
-unconcentrated, 1500-2500 moderately concentrated, above 2500 highly concentrated,
-per the 2010 US Horizontal Merger Guidelines. (The 2023 guidelines lowered the
-highly-concentrated line to 1800;
-the 2010 cutoffs are used here, so fewer markets are
-called highly concentrated than the current guidelines would call.)
+not a measure of issuance capacity, redemption liability or transfer-agent share.
+
+The index itself is the inverse-Simpson index: a property of a share vector, used
+for biodiversity and income distribution as readily as for markets, and valid on
+any vector of shares. What this code deliberately does NOT do is attach the
+1500/2500 merger-guideline bands to it. Those cut-points are defined for
+substitutable products in a relevant market, and a CoinMarketCap issuer_name
+spanning gold, tokenised equity and ETF wrappers is not that. Earlier versions
+stamped each block with a "verdict" carrying those band names; the field is now
+"shape" and describes the distribution - top-heavy, uneven, broadly even - which
+is all the data supports.
 
 HOW THE ATTRIBUTION WORKS - and why the obvious way is wrong
 ------------------------------------------------------------
@@ -375,26 +379,33 @@ def concentration_block(weights: dict[str, float], labels: dict[str, str] | None
     positive = {k: v for k, v in weights.items() if v > 0}
     total = sum(positive.values())
     if total <= 0:
-        return {"total": 0.0, "hhi": None, "effective_n": None, "verdict": "no data",
+        return {"total": 0.0, "hhi": None, "effective_n": None, "shape": "no data",
                 "top1": None, "top3": None, "top5": None, "n": 0, "leaders": []}
 
     shares = sorted((v / total for v in positive.values()), reverse=True)
     sum_sq = sum(s * s for s in shares)
     hhi = sum_sq * 10000.0
 
+    # These describe the SHAPE OF THE SHARE VECTOR and nothing else. The field
+    # used to be called "verdict" and carried the 2010 US Horizontal Merger
+    # Guidelines band names. Those marks are defined for substitutable products
+    # in a relevant market; CoinMarketCap issuer labels across gold, tokenised
+    # equity and ETF wrappers are not that, and the label claimed a finding the
+    # data cannot support. The index is kept - it is the inverse-Simpson index
+    # and is valid on any share vector - and the merger vocabulary is gone.
     if hhi >= 2500:
-        verdict = "highly concentrated"
+        shape = "top-heavy"
     elif hhi >= 1500:
-        verdict = "moderately concentrated"
+        shape = "uneven"
     else:
-        verdict = "unconcentrated"
+        shape = "broadly even"
 
     ranked = sorted(positive.items(), key=lambda kv: kv[1], reverse=True)
     return {
         "total": total,
         "hhi": round(hhi, 1),
         "effective_n": round(1.0 / sum_sq, 2),
-        "verdict": verdict,
+        "shape": shape,
         "top1": round(sum(shares[:1]), 4),
         "top3": round(sum(shares[:3]), 4),
         "top5": round(sum(shares[:5]), 4),
@@ -404,7 +415,10 @@ def concentration_block(weights: dict[str, float], labels: dict[str, str] | None
         # issuer from a 15-issuer market and renormalising over 11 of the
         # remaining 14 would quietly invent a different market. Six decimals is
         # enough to reproduce hhi to a tenth.
-        "shares": [round(x, 6) for x in shares],
+        # Nine places, not six: the smallest issuer in the live book holds a
+        # share of 0.000000148, which six places flattens to a literal 0.0 and
+        # makes the vector look padded with an empty participant.
+        "shares": [round(x, 9) for x in shares],
         "leaders": [
             {"key": k, "label": (labels or {}).get(k, k),
              "value": v, "share": round(v / total, 4)}
@@ -801,8 +815,11 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "method": {
             "metric": "Herfindahl-Hirschman Index over issuer shares of tokenised market cap",
-            "scale": "0-10000; 1500 and 2500 are the 2010 US Horizontal Merger "
-                     "Guidelines thresholds for moderate and high concentration",
+            "scale": "0-10000, the sum of squared percentage shares. Read as a "
+                     "description of this share vector. The 1500 and 2500 marks used "
+                     "in merger analysis are deliberately NOT applied: these are "
+                     "CoinMarketCap issuer labels, not firms shown to compete in a "
+                     "defined market",
             "effective_n": "1 / sum of squared shares - the number of equal-sized "
                            "issuers that would produce the same HHI",
             "weight": "each token's own market cap in USD, from quotes/latest tokens[], "
@@ -1034,7 +1051,7 @@ def main() -> None:
     if o["hhi"] is None:
         print("  NO VALUE ATTRIBUTED - the snapshot has no concentration figures.")
     else:
-        print(f"  {o['n']} issuers with value   HHI {o['hhi']} ({o['verdict']})")
+        print(f"  {o['n']} issuers with value   HHI {o['hhi']} ({o['shape']})")
         print(f"  effective issuers: {o['effective_n']}")
         print(f"  top 1 / 3 / 5 share: {o['top1']:.1%} / {o['top3']:.1%} / {o['top5']:.1%}")
     r = c["reconciliation"]
