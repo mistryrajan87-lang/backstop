@@ -264,7 +264,53 @@ function serve(dir) {
           delta.text.includes(dir), `expected ${dir}`);
   }
 
-  // 11. the page must not scroll sideways, at desktop or phone width
+  // 11. No derived concentration label, anywhere. A chip under the HHI used to
+  //     read "top-heavy"; the three names it could take were the 2,500 and 1,500
+  //     merger-guideline cut-points relabelled, and the meter drew those two
+  //     marks as unlabelled ticks. Deleting the words is only real if nothing
+  //     renders them and nothing renders the marks, so this asserts the absence.
+  //     Re-adding either one fails here rather than passing quietly.
+  const nolabel = await page.evaluate(() => {
+    const t = document.body.innerText;
+    const bandWords = ["top-heavy", "broadly even", "moderately concentrated",
+                       "highly concentrated", "unconcentrated"];
+    return {
+      words: bandWords.filter((w) => t.toLowerCase().includes(w)),
+      chips: document.querySelectorAll(".chip, #hhichip, .band-crit").length,
+      ticks: document.querySelectorAll(".meter .thr").length,
+      heads: [...document.querySelectorAll("table thead th")]
+              .map((h) => h.textContent.trim()).filter((h) => /^concentration$/i.test(h)),
+      slot: !!document.getElementById("hero-hhisub"),
+      heroText: (document.querySelectorAll(".heroblock")[1] || { innerText: "" }).innerText,
+    };
+  });
+  check("no band name is rendered anywhere on the page", nolabel.words.length === 0,
+        nolabel.words.join(", "));
+  check("no status chip or crit-banded element is rendered", nolabel.chips === 0,
+        `${nolabel.chips} found`);
+  check("the HHI meter draws no threshold marks", nolabel.ticks === 0,
+        `${nolabel.ticks} ticks`);
+  check("no table carries a Concentration verdict column", nolabel.heads.length === 0,
+        nolabel.heads.join(", "));
+
+  //     Nothing replaced it. The first attempt was a reference point - what an
+  //     equal split of the issuers present would score, 10,000/n - and it failed
+  //     on its own terms: n is a baseline this code picks (15 -> 667, without the
+  //     issuer holding $1,112 -> 714, above 1% only -> 1,429), and on a
+  //     single-issuer chain it states that 10,000 equals 10,000. So the slot is
+  //     gone, and this checks it stays gone rather than growing a new anchor.
+  check("there is no element under the HHI to write a verdict into", !nolabel.slot,
+        "#hero-hhisub is back");
+  const evenScore = (10000 / snap.overall.n)
+    .toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  check("the HHI hero block renders its label and its number and nothing else",
+        nolabel.heroText.split("\n").filter((l) => l.trim()).length === 2,
+        JSON.stringify(nolabel.heroText));
+  check("no equal-split reference score is printed beside the index",
+        !nolabel.heroText.replace(/,/g, "").includes(evenScore.replace(/,/g, "")),
+        `found ${evenScore}`);
+
+  // 12. the page must not scroll sideways, at desktop or phone width
   for (const w of [1600, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
     await page.waitForTimeout(250);
