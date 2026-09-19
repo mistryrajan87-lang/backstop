@@ -170,7 +170,11 @@ jobs:
           # index.html now carries the snapshot inside it, so it changes whenever
           # the data does. Staging only the JSON would ship the previous run's
           # baked hero - the page tests would catch it, but not before the commit.
-          git add docs/index.html docs/data/snapshot.json docs/data/history.jsonl docs/data/snapshots
+          # README.md is generated from the same snapshot by inline_snapshot.py and
+          # was missing from this line until 19 Sep, so every run rewrote it and threw
+          # the rewrite away. The file whose whole point is to quote current figures
+          # to someone who never opens the page was two runs behind it.
+          git add README.md docs/index.html docs/data/snapshot.json docs/data/history.jsonl docs/data/snapshots
           if git diff --staged --quiet; then
             echo "No change in the snapshot; nothing to commit."
           else
