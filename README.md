@@ -81,8 +81,9 @@ tokens report a market cap while the asset-level endpoint prices them at zero.**
 Those six account for **$105.9m** of the $106m. They cannot be reconciled — one
 side of the comparison is missing — so they are excluded from the ratio and
 reported as their own category, while their value stays in the market total
-because it is real. Over the assets both endpoints price, the ratio rounds to **1.0000**,
-and exactly one asset is more than 1% out (a pre-IPO wrapper, by $120k).
+because it is real. <!-- backstop:recon:start -->
+Over the assets both endpoints price, the ratio rounds to **1.0000**, and no asset is more than 1% out.
+<!-- backstop:recon:end -->
 
 That is the single most reusable thing here for anyone else building on these
 endpoints: `assets/list` and `quotes/latest` do not always agree that an asset has
