@@ -83,13 +83,35 @@ def main() -> None:
     page = set_text(page, "hero-eff", eff)
     page = set_text(page, "hero-hhi", hhi)
 
-    # 3. the reconcile line, on the first screen rather than only in Method.
+    # 3. the plain-English line. Judges read a sentence before they read an index,
+    #    and "4.29" says nothing to a reader who has never met an HHI. Every figure
+    #    in it is read from the snapshot here, at build time: typing "94.1%" into the
+    #    HTML would be the same class of bug as a hard-coded date in a test, in a
+    #    more visible place. Top-5 moved 94.11% -> 94.09% in a single day.
+    top_n = min(5, o["n"] or 0)
+    lead = (f'<b>{o["top5"]:.1%}</b> of priced tokenised value sits with '
+            f'{top_n} issuer label{"" if top_n == 1 else "s"}')
+    biggest = (snap.get("top_assets") or [{}])[0]
+    b_name = biggest.get("name") or biggest.get("symbol")
+    b_cap = biggest.get("tokenized_market_cap")
+    if b_name and b_cap and o["total"]:
+        lead += (f', and <b>{html.escape(str(b_name))}</b> alone is '
+                 f'{b_cap / o["total"]:.1%} of it')
+    lead += ". The figures are re-measured and archived every morning."
+    qual = ('<span class="qual">The band name\u2019s 1,500 and 2,500 marks come from the 2010 '
+            'US Horizontal Merger Guidelines, which describe competing firms in one market. '
+            'Borrowed here as a scale for issuer shares \u2014 not a finding about competition.'
+            '</span>')
+    page = region(page, "punchline",
+                  f'<p class="punchline" id="punchline">{lead}{qual}</p>')
+
+    # 4. the reconcile line, on the first screen rather than only in Method.
     #    The incomparable six are a category, not a footnote.
     foot = (f'{tokenised} assets &middot; two endpoints &middot; '
             f'{incomparable} incomparable &middot; snapshot {html.escape(stamp_short)}')
     page = region(page, "herofoot", f'<p class="herofoot" id="herofoot">{foot}</p>')
 
-    # 4. what the page says with scripting off
+    # 5. what the page says with scripting off
     ns = (
         '    <noscript>\n'
         '      <div class="nsbox">\n'
@@ -106,7 +128,7 @@ def main() -> None:
     )
     page = region(page, "noscript", ns)
 
-    # 5. social meta - the claim, not the stack
+    # 6. social meta - the claim, not the stack
     desc = (f'Tokenised real-world assets on CoinMarketCap concentrate into {eff} effective '
             f'issuers (HHI {hhi}). Issuer here is a label, not a custodian.')
     title = "Backstop — issuer concentration in tokenised real-world assets"
