@@ -1039,6 +1039,79 @@ def test_hero_line_is_generated_not_typed():
           f"looking for {was}: in base={was in base}, still in moved={was in moved}")
 
 
+# --------------------------------------------------------------------------- #
+# 17. The README's prose must follow the run too.
+#
+#     The headline block has been generated since 18 Sep, but two sentences in the
+#     prose still quoted the null-cap counts by hand. On 19 Sep they read "669 of
+#     1,428" while the generated block in the same file said 670 of 1,435, from the
+#     same run - the README contradicting itself about exactly the drift this
+#     project exists to catch. Both are generated now, and this checks that they
+#     move when the snapshot moves rather than being correct once.
+# --------------------------------------------------------------------------- #
+def test_readme_nullcaps_are_generated():
+    print("\n[17] the README's null-cap sentence follows the snapshot")
+    import shutil, subprocess, tempfile
+
+    root = os.path.join(os.path.dirname(__file__), "..")
+    readme_src = os.path.join(root, "README.md")
+    snap_src = os.path.join(root, "docs", "data", "snapshot.json")
+    page_src = os.path.join(root, "docs", "index.html")
+    if not all(os.path.exists(p) for p in (readme_src, snap_src, page_src)):
+        check("a README, page and snapshot are present to test against", False, "missing")
+        return
+
+    def render(mutate):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = os.path.join(tmp, "docs")
+            os.makedirs(os.path.join(d, "data"))
+            shutil.copy(page_src, os.path.join(d, "index.html"))
+            shutil.copy(readme_src, os.path.join(tmp, "README.md"))
+            snap = json.loads(open(snap_src, encoding="utf-8").read())
+            mutate(snap)
+            with open(os.path.join(d, "data", "snapshot.json"), "w", encoding="utf-8") as fh:
+                json.dump(snap, fh)
+            r = subprocess.run([sys.executable,
+                                os.path.join(root, "scripts", "inline_snapshot.py"), d],
+                               capture_output=True, text=True, cwd=tmp)
+            if r.returncode != 0:
+                return None, r.stderr[-300:]
+            md = open(os.path.join(tmp, "README.md"), encoding="utf-8").read()
+            out = []
+            for name in ("nullcaps", "nullcaps2"):
+                i = md.find(f"<!-- backstop:{name}:start -->")
+                j = md.find(f"<!-- backstop:{name}:end -->")
+                out.append(md[i:j] if i >= 0 and j >= 0 else None)
+            return out, ""
+
+    base, err = render(lambda s: None)
+    check("the generator rewrites both null-cap regions", base is not None and all(base), err)
+    if not base or not all(base):
+        return
+
+    live = json.loads(open(snap_src, encoding="utf-8").read())
+    n_null = live["coverage"]["tokens_without_market_cap"]
+    n_tok = live["counts"]["tokens_attributed"]
+    # Read the figures out of the snapshot rather than typing them: a literal here
+    # would rot on the morning the catalogue moves, which is the bug under test.
+    check("both regions state the run's own null-cap count",
+          all(f"{n_null:,} of {n_tok:,}" in b for b in base), f"{n_null:,} of {n_tok:,}")
+
+    moved, err = render(lambda s: s["coverage"].update(tokens_without_market_cap=1))
+    check("a different null count produces a different sentence",
+          moved is not None and all(moved) and moved != base, err)
+    check("and the new count is the one written",
+          moved is not None and all(moved) and all(f"**1 of {n_tok:,}**" in m for m in moved),
+          (moved or [""])[0][:180])
+    check("the old count is gone rather than sitting beside the new one",
+          moved is not None and all(moved)
+          and all(f"{n_null:,} of {n_tok:,}" not in m for m in moved),
+          f"{n_null:,} still present")
+    check("no hand-typed null-cap figure survives in the README prose",
+          "669 of 1,428" not in open(readme_src, encoding="utf-8").read(),
+          "the 19 Sep hand-typed pair is still there")
+
+
 if __name__ == "__main__":
     test_per_token_attribution()
     test_reconciliation_gap()
@@ -1056,6 +1129,7 @@ if __name__ == "__main__":
     test_history_series()
     test_ex_commodity_and_shares()
     test_hero_line_is_generated_not_typed()
+    test_readme_nullcaps_are_generated()
 
     print("\n" + "-" * 60)
     if FAILURES:
