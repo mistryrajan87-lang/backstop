@@ -259,7 +259,7 @@ function serve(dir) {
     const move = Math.abs(delta.last.hhi - delta.prev.hhi).toFixed(1);
     check("the move it shows is the difference between the two rows",
           delta.text.replace(/,/g, "").includes(move), `looking for ${move}`);
-    const dir = delta.last.hhi > delta.prev.hhi ? "\\u2191" : "\\u2193";
+    const dir = delta.last.hhi > delta.prev.hhi ? "↑" : "↓";
     check("the arrow points the way the index actually moved",
           delta.text.includes(dir), `expected ${dir}`);
   }
