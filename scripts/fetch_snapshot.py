@@ -41,10 +41,14 @@ for biodiversity and income distribution as readily as for markets, and valid on
 any vector of shares. What this code deliberately does NOT do is attach the
 1500/2500 merger-guideline bands to it. Those cut-points are defined for
 substitutable products in a relevant market, and a CoinMarketCap issuer_name
-spanning gold, tokenised equity and ETF wrappers is not that. Earlier versions
-stamped each block with a "verdict" carrying those band names; the field is now
-"shape" and describes the distribution - top-heavy, uneven, broadly even - which
-is all the data supports.
+spanning gold, tokenised equity and ETF wrappers is not that.
+
+Earlier versions stamped each block with a "verdict" carrying those band names,
+and then with a "shape" - top-heavy, uneven, broadly even - which was the same
+two cut-points under new labels while this docstring claimed they were not
+applied. Both are gone. No block carries a derived label of any kind: it carries
+hhi, effective_n, top1/3/5, n and the full shares[] vector, and a reader who
+wants a category can pick their own cut-point and say which one they used.
 
 HOW THE ATTRIBUTION WORKS - and why the obvious way is wrong
 ------------------------------------------------------------
@@ -379,33 +383,28 @@ def concentration_block(weights: dict[str, float], labels: dict[str, str] | None
     positive = {k: v for k, v in weights.items() if v > 0}
     total = sum(positive.values())
     if total <= 0:
-        return {"total": 0.0, "hhi": None, "effective_n": None, "shape": "no data",
+        return {"total": 0.0, "hhi": None, "effective_n": None,
                 "top1": None, "top3": None, "top5": None, "n": 0, "leaders": []}
 
     shares = sorted((v / total for v in positive.values()), reverse=True)
     sum_sq = sum(s * s for s in shares)
     hhi = sum_sq * 10000.0
 
-    # These describe the SHAPE OF THE SHARE VECTOR and nothing else. The field
-    # used to be called "verdict" and carried the 2010 US Horizontal Merger
-    # Guidelines band names. Those marks are defined for substitutable products
-    # in a relevant market; CoinMarketCap issuer labels across gold, tokenised
-    # equity and ETF wrappers are not that, and the label claimed a finding the
-    # data cannot support. The index is kept - it is the inverse-Simpson index
-    # and is valid on any share vector - and the merger vocabulary is gone.
-    if hhi >= 2500:
-        shape = "top-heavy"
-    elif hhi >= 1500:
-        shape = "uneven"
-    else:
-        shape = "broadly even"
-
+    # No derived label is computed here, deliberately. The field that used to sit
+    # at this point was called "verdict", carried the 2010 US Horizontal Merger
+    # Guidelines band names, and was renamed "shape" - top-heavy / uneven /
+    # broadly even - when those names were withdrawn. The rename changed the
+    # words and kept the rule: the cut-points stayed at 2500 and 1500, so the
+    # snapshot asserted a category from merger thresholds in the same file whose
+    # method block said those thresholds were deliberately not applied. The
+    # honest fix is not a third set of names. effective_n is the one-number
+    # reading of the index, shares[] is the whole vector, and any cut-point a
+    # reader wants is theirs to choose and to state.
     ranked = sorted(positive.items(), key=lambda kv: kv[1], reverse=True)
     return {
         "total": total,
         "hhi": round(hhi, 1),
         "effective_n": round(1.0 / sum_sq, 2),
-        "shape": shape,
         "top1": round(sum(shares[:1]), 4),
         "top3": round(sum(shares[:3]), 4),
         "top5": round(sum(shares[:5]), 4),
@@ -819,7 +818,9 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
                      "description of this share vector. The 1500 and 2500 marks used "
                      "in merger analysis are deliberately NOT applied: these are "
                      "CoinMarketCap issuer labels, not firms shown to compete in a "
-                     "defined market",
+                     "defined market. No block carries a derived band, verdict or "
+                     "shape label - earlier versions did, computed from exactly those "
+                     "two cut-points, which contradicted this sentence",
             "effective_n": "1 / sum of squared shares - the number of equal-sized "
                            "issuers that would produce the same HHI",
             "weight": "each token's own market cap in USD, from quotes/latest tokens[], "
@@ -1051,7 +1052,7 @@ def main() -> None:
     if o["hhi"] is None:
         print("  NO VALUE ATTRIBUTED - the snapshot has no concentration figures.")
     else:
-        print(f"  {o['n']} issuers with value   HHI {o['hhi']} ({o['shape']})")
+        print(f"  {o['n']} issuers with value   HHI {o['hhi']}")
         print(f"  effective issuers: {o['effective_n']}")
         print(f"  top 1 / 3 / 5 share: {o['top1']:.1%} / {o['top3']:.1%} / {o['top5']:.1%}")
     r = c["reconciliation"]
