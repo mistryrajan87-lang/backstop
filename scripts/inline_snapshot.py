@@ -233,8 +233,29 @@ def main() -> None:
                       f"{worst.get('name') or worst.get('label')}, whose book is computed "
                       f"from the minority of its tokens that report anything.")
 
+        # "exactly one asset is more than 1% out (a pre-IPO wrapper, by $120k)" was
+        # typed by hand and was true of an early run. By 19 Sep the run reported
+        # assets_off_by_over_1pct = 0 with an empty worst_assets, so the sentence
+        # was false in the file that argues against exactly this. Generated now.
+        off = recon.get("assets_off_by_over_1pct") or 0
+        if recon.get("ratio") is None:
+            recon_txt = "The two endpoints priced nothing in common this run."
+        else:
+            recon_txt = (f"Over the assets both endpoints price, the ratio rounds to "
+                         f"**{recon['ratio']:.4f}**")
+            if off == 0:
+                recon_txt += ", and no asset is more than 1% out."
+            else:
+                worst = (recon.get("worst_assets") or [{}])[0]
+                recon_txt += (f", and {off} {'asset is' if off == 1 else 'assets are'} "
+                              f"more than 1% out")
+                if worst.get("symbol"):
+                    recon_txt += f" (worst: {worst['symbol']} at {worst.get('ratio')})"
+                recon_txt += "."
+
         txt = readme.read_text(encoding="utf-8")
         txt = region(txt, "readme", body, readme)
+        txt = region(txt, "recon", recon_txt, readme)
         txt = region(txt, "nullcaps", nulls, readme)
         txt = region(txt, "nullcaps2", "   " + nulls, readme)
         readme.write_text(txt, encoding="utf-8", newline="")
