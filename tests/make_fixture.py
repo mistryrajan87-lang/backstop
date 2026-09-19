@@ -57,7 +57,7 @@ def main() -> None:
 
     # Issuer sizes follow a Zipf curve with multiplicative jitter: a few very
     # large issuers and a long thin tail. The exponent puts the fixture in the
-    # moderately-concentrated band rather than the degenerate single-issuer shape
+    # middle of the scale rather than at the degenerate single-issuer end
     # a raw Pareto draw gives - the dashboard has to stay readable across the
     # whole range of the scale.
     weights = [(1.0 / (i ** 1.25)) * RNG.uniform(0.75, 1.3) for i in range(1, N_ISSUERS + 1)]
@@ -156,7 +156,7 @@ def main() -> None:
 
     o, c = snap["overall"], snap["coverage"]
     print(f"wrote {out}")
-    print(f"  {o['n']} issuers, HHI {o['hhi']} ({o.get('shape') or o.get('verdict')}), effective {o['effective_n']}")
+    print(f"  {o['n']} issuers, HHI {o['hhi']}, effective {o['effective_n']}")
     print(f"  top1 {o['top1']:.1%}  top3 {o['top3']:.1%}  top5 {o['top5']:.1%}")
     print(f"  {snap['counts']['tokens_attributed']} tokens over "
           f"{snap['counts']['assets_quoted']} assets, {len(snap['by_asset_class'])} classes")
