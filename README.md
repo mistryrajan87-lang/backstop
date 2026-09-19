@@ -11,28 +11,28 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 ## What it found
 
 <!-- backstop:readme:start -->
-From the run of **Fri, 18 Sep 2026 05:50:35 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
-[`2026-09-18T05-50-35Z.json`](docs/data/snapshots/2026-09-18T05-50-35Z.json), and rewritten here by
+From the run of **Sat, 19 Sep 2026 13:51:54 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
+[`2026-09-19T13-51-54Z.json`](docs/data/snapshots/2026-09-19T13-51-54Z.json), and rewritten here by
 `scripts/inline_snapshot.py` each time the pipeline runs.
 
-> In CoinMarketCap's tokenised real-world-asset catalogue, **790 assets**
-> carry tokens, holding **$7.45bn** of reported market cap. **15**
+> In CoinMarketCap's tokenised real-world-asset catalogue, **791 assets**
+> carry tokens, holding **$7.50bn** of reported market cap. **15**
 > issuers hold all of it. The top five hold **94.1%**. Almost half the
-> tokens — 669 of 1,428 — report
-> no market cap at all. And every one of the 777 off-chain
+> tokens — 670 of 1,435 — report
+> no market cap at all. And every one of the 778 off-chain
 > listings the API returns is Binance.
 
 | | |
 |---|---|
-| Assets in `map` / carrying tokens | 7,811 / **790** |
-| Reported tokenised cap | **$7.45bn** |
+| Assets in `map` / carrying tokens | 7,811 / **791** |
+| Reported tokenised cap | **$7.50bn** |
 | Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
-| HHI over issuers, by value | **2,345.5** — 4.26 effective issuers |
-| Top 1 / 3 / 5 share | 36.7% / 74.0% / **94.1%** |
-| Largest single asset | Gold — 63.2% of the catalogue |
-| Tokens reporting no market cap | **669 of 1,428** |
-| Off-chain listings, and where | 777 — **every one of them Binance** |
-| Chain concentration | Ethereum 74.6%; 1.72 effective chains |
+| HHI over issuers, by value | **2,331.4** — 4.29 effective issuers |
+| Top 1 / 3 / 5 share | 36.5% / 73.7% / **94.1%** |
+| Largest single asset | Gold — 62.8% of the catalogue |
+| Tokens reporting no market cap | **670 of 1,435** |
+| Off-chain listings, and where | 778 — **every one of them Binance** |
+| Chain concentration | Ethereum 74.3%; 1.74 effective chains |
 <!-- backstop:readme:end -->
 
 ## What this catalogue is, and what it is not
