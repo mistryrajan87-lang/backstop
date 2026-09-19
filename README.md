@@ -58,9 +58,10 @@ tokens and carry no value whatever (`NA (Derivatives)`, Dinari Assets, Kinesis
 Assets, XAGx, Token, Superstate Assets), and four more never appear on a token at
 all. The residue is not *missing* issuers. It is *empty* ones.
 
-**Every share is a share of the half that reports a cap.** Almost half the tokens
-return `market_cap: null` — 669 of 1,428. 625 of those belong to one issuer, Backed
-Assets, whose book is computed from the minority of its tokens that report anything.
+**Every share is a share of the tokens that report a cap.**
+<!-- backstop:nullcaps:start -->
+**670 of 1,435** tokens (47% of them) return `market_cap: null`. 625 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
+<!-- backstop:nullcaps:end -->
 
 **The reconciliation gap is resolved, and it was a data-quality finding.** The
 first runs showed per-token caps summing to ~$106m more than CoinMarketCap's own
@@ -134,13 +135,15 @@ you publish them:
   the filing cabinet, not the market.
 - **The concentration.** Tether and Paxos at 62% is not "two firms captured RWAs".
   It is "this catalogue is 63% tokenised gold, and those two mint the gold."
-- **The directory.** 25 rows, 21 that appear on a token, **15** that carry value,
-  six that declare tokens worth nothing. Counting issuers from `issuers/list` gives
-  you a padded number.
+- **The directory is padded.** Rows listed, rows that appear on a token and rows
+  that carry value are three different counts - see the table above for the run's
+  own figures. Some entries declare tokens worth nothing. Counting issuers from
+  `issuers/list` gives you the largest of those numbers and the least useful.
 - **The venue field.** Every off-chain listing the API returns is Binance. `tradfi_markets[]`
   returns exchange listings, so do not read NYSE-style price discovery into it.
-- **The weighting.** Almost half the tokens report no market cap, 625 of them from
-  one issuer. Any league table built on token *count* crowns the wrong name.
+- **The weighting.** Almost half the tokens report no market cap, the great
+  majority of them from a single issuer. Any league table built on token *count*
+  crowns the wrong name.
 
 **Three things it is not**, stated on the dashboard as well as here, because people
 land on a concentration chart and reach for it as a risk tool:
@@ -317,8 +320,11 @@ to end.
    value the field would support a claim about price discoverability that the data
    does not make; read correctly it reveals a second concentration, at the venue
    layer, which is a better finding than the one I expected.
-6. **Almost half the tokens report `market_cap: null`** — 669 of 1,428, and 625 of
-   those belong to a single issuer. They are real tokens with no reported value,
+6. **The null market caps are the largest single caveat on every share.**
+<!-- backstop:nullcaps2:start -->
+   **670 of 1,435** tokens (47% of them) return `market_cap: null`. 625 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
+<!-- backstop:nullcaps2:end -->
+   They are real tokens with no reported value,
    so every share Backstop
    publishes is a share of the value that *is* reported. Treating null as zero is
    arithmetically harmless and editorially misleading, so the count is published
