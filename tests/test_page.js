@@ -166,7 +166,72 @@ function serve(dir) {
   check("no table note is clipped by its container",
         notes.clipped.length === 0, notes.clipped.join(", "));
 
-  // 8. the page must not scroll sideways, at desktop or phone width
+  // 8. The what-if must be a read of the snapshot, not an edit of it. If it
+  //     renormalises in place, every chart after it quietly shows a market with
+  //     the largest issuer deleted - and nothing on the page would say so.
+  //     A snapshot without shares[] hides the control by design, so the clicks
+  //     below would hang rather than fail. Assert the vector is there - a missing
+  //     one is a pipeline regression, not a reason to quietly skip - and gate the
+  //     interaction on the control actually being visible.
+  check("the snapshot carries a share vector for every participant",
+        Array.isArray(snap.overall.shares) && snap.overall.shares.length === snap.overall.n,
+        `shares=${(snap.overall.shares || []).length} vs n=${snap.overall.n}`);
+  const shockBtns = await page.$(".shock button");
+  const shockShown = await page.evaluate(() => {
+    const r = document.querySelector(".shock");
+    return !!r && r.offsetParent !== null;
+  });
+  check("the what-if control is on the page", shockBtns.length >= 2, `${shockBtns.length} buttons`);
+  if (!shockShown) console.log("  SKIP  what-if interaction - the control is hidden for this snapshot");
+  if (shockBtns.length >= 2 && shockShown) {
+    const before = await page.evaluate(() => JSON.stringify(SNAP.overall));
+    await page.click('.shock button[data-drop="1"]');
+    await page.waitForTimeout(150);
+    await page.click('.shock button[data-drop="3"]');
+    await page.waitForTimeout(150);
+    const after = await page.evaluate(() => JSON.stringify(SNAP.overall));
+    check("the what-if leaves the snapshot object untouched", before === after,
+          "SNAP.overall changed after dropping issuers");
+
+    const shown = await page.evaluate(() => document.getElementById("shockout").innerText);
+    const recomputed = await page.evaluate(() => {
+      const sh = SNAP.overall.shares.slice(3);
+      const t = sh.reduce((a, v) => a + v, 0);
+      const ss = sh.reduce((a, v) => a + (v / t) * (v / t), 0);
+      return (ss * 10000).toFixed(1);
+    });
+    check("the what-if's HHI is the one the shares imply",
+          shown.replace(/,/g, "").includes(recomputed), `expected ${recomputed} in "${shown}"`);
+    await page.click('.shock button[data-drop="0"]');
+    await page.waitForTimeout(150);
+  }
+
+  // 9. The two coverage lanes must not borrow each other's denominator. A hatched
+  //    segment on the value lane would claim we know how many dollars are missing.
+  //    We do not: an unpriced token is a count, and its value is unknown, not zero.
+  const lanes = await page.evaluate(() => {
+    const seg = (id, cls) => document.querySelectorAll(`#${id} .${cls}`).length;
+    const txt = (id) => (document.getElementById(id) || {}).innerText || "";
+    return {
+      valueUnpriced: seg("lane-value", "seg-unpriced"),
+      valuePriced: seg("lane-value", "seg-priced"),
+      countUnpriced: seg("lane-count", "seg-unpriced"),
+      valueText: txt("lane-value"),
+      countText: txt("lane-count"),
+    };
+  });
+  check("the value lane draws no unpriced segment", lanes.valueUnpriced === 0,
+        `${lanes.valueUnpriced} hatched segments on the value lane`);
+  check("the value lane is drawn at all", lanes.valuePriced === 1, `${lanes.valuePriced} segments`);
+  check("the count lane does draw one", lanes.countUnpriced === 1,
+        `${lanes.countUnpriced} hatched segments on the count lane`);
+  check("the count lane states the unpriced token count from the JSON",
+        lanes.countText.replace(/,/g, "").includes(String(snap.coverage.tokens_without_market_cap)),
+        `looking for ${snap.coverage.tokens_without_market_cap}`);
+  check("the value lane says an unpriced token is not a missing dollar",
+        /unknown rather than zero/i.test(lanes.valueText), lanes.valueText.slice(0, 80));
+
+  // 10. the page must not scroll sideways, at desktop or phone width
   for (const w of [1600, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
     await page.waitForTimeout(250);
