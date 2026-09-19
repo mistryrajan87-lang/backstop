@@ -138,25 +138,15 @@ h1 { font-size: clamp(26px, 4.2vw, 36px); line-height: 1.15; margin: 0 0 12px; f
 .nsbox { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin: 16px 0 0; font-size: 13px; color: var(--ink-2); }
 .nsbox b { color: var(--ink); font-size: 15px; }
 
-/* Status: the coloured dot and the glyph carry the state; the words stay in a
-   text token, so nothing rests on hue and nothing rests on shape alone. */
-.chip {
-  display: inline-flex; align-items: center; gap: 7px;
-  border: 1px solid var(--border); border-radius: 999px;
-  padding: 5px 12px 5px 9px; font-size: 13px; font-weight: 600;
-  background: var(--page); color: var(--ink);
-}
-.chip .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+/* A tag for a yes/no/count cell: the glyph and the word carry it together, so
+   nothing rests on hue alone. There is no status version of this any more - the
+   headline chip that used to sit here named an HHI band, and the bands it named
+   are merger-guideline cut-points this page does not apply. */
 .bandtag { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
-.bandtag .gly, .chip .gly { font-size: 11px; line-height: 1; flex: none; }
-.band-good    .gly, .band-good    .dot { color: var(--good);     background-color: initial; }
-.band-warning .gly, .band-warning .dot { color: var(--warning);  background-color: initial; }
-.band-crit    .gly, .band-crit    .dot { color: var(--critical); background-color: initial; }
-.band-none    .gly, .band-none    .dot { color: var(--baseline); background-color: initial; }
-.chip.band-good    .dot { background-color: var(--good); }
-.chip.band-warning .dot { background-color: var(--warning); }
-.chip.band-crit    .dot { background-color: var(--critical); }
-.chip.band-none    .dot { background-color: var(--baseline); }
+.bandtag .gly { font-size: 11px; line-height: 1; flex: none; }
+.band-good    .gly { color: var(--good); }
+.band-warning .gly { color: var(--warning); }
+.band-none    .gly { color: var(--baseline); }
 
 .tiles { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border);
          border-radius: 10px; overflow: hidden; grid-template-columns: repeat(2, 1fr); margin-top: 22px; }
@@ -242,16 +232,16 @@ td a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--
 td a:hover { border-bottom-color: var(--ink-2); }
 .wrapcell { white-space: normal; min-width: 180px; color: var(--ink-2); }
 
-/* HHI meter: fixed 0–10000 track with the guideline thresholds marked. The fill
-   carries the band; the band is also named in text, so colour never carries it
-   alone. */
+/* HHI meter: a fixed 0–10000 track, one hue, no bands and no marks. The two
+   ticks it used to carry were the 1,500 and 2,500 merger-guideline cut-points,
+   which this page does not apply; the number is printed beside the bar, so the
+   bar never has to be read on its own. */
 .meter { display: flex; align-items: center; gap: 9px; }
 .meter .track {
   position: relative; width: 108px; height: 7px; border-radius: 4px;
   background: var(--grid); flex: none; overflow: hidden;
 }
 .meter .fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px 2px 2px 4px; }
-.meter .thr { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--baseline); }
 .meter .bandtxt { font-size: 11.5px; color: var(--ink-2); }
 
 .notlist {
@@ -380,7 +370,6 @@ footer a { color: var(--ink-2); }
       <div class="heroblock">
         <p class="herolabel">Herfindahl-Hirschman Index</p>
         <div class="bigval" id="hero-hhi">2,329.3</div>
-        <p class="herosub" id="hero-hhisub"><span id="hhichip"></span></p>
       </div>
     </div>
 
@@ -609,31 +598,17 @@ const fmtNum = (v, dp = 0) =>
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-/* HHI band -> status token + glyph. The glyph and the band name travel with the
-   colour so the state never rests on hue alone. */
-function band(hhi) {
-  if (hhi == null) return { cls: "band-none", gly: "–", name: "no data", fill: "var(--baseline)" };
-  /* These name the SHAPE OF THE SHARE VECTOR and nothing else. They used to
-     carry the 2010 merger-guideline band names, which are defined for
-     substitutable products in a relevant market - not for CoinMarketCap issuer
-     labels spanning gold, tokenised equity and ETF wrappers. The index stays;
-     the borrowed verdict is gone. */
-  if (hhi >= 2500) return { cls: "band-crit", gly: "▲", name: "top-heavy", fill: "var(--critical)" };
-  if (hhi >= 1500) return { cls: "band-warning", gly: "◆", name: "uneven", fill: "var(--warning)" };
-  return { cls: "band-good", gly: "●", name: "broadly even", fill: "var(--good)" };
-}
-const chipHTML = (hhi) => {          /* the headline badge */
-  const b = band(hhi);
-  const why = "A description of this share vector, not a market measurement. The index is "
-    + "inverse-Simpson, valid on any set of shares; the 1,500 and 2,500 marks used in merger "
-    + "analysis are deliberately not applied, because these are CoinMarketCap issuer labels "
-    + "rather than firms shown to compete.";
-  return `<span class="chip ${b.cls}" title="${esc(why)}"><span class="dot"></span><span class="gly" aria-hidden="true">${b.gly}</span>${esc(b.name)}</span>`;
-};
-const bandTag = (hhi) => {           /* the compact in-table form */
-  const b = band(hhi);
-  return `<span class="bandtag ${b.cls}"><span class="gly" aria-hidden="true">${b.gly}</span>${esc(b.name)}</span>`;
-};
+/* There is deliberately no band(hhi) here any more, and nothing that turns an
+   HHI into a word. The three names it produced - top-heavy, uneven, broadly
+   even - were the 2,500 and 1,500 merger-guideline cut-points with the guideline
+   labels swapped out, and the page printed them as a headline verdict with the
+   rule nowhere on it. Two channels already say what the index says, both of them
+   in the reader's units: effective_n is the one-number version, and the
+   generated punchline is the one-sentence version. A third channel that only
+   asserted a category has been removed rather than re-labelled.
+
+   Nothing was put in its place either: see the note in renderScope() beside the
+   HHI, which records the reference point that was tried and why it went. */
 
 /* ===========================================================================
    Tooltip
@@ -873,12 +848,10 @@ function drawTradfi(svg, withMkt, withoutMkt) {
    Tables
    =========================================================================== */
 function meterHTML(hhi) {
-  const b = band(hhi);
   const pct = hhi == null ? 0 : Math.min(100, (hhi / 10000) * 100);
   return `<div class="meter">
     <span class="track" role="img" aria-label="HHI ${hhi == null ? "unavailable" : fmtNum(hhi)} of 10,000">
-      <span class="fill" style="width:${pct}%;background:${b.fill}"></span>
-      <span class="thr" style="left:15%"></span><span class="thr" style="left:25%"></span>
+      <span class="fill" style="width:${pct}%;background:var(--series-1)"></span>
     </span>
     <span class="bandtxt">${hhi == null ? "—" : fmtNum(hhi)}</span>
   </div>`;
@@ -1058,7 +1031,17 @@ function renderScope(id) {
     ? "No issuer values resolved in this scope."
     : `${fmtNum(block.n)} issuers are present, but the distribution behaves like ${fmtNum(block.effective_n, 2)} of equal size.`;
   document.getElementById("hero-hhi").textContent = block.hhi == null ? "—" : fmtNum(block.hhi, 1);
-  document.getElementById("hhichip").innerHTML = chipHTML(block.hhi);
+  /* Nothing is written under the HHI, deliberately, and there is no element to
+     write into. The slot held a chip naming an HHI band; the first replacement
+     tried was a reference point - what an equal split of the issuers present
+     would score - and it failed on its own terms. 10,000/n is arithmetic, but n
+     is a baseline this code chooses: 15 issuers give 667, dropping the issuer
+     holding $1,112 of a $7.5bn book gives 714, counting only issuers above 1%
+     gives 1,429. That is the job 1,500 used to do. And on the three chains with
+     a single issuer it prints a tautology - equal-split score and monopoly score
+     are both 10,000 - in exactly the rows where the figure looks most dramatic.
+     Any mark set beside this number is read as a norm. The legible version of
+     the index is the generated sentence below the hero, which states shares. */
   renderShock(block);
 
   const tiles = [
@@ -1320,17 +1303,17 @@ function renderStatic() {
     { h: "Share", num: true, get: (r) => fmtPct(mktTotal > 0 ? r.total / mktTotal : null) },
     { h: "Issuers", num: true, get: (r) => fmtNum(r.n) },
     { h: "HHI", raw: true, get: (r) => meterHTML(r.hhi) },
-    { h: "Concentration", raw: true, get: (r) => bandTag(r.hhi) },
     { h: "Effective", num: true, get: (r) => r.effective_n == null ? "—" : fmtNum(r.effective_n, 2) },
     { h: "Top issuer", num: true, get: (r) => fmtPct(r.top1) },
   ], chainRows,
-  "Ordered by tokenised cap. HHI runs 0–10,000 with the 1,500 and 2,500 guideline thresholds marked on each track; <em>effective</em> is the number of equal-sized issuers that would give the same figure.");
+  "Ordered by tokenised cap. HHI runs 0–10,000 — one issuer holding a chain's whole tokenised cap would score 10,000, and no band or threshold is applied to the track; <em>effective</em> is the number of equal-sized issuers that would give the same figure.");
   const cm = s.chain_mix || {};
   const unplaced = (s.coverage || {}).value_without_a_chain || 0;
   document.getElementById("chainnote").innerHTML =
     `Measured <em>across</em> chains rather than within them, the market scores an HHI of ` +
-    `<strong>${cm.hhi == null ? "—" : fmtNum(cm.hhi, 1)}</strong> — ${esc(cm.shape || cm.verdict || "")}, ` +
-    `behaving like ${cm.effective_n == null ? "—" : fmtNum(cm.effective_n, 2)} equal-sized chains. ` +
+    `<strong>${cm.hhi == null ? "—" : fmtNum(cm.hhi, 1)}</strong>, behaving like ` +
+    `${cm.effective_n == null ? "—" : fmtNum(cm.effective_n, 2)} equal-sized chains` +
+    (cm.top1 == null ? ". " : `, with ${fmtPct(cm.top1)} of value on the largest. `) +
     (tailKeys.length
       ? `A further ${fmtNum(tailKeys.length)} hold under ${fmtPct(CHAIN_FLOOR, 2)} each ` +
         `(${fmtUSD(tailTotal)} between them) and are left out of the table above. `
@@ -1372,7 +1355,6 @@ function renderStatic() {
     { h: "Share", num: true, get: (r) => fmtPct(s.overall.total > 0 ? r.total / s.overall.total : null) },
     { h: "Issuers", num: true, get: (r) => fmtNum(r.n) },
     { h: "HHI", raw: true, get: (r) => meterHTML(r.hhi) },
-    { h: "Concentration", raw: true, get: (r) => bandTag(r.hhi) },
     { h: "Effective", num: true, get: (r) => r.effective_n == null ? "—" : fmtNum(r.effective_n, 2) },
     { h: "Top issuer", num: true, get: (r) => fmtPct(r.top1) },
   ], classRows, "Ordered by tokenised cap.");
