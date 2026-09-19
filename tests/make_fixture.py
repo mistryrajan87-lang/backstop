@@ -156,7 +156,7 @@ def main() -> None:
 
     o, c = snap["overall"], snap["coverage"]
     print(f"wrote {out}")
-    print(f"  {o['n']} issuers, HHI {o['hhi']} ({o['verdict']}), effective {o['effective_n']}")
+    print(f"  {o['n']} issuers, HHI {o['hhi']} ({o.get('shape') or o.get('verdict')}), effective {o['effective_n']}")
     print(f"  top1 {o['top1']:.1%}  top3 {o['top3']:.1%}  top5 {o['top5']:.1%}")
     print(f"  {snap['counts']['tokens_attributed']} tokens over "
           f"{snap['counts']['assets_quoted']} assets, {len(snap['by_asset_class'])} classes")
