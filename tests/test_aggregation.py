@@ -314,6 +314,27 @@ def test_reconciliation_gap():
     check("concentration uses the attributed 70, not the asset's 100",
           approx(snap["overall"]["total"], 70.0), f"got {snap['overall']['total']}")
 
+    # asset_mix is the ONE block weighted by the asset-level cap rather than the
+    # token sum, so its denominator is a different number and its shares are not
+    # comparable with the issuer / chain / class blocks. An asset therefore sits at
+    # one share of asset_mix and a different share of the token sum, and a reader
+    # who assumed one denominator would call that a contradiction. The gap
+    # is exactly the value the asset endpoint prices at zero while tokens do not,
+    # so that is an invariant, not a coincidence - assert it rather than the
+    # wording, and assert the method block says which denominator it uses.
+    check("method names asset_mix's denominator",
+          "asset_mix" in snap["method"] and "token sum" in snap["method"]["asset_mix"],
+          str(snap["method"].get("asset_mix"))[:120])
+
+    # here the asset says 100 and its tokens only cover 70, so the asset-level
+    # book is the larger one and the gap runs the other way; what must hold in
+    # both directions is that the two totals differ by the reconciled amount.
+    gap = snap["asset_mix"]["total"] - snap["overall"]["total"]
+    check("asset_mix is weighted by the asset cap, not the token sum",
+          approx(snap["asset_mix"]["total"], 100.0), f"got {snap['asset_mix']['total']}")
+    check("and the two totals differ by the reconciliation difference",
+          approx(gap, -r["difference"], 1e-6), f"gap {gap} vs {-r['difference']}")
+
 
 # --------------------------------------------------------------------------- #
 # 3. Tokens with no issuer, and issuers absent from the directory.
