@@ -1144,7 +1144,7 @@ function renderDelta() {
     const flat = Math.abs(d) < 1e-9;
     const cls = flat ? "mv-flat" : (r.worseWhen == null ? "mv-flat"
               : ((d > 0) === (r.worseWhen === "up") ? "mv-up" : "mv-down"));
-    const arrow = flat ? "\\u2013" : (d > 0 ? "\\u2191" : "\\u2193");
+    const arrow = flat ? "–" : (d > 0 ? "↑" : "↓");
     /* A share that moved 0.02 percentage points is not "0.0%". Shares move in
        points, so say points. */
     const mag = flat ? "no change"
@@ -1154,7 +1154,7 @@ function renderDelta() {
   }
   if (!items.length) { box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = "<h3>Since the run before this one \\u2014 " + esc(was.date) + " to " + esc(now.date)
+  box.innerHTML = "<h3>Since the run before this one — " + esc(was.date) + " to " + esc(now.date)
     + "</h3><div class=\"deltarow\">" + items.join("") + "</div>"
     + '<p class="deltafoot">Arithmetic on two rows of <a href="data/history.jsonl">history.jsonl</a>, '
     + "which the scheduled job appends to once a run. Red means more concentrated, green means less; "
