@@ -288,6 +288,20 @@ footer a { color: var(--ink-2); }
 .punchline b { font-weight: 600; }
 .punchline .qual { display: block; margin-top: 7px; font-size: 12.5px; color: var(--muted); max-width: 76ch; }
 .scopefoot { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); max-width: 88ch; }
+.shock { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 16px 0 0; }
+.shock .sl { font-size: 12.5px; color: var(--ink-2); }
+.shock button { font: inherit; font-size: 12.5px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-1); color: var(--ink-2); cursor: pointer; }
+.shock button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.shockout { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); max-width: 74ch; min-height: 1.2em; }
+.shockout b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.lane { margin: 0 0 16px; }
+.lanehead { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--ink-2); margin: 0 0 6px; }
+.lanebar { display: flex; height: 26px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); background: var(--wash); }
+.lanebar span { display: block; height: 100%; }
+.seg-priced { background: var(--series-1); }
+.seg-unpriced { background: repeating-linear-gradient(45deg, var(--baseline) 0 6px, var(--page) 6px 12px); }
+.lanenote { margin: 6px 0 0; font-size: 12px; color: var(--muted); max-width: 86ch; }
 </style>
 </head>
 <body>
@@ -366,6 +380,14 @@ footer a { color: var(--ink-2); }
 <p class="punchline" id="punchline"><b>94.1%</b> of priced tokenised value sits with 5 issuer labels, and <b>Gold</b> alone is 62.8% of it. The figures are re-measured and archived every morning.<span class="qual">The band name’s 1,500 and 2,500 marks come from the 2010 US Horizontal Merger Guidelines, which describe competing firms in one market. Borrowed here as a scale for issuer shares — not a finding about competition.</span></p>
 <!-- backstop:punchline:end -->
 
+    <div class="shock" role="group" aria-labelledby="shocklabel">
+      <span class="sl" id="shocklabel">What if the largest issuers were not there?</span>
+      <button type="button" data-drop="0" aria-pressed="true">As measured</button>
+      <button type="button" data-drop="1" aria-pressed="false">Without the largest</button>
+      <button type="button" data-drop="3" aria-pressed="false">Without the top 3</button>
+    </div>
+    <p class="shockout" id="shockout"></p>
+
     <!-- backstop:herofoot:start -->
 <p class="herofoot" id="herofoot">791 assets &middot; two endpoints &middot; 6 incomparable &middot; snapshot 13:18 UTC</p>
 <!-- backstop:herofoot:end -->
@@ -386,6 +408,17 @@ footer a { color: var(--ink-2); }
       </div>
     </noscript>
 <!-- backstop:noscript:end -->
+  </section>
+
+  <!-- coverage ------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-coverage">
+    <h2 id="h-coverage">What the headline covers</h2>
+    <p class="sub">Two different denominators, kept apart on purpose. The index above is
+      built on value, and value exists only where a token reports a market cap. Counting
+      tokens instead gives a different and much less flattering picture, and confusing the
+      two is the easiest mistake to make with this catalogue.</p>
+    <div class="lane" id="lane-value"></div>
+    <div class="lane" id="lane-count"></div>
   </section>
 
   <!-- scope ---------------------------------------------------------------- -->
@@ -912,6 +945,11 @@ function scopeOptions(s) {
   /* Named for the question each one answers. "Asset class - stock" is inventory;
      "Stocks only" is the answer to "isn't this just gold?", which is the first
      thing anyone asks of a catalogue this commodity-heavy. */
+  /* Rebuilt from tokens whose class is not commodity - not stock + etf added
+     together. Those agree only while stock and ETF are the only other classes. */
+  if (s.ex_commodity && s.ex_commodity.n) {
+    out.push({ id: "ex:commodity", label: "Everything except commodities" });
+  }
   const CLASS_LABEL = { commodity: "Commodities only", stock: "Stocks only — excludes commodities", etf: "ETFs only" };
   for (const c of Object.keys(s.by_asset_class || {})) {
     out.push({ id: "class:" + c, label: CLASS_LABEL[c] || ("Asset class — " + c) });
@@ -939,7 +977,54 @@ function blockFor(id) {
   if (kind === "chain") {
     return { block: (SNAP.by_chain || {})[key], label: "tokens issued on " + key, full: false };
   }
+  if (kind === "ex") {
+    return { block: SNAP.ex_commodity, label: "every token whose asset class is not " + key, full: false };
+  }
   return { block: (SNAP.by_asset_class || {})[key], label: "the " + key + " asset class", full: false };
+}
+
+/* What the index would be without the largest holders.
+   Works off block.shares - the whole share vector - because leaders[] stops at
+   12 and renormalising over a truncated list would invent a different market.
+   slice() copies, so the snapshot object the other charts read is never touched. */
+let SHOCK_DROP = 0;
+function shockFrom(shares, drop) {
+  if (!Array.isArray(shares) || shares.length <= drop) return null;
+  const rest = shares.slice(drop);
+  const t = rest.reduce((a, v) => a + v, 0);
+  if (!(t > 0)) return null;
+  const ss = rest.reduce((a, v) => a + (v / t) * (v / t), 0);
+  if (!(ss > 0)) return null;
+  return { hhi: ss * 10000, effective_n: 1 / ss, n: rest.length };
+}
+
+function renderShock(block) {
+  const out = document.getElementById("shockout");
+  const row = document.querySelector(".shock");
+  /* A snapshot written before shares[] existed still renders every other part of
+     this page. Hide the control rather than offering a button that cannot answer. */
+  const base = shockFrom(block.shares, 0);
+  if (row) row.style.display = base ? "" : "none";
+  if (!base) { out.textContent = ""; return; }
+  if (SHOCK_DROP === 0) {
+    out.innerHTML = "As reported: <b>" + fmtNum(block.hhi, 1) + "</b> HHI, <b>"
+      + fmtNum(block.effective_n, 2) + "</b> effective issuers across " + fmtNum(block.n) + ".";
+    return;
+  }
+  const s = shockFrom(block.shares, SHOCK_DROP);
+  if (!s) {
+    out.textContent = "This scope has too few issuers to drop " + SHOCK_DROP + ".";
+    return;
+  }
+  const names = (block.leaders || []).slice(0, SHOCK_DROP).map((l) => l.label);
+  const who = names.length ? names.join(", ") : SHOCK_DROP + " largest";
+  const dir = s.hhi > block.hhi ? "rises to" : "falls to";
+  out.innerHTML = "Remove " + esc(who) + " and renormalise the rest: HHI " + dir
+    + " <b>" + fmtNum(s.hhi, 1) + "</b> and effective issuers "
+    + (s.effective_n > block.effective_n ? "rise to" : "fall to")
+    + " <b>" + fmtNum(s.effective_n, 2) + "</b> across " + fmtNum(s.n)
+    + '. <span class="lanenote" style="display:inline">A what-if on the priced shares in '
+    + "this snapshot, not a forecast and not a claim about the solvency of anyone named.</span>";
 }
 
 function renderScope(id) {
@@ -954,6 +1039,7 @@ function renderScope(id) {
     : `${fmtNum(block.n)} issuers are present, but the distribution behaves like ${fmtNum(block.effective_n, 2)} of equal size.`;
   document.getElementById("hero-hhi").textContent = block.hhi == null ? "—" : fmtNum(block.hhi, 1);
   document.getElementById("hhichip").innerHTML = chipHTML(block.hhi);
+  renderShock(block);
 
   const tiles = [
     { l: "Top issuer", v: fmtPct(block.top1), n: "share of scope" },
@@ -999,6 +1085,42 @@ function renderScope(id) {
   ], rows.map((r, i) => ({ ...r, _i: i + 1 })), "Same values as the chart above.");
   window.__barRows = rows;
   window.__barTotal = block.total;
+}
+
+/* Two denominators, never mixed. The value lane carries no hatching: a token
+   with no reported market cap contributes nothing to value, and drawing a gap
+   would imply we know the dollars are there and missing. We do not - we know
+   only that the token exists and is unpriced, which is a count, not a sum. */
+function renderCoverage() {
+  const o = SNAP.overall, c = SNAP.coverage, n = SNAP.counts;
+  const unpriced = c.tokens_without_market_cap || 0;
+  const attributed = n.tokens_attributed || 0;
+  const priced = Math.max(0, attributed - unpriced);
+  const pctP = attributed ? priced / attributed : 0;
+
+  document.getElementById("lane-value").innerHTML =
+    '<div class="lanehead"><span>By value &mdash; what the index is built on</span>'
+    + "<span>" + esc(fmtUSD(o.total)) + "</span></div>"
+    + '<div class="lanebar"><span class="seg-priced" style="width:100%"></span></div>'
+    + '<p class="lanenote">Every dollar here is a market cap a token actually reported. '
+    + "Tokens without one are not a hole in this bar \u2014 they contribute nothing to it, "
+    + "and their value is unknown rather than zero. They are counted below instead.</p>";
+
+  const worst = (c.null_caps_by_issuer || []).slice(0, 3)
+    .map((r) => esc(r.issuer) + " " + fmtNum(r.tokens_without_cap)).join(", ");
+  document.getElementById("lane-count").innerHTML =
+    '<div class="lanehead"><span>By token count &mdash; the same catalogue, counted</span>'
+    + "<span>" + esc(fmtNum(attributed)) + " tokens</span></div>"
+    + '<div class="lanebar">'
+    + '<span class="seg-priced" style="width:' + (pctP * 100).toFixed(2) + '%"></span>'
+    + '<span class="seg-unpriced" style="width:' + ((1 - pctP) * 100).toFixed(2) + '%"></span>'
+    + "</div>"
+    + '<p class="lanenote"><b>' + esc(fmtNum(priced)) + "</b> priced ("
+    + esc(fmtPct(pctP)) + ") and <b>" + esc(fmtNum(unpriced)) + "</b> with no market cap ("
+    + esc(fmtPct(1 - pctP)) + ", hatched)"
+    + (worst ? ", concentrated in " + worst : "")
+    + ". A share of tokens is not a share of value: these two bars answer different "
+    + "questions and should never be read against each other.</p>";
 }
 
 function renderStatic() {
@@ -1390,8 +1512,17 @@ function inlineSnapshot() {
   const sel = document.getElementById("scope");
   sel.innerHTML = scopeOptions(SNAP).map((o) => `<option value="${esc(o.id)}">${esc(o.label)}</option>`).join("");
   sel.addEventListener("change", () => renderScope(sel.value));
+  document.querySelectorAll(".shock button").forEach((b) => {
+    b.addEventListener("click", () => {
+      SHOCK_DROP = Number(b.dataset.drop) || 0;
+      document.querySelectorAll(".shock button").forEach((x) =>
+        x.setAttribute("aria-pressed", String(x === b)));
+      renderShock(blockFor(sel.value).block);
+    });
+  });
   renderStatic();
   renderScope("all");
+  renderCoverage();
 })();
 </script>
 </body>
