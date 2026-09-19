@@ -1111,6 +1111,43 @@ def test_readme_nullcaps_are_generated():
           "669 of 1,428" not in open(readme_src, encoding="utf-8").read(),
           "the 19 Sep hand-typed pair is still there")
 
+    # The reconciliation sentence had the same disease: "exactly one asset is more
+    # than 1% out (a pre-IPO wrapper, by $120k)" was typed by hand, was true of an
+    # early run, and by 19 Sep the run said assets_off_by_over_1pct = 0. Generated
+    # now, so it has to follow the count in both directions.
+    def recon_region(mutate):
+        import shutil, subprocess, tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            d = os.path.join(tmp, "docs"); os.makedirs(os.path.join(d, "data"))
+            shutil.copy(page_src, os.path.join(d, "index.html"))
+            shutil.copy(readme_src, os.path.join(tmp, "README.md"))
+            snap = json.loads(open(snap_src, encoding="utf-8").read())
+            mutate(snap)
+            with open(os.path.join(d, "data", "snapshot.json"), "w", encoding="utf-8") as fh:
+                json.dump(snap, fh)
+            rr = subprocess.run([sys.executable,
+                                 os.path.join(root, "scripts", "inline_snapshot.py"), d],
+                                capture_output=True, text=True, cwd=tmp)
+            if rr.returncode != 0:
+                return None
+            md = open(os.path.join(tmp, "README.md"), encoding="utf-8").read()
+            i = md.find("<!-- backstop:recon:start -->")
+            j = md.find("<!-- backstop:recon:end -->")
+            return md[i:j] if i >= 0 and j >= 0 else None
+
+    clean = recon_region(lambda s: s["coverage"]["reconciliation"].update(
+        assets_off_by_over_1pct=0, worst_assets=[]))
+    check("a clean reconciliation says no asset is more than 1% out",
+          clean is not None and "no asset is more than 1% out" in clean, str(clean)[:160])
+    dirty = recon_region(lambda s: s["coverage"]["reconciliation"].update(
+        assets_off_by_over_1pct=3, worst_assets=[{"symbol": "ZZZ", "ratio": 1.4}]))
+    check("and three off says three, naming the worst",
+          dirty is not None and "3 assets are more than 1% out" in dirty and "ZZZ" in dirty,
+          str(dirty)[:200])
+    check("no hand-typed reconciliation figure survives in the README prose",
+          "exactly one asset is more than 1% out" not in open(readme_src, encoding="utf-8").read(),
+          "the hand-typed 1%-out claim is still there")
+
 
 if __name__ == "__main__":
     test_per_token_attribution()
