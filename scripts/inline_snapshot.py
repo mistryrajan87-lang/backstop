@@ -98,10 +98,26 @@ def main() -> None:
         lead += (f', and <b>{html.escape(str(b_name))}</b> alone is '
                  f'{b_cap / o["total"]:.1%} of it')
     lead += ". The figures are re-measured and archived every morning."
-    qual = ('<span class="qual">The band name\u2019s 1,500 and 2,500 marks come from the 2010 '
-            'US Horizontal Merger Guidelines, which describe competing firms in one market. '
-            'Borrowed here as a scale for issuer shares \u2014 not a finding about competition.'
-            '</span>')
+    # The decomposition, generated. A 58/40 block and a 32/28/27 block average to
+    # 4.29, which is the shape of neither, and that is the honest sentence about
+    # this catalogue. Neither cut is called a market: they are share vectors.
+    def top(block, k):
+        out = []
+        for l in (block or {}).get("leaders", [])[:k]:
+            if l.get("label") and l.get("share"):
+                out.append(f'{html.escape(str(l["label"]))} {l["share"]:.0%}')
+        return " / ".join(out)
+    com = top((snap.get("by_asset_class") or {}).get("commodity"), 2)
+    rest = top(snap.get("ex_commodity"), 3)
+    parts = []
+    if com and rest:
+        parts.append(f'Underneath it sit two different share vectors \u2014 <b>{com}</b> across '
+                     f'commodities, <b>{rest}</b> across everything else. The blended index is '
+                     'the shape of neither.')
+    parts.append('The index is inverse-Simpson, a description of this share vector. The 1,500 '
+                 'and 2,500 marks used in merger analysis are deliberately not applied: these '
+                 'are CoinMarketCap issuer labels, not firms shown to compete.')
+    qual = '<span class="qual">' + " ".join(parts) + '</span>'
     page = region(page, "punchline",
                   f'<p class="punchline" id="punchline">{lead}{qual}</p>')
 
