@@ -936,6 +936,105 @@ def test_history_series():
               len(rows) == 3, f"got {len(rows)}")
 
 
+# --------------------------------------------------------------------------- #
+# 15. The ex-commodity scope, the share vectors, and the generated hero line.
+# --------------------------------------------------------------------------- #
+def test_ex_commodity_and_shares():
+    print("\n[15] ex-commodity, share vectors, and the generated hero line")
+
+    # A catalogue with a class the page does not know about. stock + etf is the
+    # obvious way to mean "not commodity" and it is wrong the moment this exists.
+    assets = [asset(1, "GOLD", "commodity", 1000.0),
+              asset(2, "NVDA", "stock", 600.0),
+              asset(3, "BOND1", "bond", 400.0)]
+    issuers = [issuer("a1", "Alpha"), issuer("b2", "Bravo"), issuer("c3", "Cirrus")]
+    tokens = {"1": [token("a1", "Alpha", "XAU", 1000.0)],
+              "2": [token("b2", "Bravo", "NVDAX", 600.0)],
+              "3": [token("c3", "Cirrus", "B1", 400.0)]}
+    snap = run(FakeCMC(assets, issuers, tokens))
+
+    bac = snap["by_asset_class"]
+    stock_etf = sum(bac[c]["total"] for c in ("stock", "etf") if c in bac)
+    ex = snap["ex_commodity"]
+    check("the fixture has a class beyond stock and etf, or this test proves nothing",
+          set(bac) - {"commodity", "stock", "etf"} != set(), str(sorted(bac)))
+    check("ex_commodity is rebuilt from tokens, not stock + etf added up",
+          approx(ex["total"], 1000.0, 1e-9) and ex["total"] != stock_etf,
+          f"ex {ex['total']} vs stock+etf {stock_etf}")
+    check("and it excludes every commodity token",
+          approx(snap["overall"]["total"] - bac["commodity"]["total"], ex["total"], 1e-9),
+          f"{snap['overall']['total']} - {bac['commodity']['total']} vs {ex['total']}")
+
+    # shares[] is what a what-if renormalises over. leaders[] stops at 12, so a
+    # shares vector shorter than n would silently model a different market.
+    for name, blk in [("overall", snap["overall"]), ("ex_commodity", ex)] + \
+                     [(f"class:{c}", b) for c, b in bac.items()]:
+        sh = blk.get("shares")
+        check(f"{name} carries one share per participant",
+              isinstance(sh, list) and len(sh) == blk["n"], f"{len(sh or [])} vs n={blk['n']}")
+        check(f"{name}'s shares sum to 1", approx(sum(sh or [0]), 1.0, 1e-4), str(sum(sh or [])))
+        check(f"{name}'s shares are ordered largest first",
+              sh == sorted(sh, reverse=True), str(sh))
+        recomputed = sum(x * x for x in sh) * 10000.0
+        check(f"{name}'s shares reproduce its own HHI",
+              approx(recomputed, blk["hhi"], 1.0), f"{recomputed:.1f} vs {blk['hhi']}")
+
+
+def test_hero_line_is_generated_not_typed():
+    """Change a number in the snapshot; the page must change with it.
+
+    A hero sentence with "94.1%" typed into the HTML passes every other check in
+    this file and is wrong by the next morning. The only way to prove it is
+    generated is to feed the generator a different snapshot and watch the page
+    move."""
+    print("\n[16] the hero line follows the snapshot")
+    import shutil, subprocess, tempfile
+
+    root = os.path.join(os.path.dirname(__file__), "..")
+    page_src = os.path.join(root, "docs", "index.html")
+    snap_src = os.path.join(root, "docs", "data", "snapshot.json")
+    if not (os.path.exists(page_src) and os.path.exists(snap_src)):
+        check("the page and a snapshot are present to test against", False, "missing")
+        return
+
+    def render(mutate):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = os.path.join(tmp, "docs")
+            os.makedirs(os.path.join(d, "data"))
+            shutil.copy(page_src, os.path.join(d, "index.html"))
+            snap = json.loads(open(snap_src, encoding="utf-8").read())
+            mutate(snap)
+            with open(os.path.join(d, "data", "snapshot.json"), "w", encoding="utf-8") as fh:
+                json.dump(snap, fh)
+            r = subprocess.run([sys.executable,
+                                os.path.join(root, "scripts", "inline_snapshot.py"), d],
+                               capture_output=True, text=True, cwd=tmp)
+            if r.returncode != 0:
+                return None, r.stderr[-300:]
+            html = open(os.path.join(d, "index.html"), encoding="utf-8").read()
+            i = html.find("<!-- backstop:punchline:start -->")
+            j = html.find("<!-- backstop:punchline:end -->")
+            return html[i:j], ""
+
+    base, err = render(lambda s: None)
+    check("the generator runs against the committed page", base is not None, err)
+    if base is None:
+        return
+
+    moved, err = render(lambda s: s["overall"].update(top5=0.5001))
+    check("a different top-5 share produces a different hero line", moved != base, err)
+    check("and the new share is the one rendered", moved is not None and "50.0%" in moved,
+          (moved or "")[:160])
+    # The figure to look for comes from the snapshot, not from a literal: writing
+    # "94.1%" here would rot on exactly the morning the catalogue moves, which is
+    # the failure this whole test exists to catch.
+    live = json.loads(open(snap_src, encoding="utf-8").read())
+    was = f'{live["overall"]["top5"]:.1%}'
+    check("the previous figure is gone rather than sitting beside the new one",
+          was in base and (was == "50.0%" or was not in moved),
+          f"looking for {was}: in base={was in base}, still in moved={was in moved}")
+
+
 if __name__ == "__main__":
     test_per_token_attribution()
     test_reconciliation_gap()
@@ -951,6 +1050,8 @@ if __name__ == "__main__":
     test_end_to_end_through_real_client()
     test_residuals_are_measured_not_asserted()
     test_history_series()
+    test_ex_commodity_and_shares()
+    test_hero_line_is_generated_not_typed()
 
     print("\n" + "-" * 60)
     if FAILURES:
