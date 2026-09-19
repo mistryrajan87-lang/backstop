@@ -18,6 +18,7 @@ Run:  python3 tests/test_aggregation.py
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import sys
@@ -898,12 +899,23 @@ def test_history_series():
         check("a re-run on the same day replaces rather than duplicates",
               len(rows) == 1, f"got {len(rows)} rows")
 
-        later = dict(snap, generated_at="2026-09-19T00:00:00+00:00")
+        # Derived from the snapshot, never written as a literal. A hard-coded
+        # "tomorrow" passes until the day it becomes today: append_history keys
+        # rows by date, so the second row would replace the first rather than
+        # append, and this test would fail on data that is perfectly fine.
+        day0 = dt.date.fromisoformat(snap["generated_at"][:10])
+        day1 = (day0 + dt.timedelta(days=1)).isoformat()
+        day2 = (day0 + dt.timedelta(days=2)).isoformat()
+        check("the three runs fall on three different days",
+              len({day0.isoformat(), day1, day2}) == 3, f"{day0}, {day1}, {day2}")
+
+        later = dict(snap, generated_at=f"{day1}T00:00:00+00:00")
         append_history(path, later)
         rows = [json.loads(l) for l in open(path) if l.strip()]
         check("a later run appends", len(rows) == 2, f"got {len(rows)}")
         check("rows are ordered oldest first",
-              rows[0]["generated_at"] < rows[1]["generated_at"], str([r["date"] for r in rows]))
+              len(rows) == 2 and rows[0]["generated_at"] < rows[1]["generated_at"],
+              str([r["date"] for r in rows]))
 
         r0 = rows[0]
         for key in ("total_cap", "hhi", "effective_n", "top1", "top5",
@@ -918,7 +930,7 @@ def test_history_series():
         # a malformed line must not lose the series
         with open(path, "a") as fh:
             fh.write("not json\n")
-        append_history(path, dict(snap, generated_at="2026-09-20T00:00:00+00:00"))
+        append_history(path, dict(snap, generated_at=f"{day2}T00:00:00+00:00"))
         rows = [json.loads(l) for l in open(path) if l.strip()]
         check("a corrupt line is skipped without dropping good rows",
               len(rows) == 3, f"got {len(rows)}")
