@@ -80,7 +80,7 @@ tokens report a market cap while the asset-level endpoint prices them at zero.**
 Those six account for **$105.9m** of the $106m. They cannot be reconciled — one
 side of the comparison is missing — so they are excluded from the ratio and
 reported as their own category, while their value stays in the market total
-because it is real. Over the assets both endpoints price, the ratio is **0.9995**,
+because it is real. Over the assets both endpoints price, the ratio rounds to **1.0000**,
 and exactly one asset is more than 1% out (a pre-IPO wrapper, by $120k).
 
 That is the single most reusable thing here for anyone else building on these
@@ -88,7 +88,7 @@ endpoints: `assets/list` and `quotes/latest` do not always agree that an asset h
 a price, and the disagreement is worth about 1.4% of the catalogue.
 
 **"All listings are Binance" is about a field, not about price discovery.**
-`tradfi_markets[]` returns exchange listings. Every one of the 777 it returned
+`tradfi_markets[]` returns exchange listings. Every one it returned
 names Binance. This is reported as a count rather than as a concentration index,
 deliberately: an HHI over a single-entry field can only return 10,000, which is
 arithmetic wearing the clothes of a finding. And it says nothing about where these
@@ -129,15 +129,15 @@ It is the entire benefit, and it is worth more than another metric.
 If you are about to cite this dataset, the page bounds five claims for you before
 you publish them:
 
-- **The size.** The map looks like ~7,800 assets. The live book is **790** and
-  about **$7.4bn**. Anything that opens "thousands of tokenised RWAs" is describing
+- **The size.** The map looks like ~7,800 assets. The live book is **under 800** and
+  about **$7.5bn**. Anything that opens "thousands of tokenised RWAs" is describing
   the filing cabinet, not the market.
 - **The concentration.** Tether and Paxos at 62% is not "two firms captured RWAs".
   It is "this catalogue is 63% tokenised gold, and those two mint the gold."
 - **The directory.** 25 rows, 21 that appear on a token, **15** that carry value,
   six that declare tokens worth nothing. Counting issuers from `issuers/list` gives
   you a padded number.
-- **The venue field.** All 777 off-chain listings are Binance. `tradfi_markets[]`
+- **The venue field.** Every off-chain listing the API returns is Binance. `tradfi_markets[]`
   returns exchange listings, so do not read NYSE-style price discovery into it.
 - **The weighting.** Almost half the tokens report no market cap, 625 of them from
   one issuer. Any league table built on token *count* crowns the wrong name.
@@ -283,7 +283,7 @@ project. It carries `issuer_id`, `issuer_name` and a per-token `market_cap`, whi
 means the issuer→value attribution needs no fuzzy matching, no name normalisation
 and no join at all. Nothing else I know of publishes tokenised-asset market caps
 broken out by the party that minted them. A full refresh — the whole 7,811-row map,
-every one of the 790 assets that carry tokens, the issuer directory, the chain
+every asset that carries tokens, the issuer directory, the chain
 lookup and the metadata — measured **73 credits and 107 calls**, a few minutes end
 to end.
 
@@ -311,7 +311,7 @@ to end.
 5. **`tradfi_markets` is not the underlying's market**, whatever the name suggests.
    Nvidia's entry is `{exchange: Binance, ticker: NVDA, market_url: …/stocks/EQ_NVDA}` —
    Binance's tokenised-stock product, not the NYSE. Across the whole catalogue,
-   **777 of 790** assets carry an off-chain listing and **every one of the 777 is
+   nearly every asset carries an off-chain listing and **every one of them is
    Binance**. (An early 100-asset probe said 97 of 100; the catalogue-wide figure
    replaced it and this line did not, for a while.) Taken at face
    value the field would support a claim about price discoverability that the data
@@ -325,7 +325,7 @@ to end.
    as its own line, overall and per issuer.
 7. **The two endpoints disagree about how big the catalogue is.** `map` says 7,811,
    `assets/list` says 7,942. Neither is documented as a subset of the other, and
-   neither is the number that matters: only **790** rows carry tokens at all. A
+   neither is the number that matters: fewer than **800** rows carry tokens at all. A
    write-up that quotes either total as "the tokenised market" is out by an order
    of magnitude — which is the mistake this README made until the first live run
    corrected it.
@@ -359,7 +359,7 @@ scripts/
   fetch_snapshot.py             the pipeline
   probe.ps1  probe.py           endpoint discovery — dumps raw responses
 tests/
-  test_aggregation.py           130 checks, hand-calculated, no network
+  test_aggregation.py           hand-calculated checks, no network
   make_fixture.py               synthetic snapshot for dashboard work
 docs/
   index.html                    the dashboard
@@ -379,7 +379,7 @@ python -m http.server -d docs 8000               # then open localhost:8000
 ## On correctness
 
 The numbers are the product, so the arithmetic is tested rather than trusted.
-`tests/test_aggregation.py` runs 130 checks against fixtures whose answers are
+`tests/test_aggregation.py` runs its checks against fixtures whose answers are
 worked out by hand in the comments — including the Gold case above in miniature,
 where a three-issuer asset must total 200 and not the 460 that per-asset counting
 would produce. It needs no network and runs in the workflow before a single credit
