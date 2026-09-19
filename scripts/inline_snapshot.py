@@ -127,7 +127,27 @@ def main() -> None:
             f'{incomparable} incomparable &middot; snapshot {html.escape(stamp_short)}')
     page = region(page, "herofoot", f'<p class="herofoot" id="herofoot">{foot}</p>')
 
-    # 5. what the page says with scripting off
+    # 5. the daily series, inlined like everything else. The page never fetches
+    #    it, so the delta strip works from the file alone - and a run that has no
+    #    yesterday simply writes one row and the strip hides itself.
+    hist_path = DOCS / "data" / "history.jsonl"
+    rows: list[dict] = []
+    if hist_path.exists():
+        for line in hist_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except ValueError:
+                continue          # a corrupt line must not cost us the series
+    rows = rows[-30:]
+    hraw = json.dumps(rows, separators=(",", ":"), ensure_ascii=False)
+    hraw = hraw.replace("</", "<\\/").replace("<!--", "<\\u0021--")
+    page = region(page, "history",
+                  f'<script type=\"application/json\" id=\"histdata\">{hraw}</script>')
+
+    # 6. what the page says with scripting off
     ns = (
         '    <noscript>\n'
         '      <div class="nsbox">\n'
@@ -144,7 +164,7 @@ def main() -> None:
     )
     page = region(page, "noscript", ns)
 
-    # 6. social meta - the claim, not the stack
+    # 7. social meta - the claim, not the stack
     desc = (f'Tokenised real-world assets on CoinMarketCap concentrate into {eff} effective '
             f'issuers (HHI {hhi}). Issuer here is a label, not a custodian.')
     title = "Backstop — issuer concentration in tokenised real-world assets"
