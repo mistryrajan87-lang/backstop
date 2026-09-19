@@ -11,8 +11,8 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 ## What it found
 
 <!-- backstop:readme:start -->
-From the run of **Sat, 19 Sep 2026 18:29:11 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
-[`2026-09-19T18-29-11Z.json`](docs/data/snapshots/2026-09-19T18-29-11Z.json), and rewritten here by
+From the run of **Sat, 19 Sep 2026 20:12:42 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
+[`2026-09-19T20-12-42Z.json`](docs/data/snapshots/2026-09-19T20-12-42Z.json), and rewritten here by
 `scripts/inline_snapshot.py` each time the pipeline runs.
 
 > In CoinMarketCap's tokenised real-world-asset catalogue, **791 assets**
@@ -27,12 +27,12 @@ From the run of **Sat, 19 Sep 2026 18:29:11 GMT** — 107 calls, 73 credits. Eve
 | Assets in `map` / carrying tokens | 7,811 / **791** |
 | Reported tokenised cap | **$7.51bn** |
 | Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
-| HHI over issuers, by value | **2,330.1** — 4.29 effective issuers |
+| HHI over issuers, by value | **2,329.2** — 4.29 effective issuers |
 | Top 1 / 3 / 5 share | 36.5% / 73.7% / **94.1%** |
 | Largest single asset | Gold — 62.8% of the catalogue |
 | Tokens reporting no market cap | **670 of 1,435** |
 | Off-chain listings, and where | 778 — **every one of them Binance** |
-| Chain concentration | Ethereum 74.3%; 1.74 effective chains |
+| Chain concentration | Ethereum 74.2%; 1.74 effective chains |
 <!-- backstop:readme:end -->
 
 ## What this catalogue is, and what it is not
@@ -82,7 +82,7 @@ Those six account for **$105.9m** of the $106m. They cannot be reconciled — on
 side of the comparison is missing — so they are excluded from the ratio and
 reported as their own category, while their value stays in the market total
 because it is real. <!-- backstop:recon:start -->
-Over the assets both endpoints price, the ratio rounds to **1.0000**, and no asset is more than 1% out.
+Over the assets both endpoints price, the ratio rounds to **0.9999**, and no asset is more than 1% out.
 <!-- backstop:recon:end -->
 
 That is the single most reusable thing here for anyone else building on these
