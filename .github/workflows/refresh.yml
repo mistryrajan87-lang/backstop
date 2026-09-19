@@ -120,7 +120,7 @@ jobs:
           if not c["assets_fully_quoted"]:
               print(f"::warning::Partial run - {c['quote_batches_run']} of "
                     f"{c['quote_batches_total']} quote batches. The page says so.")
-          print(f"OK - {o['n']} issuers, HHI {o['hhi']} ({o['verdict']}), "
+          print(f"OK - {o['n']} issuers, HHI {o['hhi']} ({o.get('shape') or o.get('verdict')}), "
                 f"reconciliation {r['ratio']}, "
                 f"{c['tokens_without_market_cap']} tokens with no cap, "
                 f"{s['api']['credits']} credits")
