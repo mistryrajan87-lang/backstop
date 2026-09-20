@@ -1051,7 +1051,7 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
 
 
 def append_history(path: str, snap: dict) -> None:
-    """Append one compact line per run.
+    """Write one compact line per DAY.
 
     A single snapshot is a photograph. The scheduled job runs daily, so keeping a
     handful of numbers per run costs nothing and turns the page into something
@@ -1099,7 +1099,7 @@ def append_history(path: str, snap: dict) -> None:
     with open(path, "w", encoding="utf-8") as fh:
         for r in existing:
             fh.write(json.dumps(r, separators=(",", ":")) + "\n")
-    print(f"  history: {len(existing)} run(s) in {path}")
+    print(f"  history: {len(existing)} day(s) in {path}")
 
 
 def main() -> None:
@@ -1117,7 +1117,7 @@ def main() -> None:
     ap.add_argument("--max-chain-calls", type=int, default=40,
                     help="ceiling on /v2/cryptocurrency/info calls")
     ap.add_argument("--history", default="docs/data/history.jsonl",
-                    help="append-only series, one line per run; '' to skip")
+                    help="daily series, one line per day; '' to skip")
     args = ap.parse_args()
 
     api = CMC(os.environ.get("CMC_API_KEY", "").strip())
