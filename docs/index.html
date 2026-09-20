@@ -563,7 +563,7 @@ footer a { color: var(--ink-2); }
   <!-- issuers -------------------------------------------------------------- -->
   <section class="card" aria-labelledby="h-issuers">
     <h2 id="h-issuers">Every issuer</h2>
-    <p class="sub">The full directory, largest first. This is the table view for both charts above — every value in them is readable here.</p>
+    <p class="sub">The full directory, largest first — always the whole catalogue, whatever the scope selector is set to. With no scope chosen it is the table view for both charts above; with one chosen the charts narrow and this does not, so the same issuer will show a different share here than it does there.</p>
 
     <div class="find">
       <label class="findlabel" for="issuerfind">Find an issuer</label>
@@ -773,11 +773,28 @@ function shareLabel(s) {
   if (s == null || !isFinite(s)) return "";
   if (s === 0) return "0%";
   const pct = s * 100;
+  /* Two significant digits where four decimals can carry them. The digit count
+     is taken from the ROUNDED string, so a value like 0.00094% reads "0.0009"
+     at four decimals - one significant digit, not two. */
   for (let dp = 1; dp <= 4; dp++) {
     const fixed = pct.toFixed(dp);
     const sig = fixed.replace("-", "").replace(".", "").replace(/^0+/, "").length;
     if (sig >= 2) return fixed + "%";
   }
+  /* One significant digit at full precision beats a bound. The first version
+     returned "<0.0001%" whenever two digits could not be reached, which
+     labelled every share from 0.00011% to 0.00095% with a bound up to 9.4x too
+     small - a false claim, printed one line from the cap that disproves it, by
+     the function written to avoid exactly that. 49 of 791 assets hit it.
+
+     Four decimals, not the first dp that happens to be non-zero: 0.00094%
+     renders "0.0009", and rounding it up to "0.001" would trade a true digit
+     for a rounder-looking one. The bound is now reserved for what really does
+     round to zero at four decimals. Two values that round to the same label at
+     that cap genuinely are indistinguishable at the precision on offer, which
+     is rounding rather than a claim. */
+  const finest = pct.toFixed(4);
+  if (Number(finest) !== 0) return finest + "%";
   return s > 0 ? "<0.0001%" : ">-0.0001%";
 }
 
@@ -876,7 +893,11 @@ function drawBars(svg, rows, total) {
      the whole plot to its right. Measuring the widest label instead cost 113px
      of a 490px plot, because the widest label in this chart belongs to the
      SMALLEST bar. Two passes: guess, measure the shortfall, settle. */
-  const CH = 7, GAP = 8, PAD_R_MIN = narrow ? 46 : 58;
+  /* 8, not 7. Measured getComputedTextLength()/length on a rendered .tiplab is
+     7.98, so 7 under-reserved by ~13% and the longest label drew outside the
+     viewBox - invisible today only because the SVG does not clip and the card
+     has 22px of padding to spill into. */
+  const CH = 8, GAP = 8, PAD_R_MIN = narrow ? 46 : 58;
   let PAD_R = PAD_R_MIN;
   for (let pass = 0; pass < 2; pass++) {
     const pw = Math.max(90, W - LABW - PAD_R);
@@ -1123,18 +1144,13 @@ function wireIssuerLookup(rows, snap) {
   trs.forEach((tr, i) => {
     tr.dataset.idx = String(i);
     tr.classList.add("hit");
-    /* Clickable rows need to be reachable without a mouse. */
-    tr.tabIndex = 0;
-    tr.setAttribute("role", "button");
-    tr.setAttribute("aria-label", `Show details for ${rows[i] ? rows[i].name : "this issuer"}`);
   });
-  body.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const tr = e.target.closest("tr");
-    if (!tr || !tr.dataset.idx) return;
-    e.preventDefault();
-    show(Number(tr.dataset.idx));
-  });
+  /* No role="button" and no tabindex on the rows. An earlier pass added both to
+     make the panel keyboard-reachable and broke something worse: role="button"
+     on a <tr> takes it out of the table, so the cells stop being cells and a
+     screen reader hears a list of anonymous buttons with the figures gone. The
+     keyboard route is the search box - typing a name opens that row's panel -
+     and the table stays a table. */
   note.setAttribute("aria-live", "polite");
 
   const total = (snap.overall || {}).total || 0;
@@ -1268,13 +1284,25 @@ function renderAssetLookup(snap) {
   const priced = rows.filter((r) => r.cap > 0).length;
   const quiet = rows.length - priced;
   const noLead = rows.filter((r) => r.lead == null).length;
+  /* cap here is the ASSET-level quote. Some assets report zero there while
+     their tokens report real value - the snapshot counts them in
+     coverage.reconciliation, and their value IS in overall.total, the index and
+     every chart. The first version of this sentence said the unpriced ones were
+     "priced at zero" full stop, which was false for those and contradicted by
+     two other numbers on this page. */
+  const recon = (snap.coverage || {}).reconciliation || {};
+  const tokenOnly = recon.assets_priced_only_by_tokens || 0;
+  const tokenOnlyValue = recon.value_priced_only_by_tokens || 0;
   document.getElementById("assetfindsub").innerHTML =
     `The catalogue lists <b>${fmtNum(rows.length)}</b> tokenised assets. ` +
-    `<b>${fmtNum(priced)}</b> of them carry a market cap the API will report; the ` +
-    `other <b>${fmtNum(quiet)}</b> are listed and tokenised and priced at zero. ` +
-    `For <b>${fmtNum(noLead)}</b>, no token reports a value at all, so no issuer ` +
-    `leads them: they are counted in the catalogue and absent from every share ` +
-    `on this page.`;
+    `<b>${fmtNum(priced)}</b> of them carry a market cap at the asset endpoint; the ` +
+    `other <b>${fmtNum(quiet)}</b> report none. ` +
+    (tokenOnly > 0
+      ? `That is not the same as worthless: for <b>${fmtNum(tokenOnly)}</b> of them the ` +
+        `tokens do report a value — <b>${fmtUSD(tokenOnlyValue)}</b> between them — which ` +
+        `is counted in the total above and reconciled below. `
+      : "") +
+    `For <b>${fmtNum(noLead)}</b>, no token reports a value either, so no issuer leads them.`;
 
   const find = document.getElementById("assetfind");
   const note = document.getElementById("assetfindnote");
@@ -1293,49 +1321,87 @@ function renderAssetLookup(snap) {
     { h: "Leading issuer", get: (r) => r.lead || "—" },
     { h: "Quoted off-chain", num: true, get: (r) => fmtNum(r.tradfi) },
   ], rows,
-    "Every asset the catalogue tokenises, largest first. <em>Tokenised cap</em> is the " +
-    "asset-level figure from <code>quotes/latest</code>, not the sum of its tokens — the two " +
-    "disagree, and the reconciliation below says by how much. A dash under <em>leading issuer</em> " +
-    "means no token for that asset reports any market cap, so there is nothing to lead.");
+    "Every asset the catalogue tokenises, ordered by the asset-level cap. <em>Tokenised cap</em> " +
+    "is that asset-level figure from <code>quotes/latest</code>, <strong>not</strong> the sum of its " +
+    "tokens — and where it reads $0 the tokens may still report value, which is why some assets " +
+    "worth tens of millions sort to the bottom of this list. The reconciliation below counts them. " +
+    "A dash under <em>leading issuer</em> means no token for that asset reports any market cap, so " +
+    "there is nothing to lead. Type a name or ticker above to open any row.");
 
   const body = table.querySelector("tbody");
   const trs = [...body.rows];
   trs.forEach((tr, i) => {
     tr.dataset.idx = String(i);
     tr.classList.add("hit");
-    tr.tabIndex = 0;
-    tr.setAttribute("role", "button");
-    tr.setAttribute("aria-label", `Show details for ${rows[i] ? rows[i].name || rows[i].symbol : "this asset"}`);
   });
+  /* Same reason as the issuer table: role="button" on 791 rows removed every
+     figure from the accessibility tree and put 791 stops in the tab order.
+     Click opens a row; typing opens a row; the table stays a table. */
   note.setAttribute("aria-live", "polite");
 
   /* top_assets carries the issuer split for the largest 25. Where the selected
      asset is one of them, the panel shows who else mints it - which is the
      single clearest illustration of why value is attributed per token. */
+  /* Keyed by symbol because asset_index carries no rwa_id, and a ticker is not
+     a key. Any symbol appearing twice is dropped from BOTH maps rather than
+     letting one asset inherit another's issuer attribution: today's 791 rows
+     have no duplicate, but the page regenerates from whatever the morning run
+     writes over a 7,811-row catalogue. */
+  const dupes = new Set();
+  const seen = new Set();
+  rows.forEach((r) => { if (seen.has(r.symbol)) dupes.add(r.symbol); seen.add(r.symbol); });
   const split = {};
-  (snap.top_assets || []).forEach((a) => { if (a.symbol) split[a.symbol] = a; });
+  (snap.top_assets || []).forEach((a) => {
+    if (a.symbol && !dupes.has(a.symbol)) split[a.symbol] = a;
+  });
+  /* The six assets the asset endpoint prices at zero while their tokens report
+     value. The reconciliation block names them, so the panel can say what the
+     zero actually means instead of guessing. */
+  const tokenOnlyBy = {};
+  (recon.token_only_examples || []).forEach((e) => {
+    if (e.symbol && !dupes.has(e.symbol)) tokenOnlyBy[e.symbol] = e;
+  });
   const total = (snap.overall || {}).total || 0;
   const hay = rows.map((r) => `${r.symbol} ${r.name} ${r.asset_class}`.toLowerCase());
+  let openedBySearch = false;   // only re-fold the list if the search unfolded it
 
   function show(i) {
     const r = rows[i];
     if (!r) return;
     trs.forEach((tr) => tr.classList.toggle("sel", tr.dataset.idx === String(i)));
+    /* Where the asset endpoint is silent but the tokens are not, BOTH figures
+       above come from the tokens. Reading the asset-level zero here printed
+       "Tokenised cap $0 / Share of catalogue 0%" directly above a note saying
+       $56.9m of it is counted in the catalogue total - the panel contradicting
+       itself within four lines. */
+    const only = tokenOnlyBy[r.symbol];
+    const shown = only ? only.token_sum : r.cap;
     const cells = [
-      ["Tokenised cap", fmtUSD(r.cap), ""],
+      ["Tokenised cap", fmtUSD(shown), only ? "reported by its tokens" : ""],
       /* Of the catalogue, never of the selected scope: this card is the whole
          directory, the same denominator the issuer panel names. */
-      ["Share of catalogue", total > 0 ? shareLabel(r.cap / total) : "—", ""],
-      ["Tokens", fmtNum(r.tokens), r.tokens === 1 ? "representing it" : "representing it"],
+      ["Share of catalogue", total > 0 ? shareLabel(shown / total) : "—", ""],
+      ["Tokens", fmtNum(r.tokens), r.tokens === 1 ? "represents it" : "represent it"],
       ["Issuers", fmtNum(r.issuers), r.issuers === 1 ? "mints it" : "mint it"],
-      ["Quoted off-chain", fmtNum(r.tradfi), "traditional markets"],
+      ["Quoted off-chain", fmtNum(r.tradfi),
+       r.tradfi === 1 ? "traditional market" : "traditional markets"],
     ];
     let msg = "";
     if (!(r.cap > 0)) {
-      msg = `<b>${esc(r.name || r.symbol)}</b> is in the catalogue and carries ` +
-            `${fmtNum(r.tokens)} token${r.tokens === 1 ? "" : "s"}, but the asset endpoint ` +
-            `prices it at zero. It counts towards the ${fmtNum(rows.length)} assets and ` +
-            `towards nothing else on this page.`;
+      /* The first version of this said the asset "counts towards nothing else
+         on this page". For EWG that was a $56.9m untruth: the asset endpoint
+         reports nothing, its tokens report plenty, and the token figure is what
+         the whole page is built on. Say which endpoint is silent, and give the
+         token figure whenever the reconciliation has it. */
+      msg = `The asset endpoint reports no market cap for <b>${esc(r.name || r.symbol)}</b>. `;
+      msg += only
+        ? `Its ${fmtNum(r.tokens)} token${r.tokens === 1 ? "" : "s"} do report one — ` +
+          `<b>${fmtUSD(only.token_sum)}</b> — and that is the figure counted in the ` +
+          `catalogue total, the index and every chart on this page. The two endpoints ` +
+          `disagree about this asset; the reconciliation below is where that gap is reported.`
+        : `Neither do its ${fmtNum(r.tokens)} token${r.tokens === 1 ? "" : "s"}, so it ` +
+          `contributes nothing to the totals — it is counted among the ` +
+          `${fmtNum(rows.length)} assets and nowhere else.`;
     }
     if (r.lead == null && r.issuers > 0) {
       /* "none of its 1 issuer" was the first wording. One issuer and several
@@ -1349,10 +1415,18 @@ function renderAssetLookup(snap) {
     let splitHtml = "";
     if (top && Array.isArray(top.split) && top.split.length > 1) {
       splitHtml = `<p class="icnote">Minted by ` +
-        /* shareLabel, not fmtPct: the tail of a split runs small, and a fixed
-           one decimal printed the sixth issuer of Gold as "0.0%" - which is a
-           different claim from "too small to show at one decimal". */
-        top.split.map((s) => `<b>${esc(s.issuer)}</b> ${shareLabel(s.share)}`).join(", ") +
+        /* Recomputed from market_cap rather than read from `share`. The
+           generator rounds share to 4dp, so it arrives already destroyed:
+           Hyperliquid Assets holds $1,111 of TSLA - a true 0.00096% - and
+           `share` carries 0.0, which shareLabel then correctly renders "0%",
+           the one thing it means by an exact zero. Switching this line to
+           shareLabel fixed nothing while the input was pre-rounded. */
+        top.split.map((s) => {
+          const exact = top.tokenized_market_cap > 0
+            ? s.market_cap / top.tokenized_market_cap
+            : s.share;
+          return `<b>${esc(s.issuer)}</b> ${shareLabel(exact)}`;
+        }).join(", ") +
         `. Each mints its own token with its own market cap, which is why this ` +
         `asset's value is split rather than credited to one of them.</p>`;
     }
@@ -1382,19 +1456,21 @@ function renderAssetLookup(snap) {
     const tr = e.target.closest("tr");
     if (tr && tr.dataset.idx) show(Number(tr.dataset.idx));
   });
-  body.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const tr = e.target.closest("tr");
-    if (!tr || !tr.dataset.idx) return;
-    e.preventDefault();
-    show(Number(tr.dataset.idx));
-  });
+  /* No keydown handler on the rows. It only ever fired because the rows carried
+     tabindex, and it swallowed the spacebar - which is page-down - on whichever
+     row happened to have focus. */
 
   find.addEventListener("input", () => {
     const q = find.value.trim().toLowerCase();
     if (!q) {
       trs.forEach((tr) => { tr.hidden = false; });
       note.textContent = "";
+      /* Fold it back. Searching force-opens the list; leaving it open on an
+         empty query drops all 791 rows back in - 29,000px on a phone, with the
+         caveats and the method pushed below them - for a reader who has just
+         cleared the box. Only re-fold what the search itself opened. */
+      if (openedBySearch) { det.open = false; openedBySearch = false; }
+      clear();
       return;
     }
     let shown = 0, only = -1, exact = -1;
@@ -1414,7 +1490,7 @@ function renderAssetLookup(snap) {
                      : shown === 1 ? "1 asset"
                      : exact >= 0 ? `${fmtNum(shown)} assets, showing the exact match`
                      : `${fmtNum(shown)} assets`;
-    det.open = true;
+    if (!det.open) { det.open = true; openedBySearch = true; }
     if (shown === 1) show(only);
     else if (exact >= 0) show(exact);
     else clear();
@@ -1691,9 +1767,18 @@ function renderLorenz(id, block, label) {
   document.getElementById("lorenzdesc").textContent =
     `Cumulative share curve over ${fmtNum(rows.length)} issuers in ${label}. ` +
     `Top issuer ${fmtPct(block.top1)}, top 5 ${fmtPct(block.top5)}.`;
-  /* Mark the blocks in this card that do NOT follow the selector. Without
-     this the card reads as one object and the numbers look untrustworthy. */
-  const wholeOnly = document.querySelectorAll("#punchline, #deltastrip");
+  /* Mark every block that does NOT follow the selector. Without this the page
+     reads as one object and the numbers look untrustworthy.
+
+     The two lookup cards are tagged too. Both are whole-catalogue directories,
+     and the issuer one sits directly under the charts calling itself "the table
+     view for both charts above" - which under a scope it is not: at chain
+     Ethereum the chart's own table shows Tether at 48.91% and the issuer table
+     shows 36.63%, the same name against two denominators one card apart. The
+     tag is the mechanism that teaches a reader an untagged block follows the
+     selector, so leaving these two untagged made it lie by omission. */
+  const wholeOnly = document.querySelectorAll(
+    "#punchline, #deltastrip, #h-issuers, #h-assetfind");
   wholeOnly.forEach((el) => {
     let tag = el.querySelector(".scopetag");
     if (id === "all") { if (tag) tag.remove(); return; }
