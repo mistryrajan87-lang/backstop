@@ -853,6 +853,12 @@ def test_residuals_are_measured_not_asserted():
     check("the uncomparable asset is counted separately",
           rz["assets_priced_only_by_tokens"] == 1,
           f"got {rz['assets_priced_only_by_tokens']}")
+    # The count printed beside the ratio has to have the same denominator as the
+    # ratio. Two assets went into the reconciliation and one of them could be
+    # compared, so this is 1; reporting 2 would make the page say "1.000x over 2
+    # assets" about a ratio that only looked at one of them.
+    check("and is not counted among the assets the ratio compares",
+          rz["assets_compared"] == 1, f"got {rz['assets_compared']}")
     check("and its value is reported, not absorbed",
           approx(rz["value_priced_only_by_tokens"], 50.0),
           f"got {rz['value_priced_only_by_tokens']}")
@@ -1261,6 +1267,47 @@ def test_readme_nullcaps_are_generated():
           "the hand-typed 1%-out claim is still there")
 
 
+def test_quoted_gates_match_the_workflow():
+    """The bands are enforced in one file and quoted in two others.
+
+    The page and the README both tell a reader that a run outside 0.85-1.15x
+    publishes nothing. Neither file can see the workflow that decides it, and
+    neither is the file anyone edits when the band moves - so the quote is a
+    promise with nothing behind it unless something reads the gate back out.
+    tests/test_page.js does that for the rendered page; this does it for the
+    README, which needs no browser and runs before a single credit is spent.
+    """
+    import re
+    print("\n[19] the bands quoted in the prose are the bands the workflow enforces")
+
+    root = os.path.join(os.path.dirname(__file__), "..")
+    wf_src = os.path.join(root, ".github", "workflows", "refresh.yml")
+    readme_src = os.path.join(root, "README.md")
+    for label, p in (("workflow", wf_src), ("README", readme_src)):
+        if not os.path.exists(p):
+            check(f"the {label} is present to check against", False, p)
+            return
+
+    wf = open(wf_src, encoding="utf-8").read()
+    # Both gates are a Python chained comparison on the ratio, inside the
+    # heredoc the sanity-check step runs.
+    bands = re.findall(r'([\d.]+)\s*<=\s*r\["ratio"\]\s*<=\s*([\d.]+)', wf)
+    check("the workflow states two bands on the reconciliation ratio",
+          len(bands) == 2, str(bands))
+    if len(bands) != 2:
+        return
+    check("the aborting band is the wider of the two",
+          float(bands[0][0]) < float(bands[1][0]) and float(bands[0][1]) > float(bands[1][1]),
+          str(bands))
+
+    # En and em dashes are normalised: the prose sets them typographically and
+    # the workflow does not, and that difference is not drift.
+    md = open(readme_src, encoding="utf-8").read().replace("–", "-").replace("—", "-")
+    for lo, hi in bands:
+        check(f"the README quotes the {lo}-{hi} band the workflow enforces",
+              f"{lo}-{hi}" in md, f"{lo}-{hi} not found in README prose")
+
+
 if __name__ == "__main__":
     test_per_token_attribution()
     test_reconciliation_gap()
@@ -1280,6 +1327,7 @@ if __name__ == "__main__":
     test_hero_line_is_generated_not_typed()
     test_readme_nullcaps_are_generated()
     test_asset_index_covers_the_catalogue()
+    test_quoted_gates_match_the_workflow()
 
     print("\n" + "-" * 60)
     if FAILURES:
