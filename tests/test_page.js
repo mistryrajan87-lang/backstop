@@ -1109,6 +1109,62 @@ function serve(dir) {
   check("no row shows a real holding as an all-zero percentage",
         zeroPcts.length === 0, zeroPcts.slice(0, 3).join("  |  "));
 
+  /* A control whose answer contradicts its own label has to explain itself on
+     the page, not in the reader's head. "What if the largest issuers were not
+     there?" answered with "HHI rises" reads as a bug: the arithmetic is right -
+     drop the leader and the rest renormalise upward - but nobody derives that
+     at skim speed.
+
+     The first version of this check parsed the direction out of the rendered
+     sentence. The old wording put the number after the word HHI rather than
+     before it, so the match came back null, the comparison was skipped, and the
+     check passed against the very page it was written to condemn. Worth writing
+     down: a check that reads its expectation out of the string it is judging
+     will agree with whatever that string says.
+
+     So the direction is computed from the snapshot's own share vector with the
+     same arithmetic the page uses, and the rendered text is only ever the thing
+     being judged. */
+  const shockCases = await page.evaluate(() => {
+    const hhiOf = (shares, drop) => {
+      if (!Array.isArray(shares) || shares.length <= drop) return null;
+      const rest = shares.slice(drop);
+      const t = rest.reduce((a, v) => a + v, 0);
+      if (!(t > 0)) return null;
+      const ss = rest.reduce((a, v) => a + (v / t) * (v / t), 0);
+      return ss > 0 ? ss * 10000 : null;
+    };
+    return scopeOptions(SNAP).map((o) => {
+      const b = (blockFor(o.id) || {}).block;
+      const sh = b && b.shares;
+      return { id: o.id, base: hhiOf(sh, 0), dropped: hhiOf(sh, 1) };
+    });
+  });
+  const shockBad = [];
+  let shockUps = 0;
+  for (const c of shockCases) {
+    if (c.base == null || c.dropped == null || !(c.dropped > c.base)) continue;
+    shockUps++;
+    await page.selectOption("#scope", c.id);
+    await page.waitForTimeout(240);
+    await page.click('.shock button[data-drop="1"]');
+    await page.waitForTimeout(350);
+    const stxt = await page.evaluate(() =>
+      ((document.getElementById("shockout") || {}).innerText || "").replace(/\s+/g, " ").trim());
+    if (!(/promotes the next name/i.test(stxt) && /of what is left/i.test(stxt))) {
+      shockBad.push(c.id + ": " + stxt.slice(0, 110));
+    }
+    await page.click('.shock button[data-drop="0"]');
+    await page.waitForTimeout(200);
+  }
+  await page.selectOption("#scope", "all");
+  await page.waitForTimeout(300);
+  check(`where dropping the leader raises the index, the page says why (${shockUps} scopes)`,
+        shockUps > 0 && shockBad.length === 0,
+        shockUps === 0 ? "no scope raises the index - this check proves nothing"
+                       : shockBad.slice(0, 3).join("  |  "));
+
+
   check(`counted nouns agree with their number, in all ${scopeIds.length} scopes`,
         pluralBad.length === 0, pluralBad.slice(0, 4).join("  |  "));
 
