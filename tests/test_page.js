@@ -1151,7 +1151,12 @@ function serve(dir) {
     await page.waitForTimeout(350);
     const stxt = await page.evaluate(() =>
       ((document.getElementById("shockout") || {}).innerText || "").replace(/\s+/g, " ").trim());
-    if (!(/promotes the next name/i.test(stxt) && /of what is left/i.test(stxt))) {
+    /* The invariant is that the OPERATION is named, not that any particular
+       moral is drawn. The first wording asserted "promotes the next name" -
+       which was the page editorialising, and a check that demands it entrenches
+       the editorial. What has to be true is that a reader can see why the index
+       moved: the control says it rebases the remainder, and names who inherits. */
+    if (!(/rebase the remaining/i.test(stxt) && /of what is left/i.test(stxt))) {
       shockBad.push(c.id + ": " + stxt.slice(0, 110));
     }
     await page.click('.shock button[data-drop="0"]');
