@@ -310,6 +310,488 @@ function serve(dir) {
         !nolabel.heroText.replace(/,/g, "").includes(evenScore.replace(/,/g, "")),
         `found ${evenScore}`);
 
+  // 11b. Reading order. The first complete card on this page used to be a
+  //      disclaimer: the caveats card sat above the finding, so a reader met
+  //      "Not a safety check" before meeting a single number. The caveats are
+  //      unchanged and still present - they sit below the headline now, and
+  //      this asserts they stay there.
+  const order = await page.evaluate(() => {
+    const ids = [...document.querySelectorAll("section.card")].map(
+      (s) => s.id || (s.querySelector("h2") || {}).id || "");
+    return {
+      ids,
+      headline: ids.indexOf("h-headline"),
+      caveats: ids.indexOf("scopecard"),
+      issuerDef: document.getElementById("scopecard").innerText
+                   .includes("only whose name is on it"),
+    };
+  });
+  check("the finding is rendered before the caveats, not after them",
+        order.headline > -1 && order.caveats > -1 && order.headline < order.caveats,
+        `headline at ${order.headline}, caveats at ${order.caveats}: ${order.ids.join(" > ")}`);
+  check("the issuer definition survived the move into the caveats card",
+        order.issuerDef, "the 'whose name is on it' sentence is gone");
+
+  // 11c. The punchline's qualifying tail - two share vectors, the
+  //      inverse-Simpson note, the merger-marks disclaimer - is correct and is
+  //      a wall of text directly under the one sentence a reader actually
+  //      reads. It is folded behind a summary, not cut: still in the DOM,
+  //      still reachable, closed by default.
+  const qual = await page.evaluate(() => {
+    /* the tail starts inside #punchline and is moved out into the
+       disclosure beside it, so it is found by class, not by ancestor. */
+    const q = document.querySelector(".qual");
+    const d = q && q.closest("details.qualwrap");
+    return {
+      present: !!q,
+      folded: !!d,
+      openByDefault: d ? d.hasAttribute("open") : null,
+      /* innerText is layout-dependent and empty for a hidden node, so the
+         text is read with textContent and visibility asked for separately. */
+      visible: q ? (typeof q.checkVisibility === "function"
+                     ? q.checkVisibility() : q.offsetParent !== null) : null,
+      keepsItsText: q ? q.textContent.includes("shape of neither") : null,
+    };
+  });
+  check("the qualifying tail is folded behind a disclosure and closed by default",
+        qual.present && qual.folded && qual.openByDefault === false
+          && qual.visible === false && qual.keepsItsText === true,
+        JSON.stringify(qual));
+
+  // 11d. The issuer lookup. Everything it shows was already on the page, in a
+  //      collapsed table in the tenth section, twelve columns wide. These check
+  //      that it is now reachable by typing a name, and that the panel agrees
+  //      with the snapshot rather than with the rendered cells.
+  const target = (snap.issuers || []).find(
+    (r) => r.declared_tokens != null && r.declared_tokens !== r.attributed_tokens)
+    || (snap.issuers || [])[0];
+
+  /* Null-safe on purpose: if the lookup markup is ever removed these must
+     report a clean FAIL, not throw and abort every check after them. */
+  const lookupPresent = await page.evaluate(() =>
+    !!document.getElementById("issuercard") && !!document.getElementById("issuerfind"));
+  check("the issuer lookup is on the page", lookupPresent, "#issuerfind / #issuercard missing");
+
+  const hiddenFirst = await page.evaluate(() => {
+    const c = document.getElementById("issuercard");
+    return c ? c.hidden : null;
+  });
+  check("no issuer panel is shown until one is asked for", hiddenFirst === true,
+        String(hiddenFirst));
+
+  if (lookupPresent) await page.fill("#issuerfind", target.name.split(" ")[0]);
+  await page.waitForTimeout(200);
+  const found = await page.evaluate(() => {
+    const body = document.querySelector("#issuertable tbody");
+    const card = document.getElementById("issuercard");
+    const det = document.getElementById("issuerdetails");
+    const nt = document.getElementById("findnote");
+    return {
+      shownCount: body ? [...body.rows].filter((r) => !r.hidden).length : -1,
+      detailsOpen: det ? det.open : null,
+      cardHidden: card ? card.hidden : null,
+      cardText: card ? card.innerText.replace(/\s+/g, " ") : "",
+      note: nt ? nt.textContent : null,
+    };
+  });
+  check("typing an issuer name filters the table and opens it",
+        found.shownCount >= 1 && found.shownCount < (snap.issuers || []).length
+          && found.detailsOpen === true,
+        JSON.stringify({ shown: found.shownCount, open: found.detailsOpen }));
+  check("the matching issuer's panel is shown",
+        found.cardHidden === false && found.cardText.includes(target.name),
+        found.cardText.slice(0, 120));
+
+  // The number that was hardest to reach on the old page: what an issuer
+  // declares through the issuers endpoint against what the catalogue can
+  // actually attribute to it.
+  if (target.declared_tokens !== target.attributed_tokens) {
+    const dec = target.declared_tokens.toLocaleString("en-GB");
+    const att = target.attributed_tokens.toLocaleString("en-GB");
+    check("the panel states the declared-versus-attributed gap from the JSON",
+          found.cardText.includes(dec) && found.cardText.includes(att),
+          `want ${att} of ${dec} in: ${found.cardText.slice(0, 200)}`);
+  }
+
+  if (lookupPresent) await page.fill("#issuerfind", "");
+  await page.waitForTimeout(150);
+  const cleared = await page.evaluate(() => {
+    const nt = document.getElementById("findnote");
+    return {
+      all: [...document.querySelectorAll("#issuertable tbody tr")].every((r) => !r.hidden),
+      note: nt ? nt.textContent : null,
+    };
+  });
+  check("clearing the search restores every row", cleared.all && cleared.note === "");
+
+  // 11e. The Lorenz curve used to be drawn once over the whole catalogue, and
+  //      the caption admitted it ignored the scope selector. Every block in
+  //      the snapshot carries its own complete `shares` vector, so the curve is
+  //      exact for any scope. Asserted against the JSON's own n, not a number.
+  const chainKeys = Object.keys(snap.by_chain || {});
+  const pick = chainKeys
+    .map((k) => ({ k, n: (snap.by_chain[k] || {}).n || 0 }))
+    .filter((c) => c.n >= 2 && c.n !== (snap.overall || {}).n)
+    .sort((a, b) => b.n - a.n)[0];
+
+  check("the Lorenz caption no longer disclaims the scope selector",
+        !(await page.evaluate(() =>
+          (document.getElementById("lorenzcap") || {}).textContent || "")).includes("does not follow"));
+
+  if (pick) {
+    await page.selectOption("#scope", `chain:${pick.k}`);
+    await page.waitForTimeout(350);
+    const scoped = await page.evaluate(() => ({
+      desc: (document.getElementById("lorenzdesc") || {}).textContent || "",
+      cap: (document.getElementById("lorenzcap") || {}).textContent || "",
+      pts: document.querySelectorAll("#chart-lorenz path, #chart-lorenz polyline").length,
+      url: location.search,
+    }));
+    /* The exact phrase, not a bare digit: "over 15 issuers ... top issuer 36.5%"
+       contains "6" and passed this check on a page where the curve never moved. */
+    check("the curve is redrawn for the selected scope, over that scope's issuers",
+          scoped.desc.includes(`over ${pick.n} issuers`) && scoped.pts > 0,
+          `want "over ${pick.n} issuers" in: ${scoped.desc}`);
+    check("the caption names the scope it is showing",
+          scoped.cap.length > 0 && !scoped.cap.includes("whole catalogue"),
+          scoped.cap);
+    check("selecting a scope puts it in the URL",
+          scoped.url.includes("scope=") && decodeURIComponent(scoped.url).includes(pick.k),
+          scoped.url);
+
+    // 11f. And the URL brings it back.
+    await page.goto(`http://127.0.0.1:${port}/index.html?scope=chain:${encodeURIComponent(pick.k)}`);
+    await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+    await page.waitForTimeout(300);
+    const deep = await page.evaluate(() => ({
+      sel: (document.getElementById("scope") || {}).value,
+      desc: (document.getElementById("lorenzdesc") || {}).textContent || "",
+    }));
+    check("a ?scope= link opens on that scope",
+          deep.sel === `chain:${pick.k}` && deep.desc.includes(`over ${pick.n} issuers`),
+          JSON.stringify(deep));
+
+    // A scope this snapshot does not have must not leave an empty page.
+    await page.goto(`http://127.0.0.1:${port}/index.html?scope=chain:NotAChainThatExists`);
+    await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+    const bad = await page.evaluate(() => ({
+      sel: (document.getElementById("scope") || {}).value,
+      eff: (document.getElementById("hero-eff") || {}).textContent,
+    }));
+    check("an unknown ?scope= falls back to the whole catalogue",
+          bad.sel === "all" && bad.eff !== "—", JSON.stringify(bad));
+
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
+    await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+    await page.waitForTimeout(250);
+  }
+
+  // 11g. The run history. This is the only block on the page that cannot be
+  //      recomputed from the API: the RWA endpoints are all "latest", and
+  //      issuer attribution exists only in the live call. So it must be honest
+  //      about how little of it there is.
+  const histRows = JSON.parse(
+    fs.readFileSync(path.join(DOCS, "data", "history.jsonl"), "utf8")
+      .split("\n").filter(Boolean).map((l) => l).join(",").replace(/^/, "[") + "]");
+
+  const hist = await page.evaluate(() => ({
+    inline: JSON.parse(document.getElementById("histdata").textContent).length,
+    cap: (document.getElementById("histcap") || {}).textContent || "",
+    paths: document.querySelectorAll("#chart-history path").length,
+    tableRows: document.querySelectorAll("#histtable tbody tr").length,
+  }));
+  check("the history card renders one table row per recorded run",
+        hist.tableRows === histRows.length && hist.inline === histRows.length,
+        `${hist.tableRows} rows vs ${histRows.length} in history.jsonl`);
+  check("the caption states how many runs it is drawn from",
+        hist.cap.includes(String(histRows.length)) && hist.cap.includes("run"),
+        hist.cap);
+
+  // Under three runs there must be no line: two points drawn as a trend would
+  // claim more than the archive knows.
+  if (histRows.length < 3) {
+    check("with fewer than three runs no line is plotted",
+          hist.paths === 0 && /line starts/i.test(hist.cap), JSON.stringify(hist));
+  }
+
+  // Inject a longer archive to exercise the branch the real data cannot reach
+  // yet, then put the page back as it was.
+  const synth = await page.evaluate(() => {
+    /* Guarded: if the history card is ever removed these must FAIL, not throw
+       and abort every check after them. */
+    const node = document.getElementById("histdata");
+    if (!node || typeof renderHistory !== "function") return null;
+    const real = node.textContent;
+    const base = JSON.parse(real);
+    const seed = base[base.length - 1] || { hhi: 2000, effective_n: 4, top5: 0.9,
+                                            largest_asset_share: 0.6, date: "2026-09-19" };
+    const rows = [];
+    for (let i = 0; i < 5; i++) {
+      rows.push(Object.assign({}, seed, {
+        date: `2026-09-${String(10 + i).padStart(2, "0")}`,
+        hhi: seed.hhi + i * 25,
+        effective_n: seed.effective_n - i * 0.05,
+      }));
+    }
+    node.textContent = JSON.stringify(rows);
+    renderHistory();
+    const out = {
+      paths: document.querySelectorAll("#chart-history path").length,
+      dots: document.querySelectorAll("#chart-history circle").length,
+      cap: document.getElementById("histcap").textContent,
+      desc: document.getElementById("histdesc").textContent,
+      rows: document.querySelectorAll("#histtable tbody tr").length,
+    };
+    node.textContent = real;
+    renderHistory();
+    return out;
+  });
+  check("with three or more runs the series is plotted, one point per run",
+        !!synth && synth.paths === 1 && synth.dots === 5 && synth.rows === 5,
+        JSON.stringify(synth));
+  check("a plotted series says its axis is not zero-based",
+        !!synth && /not zero-based/i.test(synth.cap), synth ? synth.cap : "no history card");
+  check("the series description names its start and end value",
+        !!synth && synth.desc.length > 0 && /to /.test(synth.desc),
+        synth ? synth.desc : "no history card");
+
+  // The series selector must actually change what is drawn.
+  const switched = await page.evaluate(() => {
+    const b = document.querySelector('[data-series="effective_n"]');
+    if (!b) return null;
+    b.click();
+    return {
+      cap: document.getElementById("histcap").textContent,
+      pressed: b.getAttribute("aria-pressed"),
+    };
+  });
+  check("choosing a different series redraws the history",
+        switched && switched.pressed === "true" && switched.cap.includes("Effective issuers"),
+        JSON.stringify(switched));
+
+  // 11h. REGRESSION SCENARIOS from the code review of the presentation work.
+  //      Every defect below passed all 57 checks that existed at the time. They
+  //      are written as the sequence that reproduced them, not as a property of
+  //      the markup, because that is how they were missed.
+
+  // (a) The history card borrows .shock for its pill styling. Boot used to bind
+  //     the what-if handler with querySelectorAll(".shock button"), so choosing
+  //     a history series reset SHOCK_DROP to 0 and blanked the other group.
+  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+  await page.waitForTimeout(300);
+  const beforeErrs = consoleErrors.length;
+  await page.click('[data-drop="3"]');
+  await page.waitForTimeout(250);
+  const shockA = await page.evaluate(() =>
+    (document.getElementById("shockout") || {}).textContent || "");
+  await page.click('[data-series="top5"]');
+  await page.waitForTimeout(300);
+  const cross = await page.evaluate(() => ({
+    shock: (document.getElementById("shockout") || {}).textContent || "",
+    drop3: (document.querySelector('[data-drop="3"]') || {}).getAttribute
+             ? document.querySelector('[data-drop="3"]').getAttribute("aria-pressed") : null,
+    series: (document.querySelector('[data-series="top5"]') || {}).getAttribute
+             ? document.querySelector('[data-series="top5"]').getAttribute("aria-pressed") : null,
+  }));
+  check("choosing a history series does not reset the what-if",
+        cross.shock === shockA && shockA.length > 0
+          && cross.drop3 === "true" && cross.series === "true",
+        JSON.stringify(cross));
+
+  // (b) ?scope= was validated on "does a block exist", which is a wider set than
+  //     the <option> list: majorChains() hides chains under the floor. Their
+  //     blocks rendered with a blank selector, and the next click threw.
+  const hidden = await page.evaluate(() => {
+    const offered = new Set(scopeOptions(SNAP).map((o) => o.id));
+    const k = Object.keys(SNAP.by_chain || {}).find((c) => !offered.has("chain:" + c));
+    return k ? "chain:" + k : null;
+  });
+  if (hidden) {
+    await page.goto(`http://127.0.0.1:${port}/index.html?scope=${encodeURIComponent(hidden)}`);
+    await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+    await page.waitForTimeout(300);
+    const sel = await page.evaluate(() => (document.getElementById("scope") || {}).value);
+    await page.click('[data-drop="1"]');
+    await page.waitForTimeout(250);
+    check("a scope with no option falls back and leaves the selector usable",
+          sel === "all" && consoleErrors.length === beforeErrs,
+          `sel=${sel} newErrors=${consoleErrors.slice(beforeErrs).join(" | ")}`);
+  }
+
+  // (c) A bare key lookup let ?scope=class:__proto__ resolve to Object.prototype
+  //     and render a fully laid-out page about nothing.
+  await page.goto(`http://127.0.0.1:${port}/index.html?scope=class:__proto__`);
+  await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+  await page.waitForTimeout(250);
+  const proto = await page.evaluate(() => ({
+    sel: (document.getElementById("scope") || {}).value,
+    eff: (document.getElementById("hero-eff") || {}).textContent,
+  }));
+  check("a prototype key in ?scope= does not render a page about nothing",
+        proto.sel === "all" && proto.eff !== "—", JSON.stringify(proto));
+
+  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+  await page.waitForTimeout(400);
+
+  // (d) The Lorenz table emits rows for i<10 then every tenth, so the last row
+  //     is only the whole scope when the count lands on a multiple of ten. The
+  //     note claimed it always was.
+  const lnote = await page.evaluate(() => {
+    const n = document.getElementById("lorenztable-note");
+    return n ? n.textContent : "";
+  });
+  check("the Lorenz note does not claim the last row is the whole scope",
+        lnote.length > 0 && !/last row is the whole scope/i.test(lnote), lnote.slice(0, 100));
+
+  // (e) The issuer panel divided by the whole-catalogue total but called it
+  //     "Share of scope". Selecting a class the issuer is absent from still
+  //     showed its catalogue share under a label naming that class.
+  await page.fill("#issuerfind", (snap.issuers[0].name || "").split(" ")[0]);
+  await page.waitForTimeout(300);
+  const classKey = Object.keys(snap.by_asset_class || {})[0];
+  if (classKey) {
+    await page.selectOption("#scope", `class:${classKey}`);
+    await page.waitForTimeout(350);
+  }
+  const panel = await page.evaluate(() => {
+    const c = document.getElementById("issuercard");
+    return c ? c.innerText.replace(/\s+/g, " ") : "";
+  });
+  check("the issuer panel names the denominator it divides by",
+        panel.includes("Share of catalogue") && !panel.includes("Share of scope"),
+        panel.slice(0, 90));
+
+  // (f) With the curve following the scope, a one-issuer scope drew a line
+  //     identical to the equality diagonal - the most concentrated possible
+  //     scope rendered as a picture of perfect equality.
+  const single = await page.evaluate(() => {
+    const bc = SNAP.by_chain || {};
+    const offered = new Set(scopeOptions(SNAP).map((o) => o.id));
+    const k = Object.keys(bc).find((c) => bc[c].n === 1 && offered.has("chain:" + c));
+    return k ? "chain:" + k : null;
+  });
+  if (single) {
+    await page.selectOption("#scope", single);
+    await page.waitForTimeout(400);
+    const degen = await page.evaluate(() => {
+      const f = document.getElementById("chart-lorenz").closest("figure");
+      return { display: f ? f.style.display : null,
+               cap: (document.getElementById("lorenzcap") || {}).textContent || "" };
+    });
+    check("a scope with too few issuers hides the curve instead of drawing equality",
+          degen.display === "none" && /too few/i.test(degen.cap), JSON.stringify(degen));
+  }
+
+  // (g) drawHistory gated and scaled on a filtered copy but drew from the
+  //     unfiltered rows, so a run with a null field - which append_history emits
+  //     whenever the priced total is 0 - put the path thousands of units off
+  //     canvas, or produced d="M 54 NaN".
+  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+  await page.waitForTimeout(400);
+  const nulls = await page.evaluate(() => {
+    const node = document.getElementById("histdata");
+    if (!node || typeof renderHistory !== "function") return null;
+    const real = node.textContent;
+    const base = JSON.parse(real);
+    const seed = base[base.length - 1];
+    const rows = [0, 1, 2, 3].map((i) => Object.assign({}, seed, {
+      date: `2026-09-1${i}`, hhi: i === 1 ? null : seed.hhi + i * 10 }));
+    node.textContent = JSON.stringify(rows);
+    renderHistory();
+    const pathEl = document.querySelector("#chart-history path");
+    const out = {
+      d: pathEl ? pathEl.getAttribute("d") : "",
+      cap: (document.getElementById("histcap") || {}).textContent || "",
+    };
+    node.textContent = real;
+    renderHistory();
+    return out;
+  });
+  check("a run with a null field is dropped, not drawn off canvas",
+        !!nulls && !/NaN/.test(nulls.d) && nulls.d.split(" L ").length === 3
+          && /Plotted only where .* is defined/i.test(nulls.cap),
+        JSON.stringify(nulls).slice(0, 220));
+
+  // (h) The issuer rows were clickable but had no tabindex, no role and no key
+  //     handler, so the entire detail panel was unreachable by keyboard.
+  const kb = await page.evaluate(() => {
+    const tr = document.querySelector("#issuertable tbody tr");
+    const nt = document.getElementById("findnote");
+    return tr ? { tab: tr.tabIndex, role: tr.getAttribute("role"),
+                  live: nt ? nt.getAttribute("aria-live") : null } : null;
+  });
+  check("issuer rows are reachable by keyboard and the match count is announced",
+        !!kb && kb.tab === 0 && kb.role === "button" && kb.live === "polite",
+        JSON.stringify(kb));
+
+  // (i) The band refusal - why no 1,500/2,500 threshold is applied - must stay
+  //     in the open paragraph. It is the one claim this page refuses to make,
+  //     and it was briefly folded behind a disclosure.
+  const band = await page.evaluate(() => {
+    const b = document.querySelector(".bandnote");
+    const q = document.querySelector(".qual");
+    return {
+      present: !!b,
+      visible: b ? (typeof b.checkVisibility === "function" ? b.checkVisibility() : b.offsetParent !== null) : null,
+      folded: !!(b && b.closest(".qualwrap")),
+      says: b ? /merger analysis are deliberately not applied/i.test(b.textContent) : false,
+      qualFolded: !!(q && q.closest(".qualwrap")),
+    };
+  });
+  check("the merger-band refusal stays in the open, not behind the disclosure",
+        band.present && band.visible === true && band.folded === false && band.says === true,
+        JSON.stringify(band));
+  check("the two-vector decomposition is still the thing that folds",
+        band.qualFolded === true, JSON.stringify(band));
+
+  await page.fill("#issuerfind", "");
+  await page.waitForTimeout(150);
+
+  // 11i. Scope staleness. The hero, the bars and the curve follow the selector.
+  //      The generated punchline and the delta strip are whole-catalogue and
+  //      always will be. With a chain selected the same card showed
+  //      "Effective number of issuers 1.31" beside "94.1% ... 5 issuer labels"
+  //      and a delta of "HHI 2,329.2" - three objects, one card. They are
+  //      tagged now, and this asserts the tag appears only when it is needed.
+  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+  await page.waitForTimeout(400);
+  const tagAll = await page.evaluate(() =>
+    document.querySelectorAll("#punchline .scopetag, #deltastrip .scopetag").length);
+  check("no whole-catalogue tag is shown when the scope IS the whole catalogue",
+        tagAll === 0, `${tagAll} tags`);
+
+  const someScope = await page.evaluate(() => {
+    const o = scopeOptions(SNAP).map((x) => x.id).filter((x) => x !== "all");
+    return o[0] || null;
+  });
+  if (someScope) {
+    await page.selectOption("#scope", someScope);
+    await page.waitForTimeout(400);
+    const tagged = await page.evaluate(() => {
+      const p = document.getElementById("punchline");
+      const d = document.getElementById("deltastrip");
+      const t = (el) => {
+        const s = el ? el.querySelector(".scopetag") : null;
+        return s ? s.textContent.trim() : null;
+      };
+      return { punch: t(p), delta: d && !d.hidden ? t(d) : "hidden" };
+    });
+    check("blocks that do not follow the selector say so when a scope is picked",
+          tagged.punch === "Whole catalogue"
+            && (tagged.delta === "Whole catalogue" || tagged.delta === "hidden"),
+          JSON.stringify(tagged));
+    await page.selectOption("#scope", "all");
+    await page.waitForTimeout(350);
+    const cleared = await page.evaluate(() =>
+      document.querySelectorAll("#punchline .scopetag, #deltastrip .scopetag").length);
+    check("the tag is removed again on returning to the whole catalogue",
+          cleared === 0, `${cleared} tags left`);
+  }
+
   // 12. the page must not scroll sideways, at desktop or phone width
   for (const w of [1600, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
