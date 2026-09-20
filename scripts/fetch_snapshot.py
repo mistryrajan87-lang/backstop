@@ -892,6 +892,13 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
             # The count that matters is the one the concentration is measured over.
             "issuers_seen": len(by_issuer),
             "issuers_with_value": sum(1 for v in by_issuer.values() if v > 0),
+            # Every token seen on a quoted asset, whether or not it carries an
+            # issuer_id - the loop above appends to `links` before it checks.
+            # So this is the denominator for "tokens reporting no market cap",
+            # and it is NOT the number of tokens attributed to an issuer; that
+            # is this minus coverage.tokens_without_issuer. The name is kept
+            # for the archived snapshots that already use it; the page labels it
+            # by what it counts.
             "tokens_attributed": len(links),
         },
         "coverage": {
@@ -907,11 +914,18 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
             "placeholder_issuers": sum(1 for m in meta.values() if m["placeholder"]),
             "reconciliation": {
                 # `comparable`, not `recon_assets`. The note below says the ratio
-                # covers only the assets both endpoints price; until this line was
-                # fixed the count beside it said 791 while the ratio was computed
-                # over 785, because the six token-only assets were counted in the
-                # sentence's denominator but not in the sum's. Splitting (a) from
-                # (b) above is pointless if the reported count re-merges them.
+                # covers only the assets both endpoints price, and `comparable`
+                # is the only set that satisfies it: a POSITIVE asset-level cap
+                # on both sides.
+                #
+                # The first version of this comment said the count should have
+                # been 785 - 791 minus the six token-only assets. That was wrong
+                # by arithmetic I did not check. 499 of the 791 have no
+                # asset-level cap at all; only six of those are token-only and
+                # the other 493 are zero on both sides. The published label said
+                # 791 about a ratio computed over 292, and the fix moves it by
+                # 499, not by 6. Written down because getting the denominator
+                # wrong is the exact failure this field exists to report.
                 "assets_compared": len(comparable),
                 "sum_of_token_caps": token_total,
                 "sum_of_asset_caps": asset_total,
