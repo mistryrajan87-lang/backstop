@@ -498,7 +498,8 @@ footer a { color: var(--ink-2); }
     <p class="sub">CoinMarketCap's Real World Assets endpoints are all
       <em>latest</em> — there is no historical series for any of them, and issuer
       attribution in particular exists only in the live call. This series is not
-      fetched from anywhere: it is what the scheduled run wrote down each morning.</p>
+      fetched from anywhere: it is what the scheduled run wrote down each morning.
+      One point per day, taken from that day&rsquo;s last run.</p>
 
     <div class="shock seriespick" role="group" aria-labelledby="hslabel">
       <span class="sl" id="hslabel">Series</span>
@@ -1912,21 +1913,28 @@ function renderDelta() {
   }
   if (!items.length) { box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = "<h3>Since the run before this one — " + esc(was.date) + " to " + esc(now.date)
+  box.innerHTML = "<h3>Since the day before — " + esc(was.date) + " to " + esc(now.date)
     + "</h3><div class=\"deltarow\">" + items.join("") + "</div>"
     + '<p class="deltafoot">Arithmetic on two rows of <a href="data/history.jsonl">history.jsonl</a>, '
-    + "which the scheduled job appends to once a run. Red means more concentrated, green means less; "
+    + "which the scheduled job writes once a day, keeping that day's last run. Red means more "
+    + "concentrated, green means less; "
     + "cap and asset count carry no colour because neither direction is better. "
-    + "<b>" + esc(fmtNum(HIST.length)) + "</b> run"
+    + "<b>" + esc(fmtNum(HIST.length)) + "</b> day"
     + (HIST.length === 1 ? "" : "s") + " recorded so far.</p>";
 }
 
 /* ---------------------------------------------------------------------------
-   The run history. Drawn from the archive the scheduled job appends to, never
-   from the API - there is nothing in the API to draw it from.
+   The daily history. Drawn from the one-row-per-day file the scheduled job
+   writes, never from the API - there is nothing in the API to draw it from.
+
+   One row per day, not per run: the job re-runs, and a second run on the same
+   day replaces that day's row rather than adding a point. Every run is still
+   archived whole under data/snapshots/, so no receipt is lost - but nothing on
+   this card may call a point a run, which every line of it did until 20 Sep,
+   with 19 runs archived and three points on the chart.
 
    Two deliberate choices, both about not overclaiming:
-     - the line only appears at three runs. Two points is a line segment, and a
+     - the line only appears at three days. Two points is a line segment, and a
        line segment drawn as a trend is a lie about what is known.
      - the y axis is NOT zero-based, because an index that moves 16 points in
        2,300 is invisible on one. The caption says so rather than letting the
@@ -2019,31 +2027,31 @@ function renderHistory() {
   const fig = svg.closest("figure");
   const tbl = document.querySelector("#histtable").closest("details");
   if (fig) fig.style.display = out.drawn ? "" : "none";
-  /* With too few runs to plot, the table is the content, so it opens. */
+  /* With too few days to plot, the table is the content, so it opens. */
   if (tbl && !out.drawn) tbl.open = true;
 
-  const runs = `${fmtNum(rows.length)} run${rows.length === 1 ? "" : "s"}`;
+  const days = `${fmtNum(rows.length)} day${rows.length === 1 ? "" : "s"}`;
   let cap = rows.length
-    ? `${spec.label}, one point per run — ${runs} recorded, ${esc(rows[0].date)} to ${esc(rows[rows.length - 1].date)}.`
-    : "No runs recorded yet.";
+    ? `${spec.label}, one point per day — ${days} recorded, ${esc(rows[0].date)} to ${esc(rows[rows.length - 1].date)}.`
+    : "No days recorded yet.";
   if (out.drawn) {
-    /* A drawn line can still be short of the run count: a run whose priced
-       total was 0 reports the series as null and is not plotted. Say so here
-       too, or "4 runs recorded" sits above a line with three points. */
+    /* A drawn line can still be short of the day count: a day whose run had a
+       priced total of 0 reports the series as null and is not plotted. Say so
+       here too, or "4 days recorded" sits above a line with three points. */
     if (out.n < rows.length) {
-      /* Wording per review: "3 of them are plotted" underplays a null. A run
-         with no priced value has no index at all, and the caption should say
+      /* Wording per review: "3 of them are plotted" underplays a null. A day
+         whose run had no priced value has no index at all, and the caption says
          that rather than imply a sampling choice. Series-named rather than
          hardcoded to HHI, because the selector switches series. */
-      cap += ` Plotted only where ${spec.label} is defined; runs with no priced` +
-             ` value are in the table only.`;
+      cap += ` Plotted only where ${spec.label} is defined; days whose run reported no` +
+             ` priced value are in the table only.`;
     }
     cap += " The vertical axis is not zero-based: it is scaled to the range actually observed, so small moves stay visible.";
   } else if (rows.length) {
     cap += out.n === rows.length
-      ? " The table below carries every run; the line starts once there are three."
-      : ` ${fmtNum(out.n)} of ${fmtNum(rows.length)} runs report this series; ` +
-        `the line starts once three of them do. The table below carries every run.`;
+      ? " The table below carries every day; the line starts once there are three."
+      : ` ${fmtNum(out.n)} of ${fmtNum(rows.length)} days report this series; ` +
+        `the line starts once three of them do. The table below carries every day.`;
   }
   document.getElementById("histcap").textContent = cap;
   let stub = document.getElementById("histstub");
@@ -2063,11 +2071,11 @@ function renderHistory() {
     stub.hidden = true;
   }
   document.getElementById("histdesc").textContent = out.drawn
-    ? `${spec.label} across ${runs}, from ${spec.fmt(out.first)} to ${spec.fmt(out.last)}.`
-    : `${spec.label}: ${runs} recorded, too few to plot.`;
+    ? `${spec.label} across ${days}, from ${spec.fmt(out.first)} to ${spec.fmt(out.last)}.`
+    : `${spec.label}: ${days} recorded, too few to plot.`;
 
   renderTable(document.getElementById("histtable"), [
-    { h: "Run", get: (r) => r.date || "" },
+    { h: "Day", get: (r) => r.date || "" },
     { h: "HHI", num: true, get: (r) => fmtNum(r.hhi, 1) },
     { h: "Effective issuers", num: true, get: (r) => fmtNum(r.effective_n, 2) },
     { h: "Top five", num: true, get: (r) => fmtPct(r.top5) },
@@ -2077,8 +2085,9 @@ function renderHistory() {
     { h: "Tokens with no cap", num: true, get: (r) => fmtNum(r.tokens_without_cap) },
     { h: "Credits", num: true, get: (r) => fmtNum(r.credits) },
   ], rows.slice().reverse(),
-    "Every recorded run, newest first, exactly as the scheduled job appended it to " +
-    "<a href=\"data/history.jsonl\">history.jsonl</a>. Nothing here is recomputed.");
+    "One row per day - the last run of that day - newest first, exactly as the scheduled " +
+    "job wrote it to <a href=\"data/history.jsonl\">history.jsonl</a>. Nothing here is " +
+    "recomputed. The per-run snapshots are archived separately, in data/snapshots/.");
 }
 
 function renderCoverage() {
