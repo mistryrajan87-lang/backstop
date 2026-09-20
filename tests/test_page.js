@@ -912,6 +912,70 @@ function serve(dir) {
           cleared === 0, `${cleared} tags left`);
   }
 
+  // 11i-bis. THE SAME TAGS, REACHED BY LINK RATHER THAN BY CLICK. Everything above
+  //      picks the scope with selectOption. On a cold load with ?scope= the call
+  //      order is renderScope -> renderHistory -> renderDelta, and the last two
+  //      replace the caption and the strip wholesale, taking the tag with them.
+  //      So the tag was present on the path nobody uses and absent on the one the
+  //      DoraHacks entry advertises. The click path passing is not evidence about
+  //      the load path; assert the load path separately.
+  if (someScope) {
+    await page.goto(`http://127.0.0.1:${port}/index.html?scope=${encodeURIComponent(someScope)}`);
+    await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+    await page.waitForTimeout(500);
+    const onLoad = await page.evaluate(() => {
+      const t = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return "missing";
+        if (el.hidden) return "hidden";
+        const s = el.querySelector(".scopetag");
+        return s ? s.textContent.trim() : null;
+      };
+      return { scope: CURRENT_SCOPE, punch: t("punchline"), delta: t("deltastrip"),
+               hist: t("histcap") };
+    });
+    check("arriving on a scoped URL tags the blocks that do not follow the selector",
+          onLoad.scope === someScope
+            && onLoad.punch === "Whole catalogue"
+            && onLoad.hist === "Whole catalogue"
+            && (onLoad.delta === "Whole catalogue" || onLoad.delta === "hidden"),
+          JSON.stringify(onLoad));
+
+    // 11i-ter. A SCOPED VIEW STATES ITS BASELINE. The entry claims the index RISES
+    //      once commodities are out. In a scoped view the page printed the scoped
+    //      pair alone, so the claim was made in the submission and unverifiable on
+    //      the artefact it links to. The expectation below comes from the snapshot,
+    //      never from the sentence being judged - and a regex that fails to match
+    //      fails the check rather than skipping it, which is how the first version
+    //      of the shock check passed against the page it was written to condemn.
+    const shown = await page.evaluate(() => ({
+      sub: (document.getElementById("hero-effsub") || {}).textContent || "",
+      hhi: SNAP.overall.hhi, eff: SNAP.overall.effective_n, n: SNAP.overall.n
+    }));
+    const m = shown.sub.match(
+      /Whole catalogue for comparison: HHI ([\d,]+\.\d), ([\d.]+) effective issuers across ([\d,]+)\./);
+    if (!m) {
+      check("a scoped view states the whole-catalogue baseline", false,
+            `no baseline in: ${shown.sub.slice(0, 140)}`);
+    } else {
+      const num = (s) => Number(String(s).replace(/,/g, ""));
+      check("the stated baseline equals the snapshot's own whole-catalogue figures",
+            Math.abs(num(m[1]) - shown.hhi) < 0.05
+              && Math.abs(num(m[2]) - shown.eff) < 0.005
+              && num(m[3]) === shown.n,
+            `page ${m[1]}/${m[2]}/${m[3]} vs snapshot ${shown.hhi}/${shown.eff}/${shown.n}`);
+    }
+
+    // And it must not compare the whole catalogue against itself.
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
+    await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+    await page.waitForTimeout(400);
+    const allSub = await page.evaluate(() =>
+      (document.getElementById("hero-effsub") || {}).textContent || "");
+    check("the whole catalogue states no baseline against itself",
+          !/Whole catalogue for comparison/.test(allSub), allSub.slice(0, 100));
+  }
+
   // 11j. THE BAR CHART. Every bar used to be labelled only if it was one of the
   //      top three; the rest carried a name, a two-pixel stub and no number,
   //      and the tooltip meant to carry it cannot be opened on a touch screen.
