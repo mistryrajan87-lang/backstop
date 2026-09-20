@@ -400,6 +400,36 @@ per issuer, and the reconciliation ratio between the per-token and asset-level t
 refuses to publish a snapshot flagged synthetic, one with no issuer carrying value,
 or one whose top-1/3/5 shares are not monotonic.
 
+The gate that can stop a run outright is the reconciliation one. CoinMarketCap
+prices each asset twice — at asset level, and as the sum of the tokens that
+represent it — so the two can be compared across every asset both of them price.
+Outside **0.85–1.15×** the workflow aborts and publishes nothing; inside that but
+outside **0.98–1.02×** it publishes and records a warning against quoting the
+headline. A 0.5–2.0 gate, which is the kind usually written, would pass a 30%
+systematic attribution error without comment — which is exactly the failure that
+would survive to the headline. These bands are quoted on the page as well, and
+`tests/test_page.js` reads them back out of the workflow file, so the claim cannot
+drift from the gate it describes.
+
+`tests/test_page.js` covers what the page *renders*, which the aggregation tests
+cannot see. It serves `docs/` to a headless browser and re-derives the figures, and
+the wording around them, from the same snapshot: every rendered asset row must match
+its snapshot row, a share too small to print at four decimals must be labelled as a
+bound rather than rounded to zero, and no counted noun may be pluralised against a
+count of one. It runs after the page is built and before the commit step, so a page
+that disagrees with its own data is never committed.
+
+It is not sufficient, and the history says so. Four wrong statements shipped past it
+on 20 September — $105.9m of tokenised value described as counting towards nothing
+on the page, forty-nine small shares printed as a bound up to nine times smaller
+than the value itself, an issuer with a real holding shown at 0% of the asset, and
+an accessibility change made earlier that morning which took 791 rows out of the
+table's accessibility tree and replaced them with anonymous buttons. Each was found by reading the
+rendered page, not by a check. The checks that replaced them test the class rather
+than the instance: the bound is fuzzed over twenty thousand random shares instead of
+three literals, and the plural rule sweeps every counted noun on the page instead of
+the five that had been thought of.
+
 ---
 
 Backstop is an independent hackathon entry. It is not affiliated with or endorsed
