@@ -1005,6 +1005,97 @@ def test_ex_commodity_and_shares():
               approx(recomputed, blk["hhi"], 1.0), f"{recomputed:.1f} vs {blk['hhi']}")
 
 
+def test_asset_index_covers_the_catalogue():
+    """The snapshot used to publish 25 assets out of 791.
+
+    Everything else in it is complete - the index, the chains, the classes, the
+    issuer table - so the asset side was the one place where a sample was
+    presented in the same voice as a whole. These assert the index IS the whole,
+    and that it agrees with top_assets, which is the block that was already
+    trusted: two paths to the same numbers, compared.
+    """
+    print("\n[18] the asset index covers the catalogue, and agrees with top_assets")
+
+    assets = [asset(1, "GOLD", "commodity", 1000.0),
+              asset(2, "NVDA", "stock", 600.0),
+              asset(3, "BOND1", "bond", 400.0),
+              # priced, but no token attributes any value to it
+              asset(4, "QUIET", "stock", 250.0)]
+    issuers = [issuer("a1", "Alpha"), issuer("b2", "Bravo"), issuer("c3", "Cirrus")]
+    tokens = {"1": [token("a1", "Alpha", "XAU", 700.0), token("b2", "Bravo", "PAXG", 300.0)],
+              "2": [token("b2", "Bravo", "NVDAX", 600.0)],
+              "3": [token("c3", "Cirrus", "B1", 400.0)],
+              # a token with no market cap at all: the asset is real, its value is not
+              "4": [token("c3", "Cirrus", "QTX", None)]}
+    snap = run(FakeCMC(assets, issuers, tokens))
+
+    ai = snap.get("asset_index") or {}
+    rows = ai.get("rows") or []
+    fields = ai.get("fields") or []
+    col = {f: i for i, f in enumerate(fields)}
+
+    check("the index names its own columns",
+          fields == ["symbol", "name", "asset_class", "tokenised_market_cap",
+                     "tokens", "issuers", "top_issuer", "tradfi_markets"],
+          str(fields))
+    check("every asset in the catalogue has a row, not just the largest",
+          len(rows) == snap["counts"]["assets_tokenised"] == len(assets),
+          f"{len(rows)} rows vs {snap['counts']['assets_tokenised']} tokenised")
+    check("every row has one cell per named column",
+          all(len(r) == len(fields) for r in rows),
+          str([len(r) for r in rows]))
+
+    caps = [r[col["tokenised_market_cap"]] for r in rows]
+    check("rows are ordered largest first",
+          caps == sorted(caps, reverse=True), str(caps))
+
+    # top_issuer is an index into issuers[], which is only useful if it points
+    # at the right one. -1 is a real state, not a failure: QUIET's only token
+    # reports no cap, so no issuer attributes value to it.
+    bad = [r for r in rows if not (-1 <= r[col["top_issuer"]] < len(snap["issuers"]))]
+    check("every top_issuer is a usable index into issuers[]", not bad, str(bad))
+    by_symbol = {r[col["symbol"]]: r for r in rows}
+    gold = by_symbol.get("GOLD")
+    check("the index points at the issuer that actually leads the asset",
+          gold is not None and snap["issuers"][gold[col["top_issuer"]]]["name"] == "Alpha",
+          gold and snap["issuers"][gold[col["top_issuer"]]]["name"])
+    # QUIET's only token reports no market cap. It has an issuer - Cirrus mints
+    # it - but nobody attributes value to it, so there is no leader to name.
+    # Sorting a list of zeroes and taking the first would name one on the
+    # strength of dictionary order.
+    quiet = by_symbol.get("QUIET")
+    check("an asset whose tokens all report no value has no leading issuer",
+          quiet is not None and quiet[col["top_issuer"]] == -1, str(quiet))
+    check("but it is still listed, with its issuer and its token counted",
+          quiet is not None and quiet[col["tokens"]] == 1 and quiet[col["issuers"]] == 1,
+          str(quiet))
+
+    # The cross-check that matters: two independently built blocks, same numbers.
+    top = {a["symbol"]: a for a in snap["top_assets"]}
+    drift = []
+    for r in rows:
+        a = top.get(r[col["symbol"]])
+        if not a:
+            continue
+        if abs(a["tokenized_market_cap"] - r[col["tokenised_market_cap"]]) > 0.01:
+            drift.append((a["symbol"], "cap", a["tokenized_market_cap"], r[col["tokenised_market_cap"]]))
+        for k, f in (("tokens", "tokens"), ("issuers", "issuers"),
+                     ("tradfi_markets", "tradfi_markets")):
+            if a[k] != r[col[f]]:
+                drift.append((a["symbol"], k, a[k], r[col[f]]))
+        want = snap["issuers"][r[col["top_issuer"]]]["name"] if r[col["top_issuer"]] >= 0 else ""
+        if a["top_issuer"] != want:
+            drift.append((a["symbol"], "top_issuer", a["top_issuer"], want))
+    check("the index and top_assets agree on every asset they share",
+          not drift, str(drift[:4]))
+
+    # The index is inlined into a single-file page, so its size is a property
+    # worth asserting rather than discovering later.
+    per_row = len(json.dumps(rows)) / max(1, len(rows))
+    check("a row stays compact enough to inline the whole catalogue",
+          per_row < 110, f"{per_row:.0f} bytes per row")
+
+
 def test_hero_line_is_generated_not_typed():
     """Change a number in the snapshot; the page must change with it.
 
@@ -1188,6 +1279,7 @@ if __name__ == "__main__":
     test_ex_commodity_and_shares()
     test_hero_line_is_generated_not_typed()
     test_readme_nullcaps_are_generated()
+    test_asset_index_covers_the_catalogue()
 
     print("\n" + "-" * 60)
     if FAILURES:
