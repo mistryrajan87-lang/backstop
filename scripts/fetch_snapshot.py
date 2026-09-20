@@ -790,12 +790,53 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
             "industry": enrich.get("industry", ""),
             "primary_exchange": enrich.get("primary_exchange", ""),
             "cik": enrich.get("cik", ""),
-            "top_issuer": labels.get(split[0][0], "") if split else "",
-            "top_issuer_share": round(split[0][1] / cap, 4) if split and cap > 0 else None,
+            # Largest BY VALUE, same rule as asset_index. An asset can be priced
+            # while every token representing it reports no market cap: it has
+            # issuers, but none of them leads it, and naming the first of several
+            # zeroes credits whoever happens to sort first.
+            "top_issuer": labels.get(split[0][0], "") if split and split[0][1] > 0 else "",
+            "top_issuer_share": (round(split[0][1] / cap, 4)
+                                 if split and split[0][1] > 0 and cap > 0 else None),
             "split": [{"issuer": labels.get(k, k), "market_cap": v,
                        "share": round(v / cap, 4) if cap > 0 else None}
                       for k, v in split[:8]],
         })
+
+    # Every tokenised asset, not only the largest 25. The page inlines the whole
+    # snapshot into one self-contained file, so this block is columnar: `fields`
+    # names the columns once and each asset is a row. Written as 791 objects with
+    # full keys it is ~119KB; written this way it is ~47KB, and the `fields`
+    # line keeps it readable on its own terms rather than making a row a mystery.
+    #
+    # top_issuer is an INDEX into issuers[] rather than a name. The names are
+    # already in that list, and repeating 791 of them would cost more than the
+    # rest of this block; -1 means no issuer attributes any value to this asset,
+    # which is a real state - an asset can carry tokens that all report no cap.
+    #
+    # The set is the union of "has a quoted cap" and "has at least one token",
+    # not just the first. They coincide today at 791; the day they do not, an
+    # asset with tokens and no price is exactly the one worth seeing.
+    issuer_pos = {r["issuer_id"]: i for i, r in enumerate(issuer_rows)}
+    asset_ids = sorted(set(raw["quoted_caps"]) | set(tokens_per_asset),
+                       key=lambda rid: (-raw["quoted_caps"].get(rid, 0.0), rid))
+    index_rows = []
+    for rid in asset_ids:
+        a = raw["assets_seen"].get(rid, {})
+        split = sorted(asset_issuer.get(rid, {}).items(), key=lambda kv: kv[1], reverse=True)
+        index_rows.append([
+            text(a, "symbol"),
+            text(a, "name"),
+            text(a, "asset_type", default="unclassified"),
+            round(raw["quoted_caps"].get(rid, 0.0), 2),
+            tokens_per_asset.get(rid, 0),
+            len(split),
+            # Largest BY VALUE. An asset can carry tokens that all report no
+            # market cap, and then no issuer leads it: sorting zeroes and taking
+            # the first would name one on the strength of dictionary order. The
+            # issuer COUNT beside it still says how many mint it.
+            (issuer_pos.get(split[0][0], -1) if split and split[0][1] > 0 else -1),
+            raw["tradfi"].get(rid, 0),
+        ])
 
     # Value attributed to each symbol, so a present-but-empty ticker can be told
     # apart from a present-and-real one.
@@ -912,6 +953,22 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
         },
         "issuers": issuer_rows,
         "top_assets": top_assets,
+        "asset_index": {
+            "note": "every asset in the catalogue that is tokenised or priced, "
+                    "largest first. top_assets above carries the same assets in "
+                    "full for the largest 25; this is the whole list, in columns.",
+            "fields": ["symbol", "name", "asset_class", "tokenised_market_cap",
+                       "tokens", "issuers", "top_issuer", "tradfi_markets"],
+            "top_issuer": "an index into issuers[] above: the issuer holding the "
+                          "largest attributed value. -1 where no issuer attributes "
+                          "any value - an asset whose tokens all report no market "
+                          "cap has issuers but no leader",
+            "tokenised_market_cap": "the asset-level figure from quotes/latest, "
+                                    "NOT the sum of its tokens - the two disagree, "
+                                    "and coverage.reconciliation is where that gap "
+                                    "is reported",
+            "rows": index_rows,
+        },
         "tradfi_reference": {
             "assets_checked": checked,
             "assets_with_tradfi_market": with_tradfi,
