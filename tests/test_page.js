@@ -500,14 +500,38 @@ function serve(dir) {
     paths: document.querySelectorAll("#chart-history path").length,
     tableRows: document.querySelectorAll("#histtable tbody tr").length,
   }));
-  check("the history card renders one table row per recorded run",
+  check("the history card renders one table row per recorded day",
         hist.tableRows === histRows.length && hist.inline === histRows.length,
         `${hist.tableRows} rows vs ${histRows.length} in history.jsonl`);
-  check("the caption states how many runs it is drawn from",
-        hist.cap.includes(String(histRows.length)) && hist.cap.includes("run"),
+  check("the caption states how many days it is drawn from",
+        hist.cap.includes(String(histRows.length)) && /\bdays?\b/.test(hist.cap),
         hist.cap);
 
-  // Under three runs there must be no line: two points drawn as a trend would
+  // history.jsonl is keyed by date: a second run on the same day replaces that
+  // day's row rather than adding one. So a point is a DAY, and calling it a run
+  // overstates nothing about the data but understates the work and misnames the
+  // axis - there were 19 archived runs behind three points on 20 Sep, and every
+  // string on this card said "run". The page may describe the series only in
+  // days; "run" is allowed where the sentence is about a run (the day's last
+  // one, the per-run archive), which is why this looks for the counting
+  // phrases rather than banning the word.
+  const histDates = new Set(histRows.map((r) => r.date));
+  check("history.jsonl really is one row per day, which is what the card now claims",
+        histDates.size === histRows.length,
+        `${histRows.length} rows over ${histDates.size} distinct dates`);
+  const histText = await page.evaluate(() => {
+    const card = document.getElementById("h-history").closest("section");
+    const strip = document.getElementById("deltastrip");
+    return ((card ? card.innerText : "") + " " + (strip && !strip.hidden ? strip.innerText : ""))
+      .replace(/\s+/g, " ");
+  });
+  const runCounting = [/\d[\d,]* runs?\b/, /per run\b/, /every run\b/,
+                       /runs? recorded/, /once a run\b/, /run before this one/];
+  const offenders = runCounting.filter((re) => re.test(histText)).map(String);
+  check("and neither the history card nor the delta strip counts its points as runs",
+        offenders.length === 0, offenders.join(" "));
+
+  // Under three days there must be no line: two points drawn as a trend would
   // claim more than the archive knows.
   if (histRows.length < 3) {
     check("with fewer than three runs no line is plotted",
