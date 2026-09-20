@@ -715,17 +715,37 @@ function serve(dir) {
           && /Plotted only where .* is defined/i.test(nulls.cap),
         JSON.stringify(nulls).slice(0, 220));
 
-  // (h) The issuer rows were clickable but had no tabindex, no role and no key
-  //     handler, so the entire detail panel was unreachable by keyboard.
+  // (h) The issuer rows were clickable and unreachable by keyboard. The first
+  //     fix gave every row tabindex=0 and role="button", which was worse:
+  //     role="button" on a <tr> takes it out of the table, so a screen reader
+  //     stops hearing the cells at all and hears a run of anonymous buttons.
+  //     The row stays a row; the search box is the keyboard route.
   const kb = await page.evaluate(() => {
     const tr = document.querySelector("#issuertable tbody tr");
     const nt = document.getElementById("findnote");
     return tr ? { tab: tr.tabIndex, role: tr.getAttribute("role"),
+                  cells: tr.cells.length,
                   live: nt ? nt.getAttribute("aria-live") : null } : null;
   });
-  check("issuer rows are reachable by keyboard and the match count is announced",
-        !!kb && kb.tab === 0 && kb.role === "button" && kb.live === "polite",
+  check("issuer rows stay table rows rather than becoming buttons",
+        !!kb && kb.role === null && kb.tab === -1 && kb.cells > 1,
         JSON.stringify(kb));
+  check("and the match count is still announced",
+        !!kb && kb.live === "polite", JSON.stringify(kb));
+
+  // The keyboard route that replaces it: type a name, get that issuer's panel.
+  const kbName = (snap.issuers[0] || {}).name || "";
+  await page.fill("#issuerfind", kbName);
+  await page.waitForTimeout(350);
+  const kbOpen = await page.evaluate(() => ({
+    hidden: (document.getElementById("issuercard") || {}).hidden,
+    text: (document.getElementById("issuercard") || {}).innerText || "",
+  }));
+  check("typing an issuer's name opens its panel without a mouse",
+        kbOpen.hidden === false && kbOpen.text.includes(kbName),
+        `${kbName}: ${kbOpen.text.replace(/\s+/g, " ").slice(0, 80)}`);
+  await page.fill("#issuerfind", "");
+  await page.waitForTimeout(200);
 
   // (i) The band refusal - why no 1,500/2,500 threshold is applied - must stay
   //     in the open paragraph. It is the one claim this page refuses to make,
@@ -890,6 +910,33 @@ function serve(dir) {
     (typeof shareLabel === "function" ? [shareLabel(0.00014), shareLabel(0.000094)] : null));
   check("two bars of different size are never given the same label",
         !!near && near[0] !== near[1], JSON.stringify(near));
+
+  /* THE BOUND MUST NEVER OVERSTATE SMALLNESS. The first rule returned
+     "<0.0001%" whenever two significant digits could not be reached at four
+     decimals, which labelled everything from 0.00011% to 0.00095% with a bound
+     up to 9.4x too small - 49 of the 791 assets - by the function written to
+     stop exactly that kind of claim. Fuzzed, because the three literals the
+     suite happened to test all sat outside the broken range. */
+  const bound = await page.evaluate(() => {
+    if (typeof shareLabel !== "function") return null;
+    const liars = [];
+    for (let i = 0; i < 20000; i++) {
+      const v = Math.random() * 0.004;
+      if (shareLabel(v) === "<0.0001%" && v * 100 > 0.0001 + 1e-12) liars.push(v);
+    }
+    return {
+      liars: liars.length,
+      worst: liars.length ? Math.max(...liars) * 100 : 0,
+      spot: [shareLabel(0.0000094), shareLabel(0.000005), shareLabel(0.0000001486)],
+    };
+  });
+  check("no share is ever labelled with a bound smaller than itself",
+        !!bound && bound.liars === 0,
+        bound && `${bound.liars} false bounds, worst ${bound.worst}%`);
+  check("a value below four decimals still reads as a bound, not a rounded zero",
+        !!bound && bound.spot[0] === "0.0009%" && bound.spot[1] === "0.0005%"
+          && bound.spot[2] === "<0.0001%",
+        JSON.stringify(bound && bound.spot));
   check("below four decimals it states a bound rather than rounding to zero",
         !!sl && sl.tiny === "<0.0001%", JSON.stringify(sl));
   check("an exact zero is labelled 0%, and a missing value is not labelled",
@@ -981,9 +1028,12 @@ function serve(dir) {
     check("the lookup renders one row per asset in the index",
           look.hidden === false && look.rows === ai.rows.length,
           `hidden=${look.hidden} rows=${look.rows} vs ${ai.rows.length}`);
-    check("its rows are reachable by keyboard and the match count is announced",
-          look.tab === 0 && look.role === "button" && look.live === "polite",
-          JSON.stringify(look));
+    /* 791 rows with role="button" put 791 anonymous stops in the tab order and
+       removed every figure from the accessibility tree. The row stays a row. */
+    check("its rows stay table rows rather than becoming 791 buttons",
+          look.role === null && look.tab === -1, JSON.stringify(look));
+    check("and the match count is still announced",
+          look.live === "polite", JSON.stringify(look));
     check("no asset panel is shown until one is asked for",
           look.panelHidden === true, String(look.panelHidden));
     check("the disclosure says how many assets are behind it",
@@ -1013,9 +1063,15 @@ function serve(dir) {
         hidden: (document.getElementById("assetcard") || {}).hidden,
         note: (document.getElementById("assetfindnote") || {}).textContent || "",
       }));
-      check("an asset priced at zero is in the lookup and explains its zero",
-            z.hidden === false && /prices it at zero/i.test(z.panel),
+      check("an asset with no asset-level cap is listed and explains the zero",
+            z.hidden === false && /asset endpoint reports no market cap/i.test(z.panel),
             z.panel.replace(/\s+/g, " ").slice(0, 160));
+      /* The defect this replaces: the panel said such an asset "counts towards
+         nothing else on this page". Six of them carry $105.9m on their tokens,
+         which IS in overall.total, the index and every chart. Never again. */
+      check("and it never claims a token-priced asset counts towards nothing",
+            !/towards nothing else on this page/i.test(z.panel),
+            z.panel.replace(/\s+/g, " ").slice(0, 200));
       check("and it does not claim a leading issuer it does not have",
             zeroRow[col.top_issuer] >= 0 || /cannot be called the largest|can be called the largest/i.test(z.panel),
             z.panel.replace(/\s+/g, " ").slice(0, 200));
@@ -1023,6 +1079,57 @@ function serve(dir) {
       check("its issuer count reads as English, singular or plural",
             !/\bits 1 issuers\b|\bnone of its 1 issuer\b/i.test(z.panel),
             (z.panel.match(/none of its \d+ issuers?/i) || ["n/a"])[0]);
+      /* Every counted noun in the panel, not the five nouns the earlier check
+         happened to list - it grepped issuers|assets|tokens|chains|runs and so
+         sailed past "1 traditional markets" on 778 of the 791 panels. */
+      /* A third-person verb after "1" is correct English - "1 token represents
+         it" - so the naive "1 <word>s" sweep has to let the verbs through. The
+         point of sweeping rather than listing nouns is that the earlier check
+         listed five and missed "markets" on 778 panels. */
+      const VERBS = /^(represents|mints|carries|reports|holds|is|has)$/;
+      const plural = (z.panel.match(/\b1 [a-z]+s\b/gi) || [])
+        .filter((m) => !VERBS.test(m.slice(2).toLowerCase()));
+      check("no noun in the panel is pluralised against a count of one",
+            plural.length === 0, JSON.stringify(plural));
+    }
+
+    /* THE TOKEN-ONLY ASSETS. The asset endpoint prices these at zero while
+       their tokens report value; that value is inside overall.total and every
+       chart. The panel must give the token figure rather than deny it. */
+    const tokenOnly = ((snap.coverage || {}).reconciliation || {}).token_only_examples || [];
+    if (tokenOnly.length) {
+      const worst = tokenOnly.slice().sort((a, b) => b.token_sum - a.token_sum)[0];
+      await page.fill("#assetfind", worst.symbol);
+      await page.waitForTimeout(400);
+      const to = await page.evaluate(() => ({
+        panel: (document.getElementById("assetcard") || {}).innerText || "",
+        hidden: (document.getElementById("assetcard") || {}).hidden,
+      }));
+      check("the largest token-only asset is reachable in the lookup",
+            to.hidden === false && to.panel.includes(worst.symbol),
+            `${worst.symbol}: ${to.panel.replace(/\s+/g, " ").slice(0, 90)}`);
+      check("and its panel states the value its tokens do report",
+            /token.{0,40}do report/i.test(to.panel) && /\$/.test(to.panel)
+              && !/towards nothing/i.test(to.panel),
+            to.panel.replace(/\s+/g, " ").slice(0, 220));
+      /* The figures at the top of the panel must agree with the note under it.
+         Reading the asset-level zero there printed "Tokenised cap $0 / Share of
+         catalogue 0%" four lines above "$56.9m is counted in the catalogue
+         total" - the panel contradicting itself inside one card. */
+      const wantShare = (snap.overall || {}).total > 0
+        ? worst.token_sum / snap.overall.total : 0;
+      check("its headline figures come from the tokens too, not the silent endpoint",
+            !/Tokenised cap \$0\b/.test(to.panel) && !/Share of catalogue 0%/.test(to.panel)
+              && /reported by its tokens/i.test(to.panel),
+            `want ~${(wantShare * 100).toFixed(2)}% — got: ${to.panel.replace(/\s+/g, " ").slice(0, 110)}`);
+
+      // The lead sentence must not call the whole unpriced group worthless.
+      const lead2 = await page.evaluate(() =>
+        (document.getElementById("assetfindsub") || {}).textContent || "");
+      check("the lead sentence separates 'no asset-level cap' from 'worth nothing'",
+            !/priced at zero/i.test(lead2)
+              && lead2.includes(tokenOnly.length.toLocaleString("en-GB")),
+            lead2.slice(0, 200));
     }
 
     // The largest asset is the one a reader is most likely to type, and it is
@@ -1065,6 +1172,27 @@ function serve(dir) {
             flat.length === 0, JSON.stringify(flat));
     }
 
+    /* The split's `share` field arrives ROUNDED TO 4dp from the generator, so
+       an issuer holding 0.00096 of an asset carries share 0.0 and renders "0%"
+       - which shareLabel reserves for an exact zero. The page recomputes from
+       market_cap. Checked on whichever top-25 asset actually has such a holder,
+       not on the largest, whose tail really is zero. */
+    const roundedAway = (snap.top_assets || []).find((a) =>
+      (a.split || []).some((s) => s.share === 0 && s.market_cap > 0));
+    if (roundedAway) {
+      const holder = roundedAway.split.find((s) => s.share === 0 && s.market_cap > 0);
+      await page.fill("#assetfind", roundedAway.symbol);
+      await page.waitForTimeout(400);
+      const sp = await page.evaluate(() => {
+        const ps = [...document.querySelectorAll("#assetcard .icnote")].map((p) => p.innerText);
+        return ps.find((x) => /Minted by/.test(x)) || "";
+      });
+      const claim = new RegExp(holder.issuer.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*0%");
+      check("an issuer with a real holding is never shown as 0% of an asset",
+            sp.length > 0 && !claim.test(sp),
+            `${roundedAway.symbol} / ${holder.issuer} ($${holder.market_cap}): ${sp.slice(0, 200)}`);
+    }
+
     await page.fill("#assetfind", "zzzzzznotanasset");
     await page.waitForTimeout(300);
     const none = await page.evaluate(() => ({
@@ -1078,9 +1206,41 @@ function serve(dir) {
 
     await page.fill("#assetfind", "");
     await page.waitForTimeout(300);
-    const back = await page.evaluate(() =>
-      [...document.querySelectorAll("#assetindextable tbody tr")].every((r) => !r.hidden));
-    check("clearing the search restores every asset", back);
+    const back = await page.evaluate(() => ({
+      all: [...document.querySelectorAll("#assetindextable tbody tr")].every((r) => !r.hidden),
+      open: (document.getElementById("assetindexdetails") || {}).open,
+      panelHidden: (document.getElementById("assetcard") || {}).hidden,
+    }));
+    check("clearing the search restores every asset", back.all);
+    /* Searching force-opens the list. Leaving it open on an empty query drops
+       791 rows back in - 29,000px on a phone, with the caveats and the method
+       pushed below them - for a reader who has just cleared the box. */
+    check("and folds the list back rather than leaving 791 rows on the page",
+          back.open === false && back.panelHidden === true, JSON.stringify(back));
+  }
+
+  /* Neither lookup follows the scope selector, and the issuer one sits directly
+     under the charts that do. The tag is what teaches a reader that an untagged
+     block follows the selector, so these two must carry it too. */
+  const scopeChoice = await page.evaluate(() => {
+    const o = scopeOptions(SNAP).map((x) => x.id).filter((x) => x !== "all");
+    return o[0] || null;
+  });
+  if (scopeChoice) {
+    await page.selectOption("#scope", scopeChoice);
+    await page.waitForTimeout(400);
+    const tagged = await page.evaluate(() => ({
+      issuer: !!document.querySelector("#h-issuers .scopetag"),
+      asset: !!document.querySelector("#h-assetfind .scopetag"),
+    }));
+    check("both whole-catalogue lookups are tagged when a scope is chosen",
+          tagged.issuer && tagged.asset, JSON.stringify(tagged));
+    await page.selectOption("#scope", "all");
+    await page.waitForTimeout(350);
+    const cleared2 = await page.evaluate(() =>
+      document.querySelectorAll("#h-issuers .scopetag, #h-assetfind .scopetag").length);
+    check("and untagged again on returning to the whole catalogue",
+          cleared2 === 0, `${cleared2} tags left`);
   }
 
   // 12. the page must not scroll sideways, at desktop or phone width
