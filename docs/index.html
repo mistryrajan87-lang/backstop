@@ -327,7 +327,9 @@ footer a { color: var(--ink-2); }
 .find { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
 .findlabel { font-size: 12.5px; color: var(--ink-2); }
 .find input {
-  font: inherit; font-size: 14px; color: var(--ink);
+  /* 16px, not 14: below 16 iOS Safari zooms the viewport on focus, and this
+     input is now the one a reader is most likely to tap first. */
+  font: inherit; font-size: 16px; color: var(--ink);
   background: var(--page); border: 1px solid var(--border);
   border-radius: 8px; padding: 7px 11px; min-width: 240px; flex: 0 1 300px;
 }
@@ -1503,6 +1505,16 @@ function renderAssetLookup(snap) {
           `contributes nothing to the totals — it is counted among the ` +
           `${fmtNum(rows.length)} assets and nowhere else.`;
     }
+    /* JAAA is on the league-table watchlist AND is an asset here, so the exact
+       asset symbol wins and it never reaches the "present but empty" branch. It is
+       the only one of the three that carries anything, which makes it the one
+       worth saying this about. */
+    const watched = hollowBy.get(String(r.symbol || "").toUpperCase());
+    if (watched) {
+      msg += (msg ? " " : "") + "One of the tickers a reader arriving from an RWA " +
+             "league table would look for. It is in this map, and this is everything " +
+             "it carries.";
+    }
     if (r.lead == null && r.issuers > 0) {
       /* "none of its 1 issuer" was the first wording. One issuer and several
          issuers are different sentences, not the same sentence with an -s. */
@@ -1545,6 +1557,177 @@ function renderAssetLookup(snap) {
     panel.querySelector(".icclose").addEventListener("click", () => { clear(); find.focus(); });
   }
 
+  /* Not every miss is a miss. A query that matches no asset can still be a token
+     symbol, an issuer, or a ticker this catalogue is known not to carry - and that
+     last one is the most useful answer on the page, because a reader who types
+     BUIDL is checking whether the entry is honest about what its source omits.
+
+     Deliberately inside this control rather than in a second search box. The page
+     already had one asset lookup; a third input would read as indecision, and a
+     separate implementation would drift from this one's handling of the assets the
+     asset endpoint prices at zero. */
+  const beyondQ = (s) => String(s == null ? "" : s).trim().toUpperCase();
+  const nic = snap.not_in_this_catalogue || {};
+  const absentSet = new Set((nic.absent || []).map(beyondQ));
+  const hollowBy = new Map((nic.present || []).map((p) => [beyondQ(p.symbol), p]));
+  const tokenBy = new Map((snap.token_references || []).map((t) => [beyondQ(t.symbol), t]));
+  const mapped = ((snap.counts || {}).assets_mapped) || 0;
+
+  function beyondTop(title, sub) {
+    return `<div class="ictop"><h3>${title}</h3>` +
+           `<button type="button" class="icclose">Clear</button></div>` +
+           (sub ? `<p class="icnote">${sub}</p>` : "");
+  }
+
+  /* Stated once, and stated wherever a miss is reported: this control searches the
+     assets that carry a token, not the whole map, and token-level detail exists for
+     the largest few only. Without it the page tells a reader that XAUT0 - Tether's
+     second gold token, which the run does attribute - does not exist. */
+  function beyondBounds() {
+    return `This searches the ${fmtNum(rows.length)}` +
+      (mapped ? ` of ${fmtNum(mapped)} map rows` : " assets") +
+      ` that carry a token on this run, plus contract-level detail for the ` +
+      `${fmtNum((snap.token_references || []).length)} largest tokens. A symbol can ` +
+      `exist in CoinMarketCap's RWA data and still miss here \u2014 that is a limit of ` +
+      `what this page publishes, not a claim that the thing does not exist.`;
+  }
+
+  /* The note span is the asset count's home, and answering something that is not
+     an asset overwrites it. Where rows did match, say so - otherwise a panel about
+     BOXX sits above a visible row for iShares iBoxx with nothing connecting them. */
+  function beyondResidual(n, qShown) {
+    if (!n) return "";
+    return ` <span class="unit">${fmtNum(n)} asset name${n === 1 ? "" : "s"} also ` +
+           `contain${n === 1 ? "s" : ""} &ldquo;${esc(qShown)}&rdquo;; open the list ` +
+           `below to see ${n === 1 ? "it" : "them"}.</span>`;
+  }
+
+  function beyondAssets(qRaw, allowExact, allowFuzzy, shownCount) {
+    const Q = beyondQ(qRaw);
+    if (!Q) return null;
+    const residual = beyondResidual(shownCount || 0, String(qRaw).trim());
+
+    const hollow = allowExact ? hollowBy.get(Q) : null;
+    if (hollow) {
+      /* "Carries nothing" is only said where nothing is carried. A hollow ticker
+         with a non-zero attributed value gets the figure instead of the slogan. */
+      const v = hollow.attributed_value || 0;
+      return {
+        note: "in the map, carrying no value",
+        html: beyondTop(esc(hollow.symbol) +
+                ` <span style="color:var(--muted);font-weight:400">in the map</span>`,
+              esc(hollow.name || "") +
+                (hollow.has_tokens ? " reports tokens" : " reports no tokens") +
+                " and " + (v > 0 ? `<b>${fmtUSD(v)}</b>` : "<b>nothing</b>") +
+                " of attributed value on this run. Present and empty is its own kind" +
+                " of absence, which is why it is counted apart from the assets above." + residual),
+      };
+    }
+
+    if (allowExact && absentSet.has(Q)) {
+      return {
+        note: "not in this catalogue",
+        html: beyondTop(esc(Q) +
+                ` <span style="color:var(--muted);font-weight:400">not in this catalogue</span>`,
+              "Looked up by symbol in CoinMarketCap's own RWA map on this run and not" +
+              " found. Absent from <em>this catalogue</em> \u2014 not from the world, and not" +
+              " a judgement on the product. The map holds three asset classes" +
+              " \u2014 commodity, stock, etf \u2014 and no tokenised-treasury class at all," +
+              " which is why the names an RWA league table leads with are the ones" +
+              " missing here." + residual),
+      };
+    }
+
+    const tok = allowExact ? tokenBy.get(Q) : null;
+    if (tok) {
+      return {
+        note: "a token, not an asset",
+        html: beyondTop(esc(tok.symbol) +
+                ` <span style="color:var(--muted);font-weight:400">token</span>`,
+              `<b>${fmtUSD(tok.market_cap)}</b>` +
+                (tok.chain ? ` on ${esc(tok.chain)}` : "") +
+                (tok.issuer ? `, issued by <b>${esc(tok.issuer)}</b>` : "") +
+                ". This is the token's own market cap, which is what every share on" +
+                " this page is summed from \u2014 never the asset's, which its issuers share." + residual) +
+          (/^https:\/\//.test(tok.explorer || "")
+            ? `<p class="icnote"><a href="${esc(tok.explorer)}" rel="nofollow noopener">` +
+              `Contract on the explorer</a></p>`
+            : ""),
+      };
+    }
+
+    /* Issuers match in two tiers, and the difference is not cosmetic. Gating the
+       issuer answer on "no asset matched" hid Robinhood and Republic entirely:
+       both are issuers on this page - $134.8m and $71.9m - and both are also
+       substrings of a tokenised stock's name, so the asset branch always won and
+       a reader who typed a name straight off the issuer table got the wrong
+       entity. An exact or leading match on an issuer name is as deliberate as
+       typing a ticker, so it ranks with the exact kinds; a name appearing
+       somewhere in the middle stays a fallback. The length guard matters: without
+       it every letter that begins an issuer name opens a panel. */
+    const issAll = (snap.issuers || []).map((x, i) => [x, i]);
+    const byCap = (list) =>
+      list.sort((a, b) => (b[0].market_cap || 0) - (a[0].market_cap || 0))[0] || null;
+    const issHit =
+      (allowExact && Q.length >= 3 ? byCap(issAll.filter(([x]) => beyondQ(x.name).indexOf(Q) === 0)) : null) ||
+      (allowFuzzy ? byCap(issAll.filter(([x]) => beyondQ(x.name).indexOf(Q) >= 0)) : null);
+    if (issHit) {
+      const [x, idx] = issHit;
+      const led = rows.filter((r) => r.lead === x.name);
+      const bits = [];
+      bits.push((x.market_cap > 0 ? `<b>${fmtUSD(x.market_cap)}</b> attributed`
+                                  : "No value attributed") +
+                ` across ${fmtNum(x.assets || 0)} asset${(x.assets || 0) === 1 ? "" : "s"}` +
+                ` and ${fmtNum(x.tokens || 0)} token${(x.tokens || 0) === 1 ? "" : "s"}` +
+                ((x.chains && x.chains.length) ? `. On ${x.chains.map(esc).join(", ")}` : "") + ".");
+      if (x.declared_tokens != null && x.attributed_tokens != null &&
+          x.declared_tokens !== x.attributed_tokens) {
+        /* "1 are attributable" - Republic declares 2 and attributes 1. The page
+           has fixed this class of thing four times; do not add a fifth. */
+        bits.push(`The issuer directory declares <b>${fmtNum(x.declared_tokens)}</b> ` +
+                  `token${x.declared_tokens === 1 ? "" : "s"}; ` +
+                  `<b>${fmtNum(x.attributed_tokens)}</b> ` +
+                  `${x.attributed_tokens === 1 ? "is" : "are"} attributable in this run.` +
+                  ` Both counts are published rather than one being chosen.`);
+      }
+      /* Seven of the valued issuers lead no asset at all, Paxos among them - its
+         one asset is Gold, where Tether outweighs it. Saying so is a finding; an
+         omitted line is just a gap. */
+      /* Symbols, deliberately without figures. The first version printed the
+         asset's cap beside the ticker - "SPCX $213.7M" for Republic, which holds
+         $71.9m of it - and an issuer card that prints an asset's whole value next
+         to one issuer's name is the exact error this page exists to report. The
+         count says how much of its book it leads; the asset's own cap belongs in
+         the asset panel, where the split beside it says who else mints it. */
+      bits.push(led.length
+        ? `It leads <b>${fmtNum(led.length)}</b> of them` +
+          `, largest first: ` + led.slice(0, 3).map((r) => esc(r.symbol)).join(", ") +
+          (led.length > 3 ? `, and ${fmtNum(led.length - 3)} more` : "") + "."
+        : `It leads no asset in this run: on every asset it touches, a larger issuer` +
+          ` sits above it.`);
+      if (residual) bits.push(residual);
+      return {
+        note: "an issuer, not an asset",
+        html: beyondTop(esc(x.name) +
+                ` <span style="color:var(--muted);font-weight:400">issuer</span>`, "") +
+              bits.map((b) => `<p class="icnote">${b}</p>`).join(""),
+      };
+    }
+    if (!allowFuzzy || Q.length < 3) return null;
+    /* Flagged generic so the caller can hold it back. The handler fires on every
+       keystroke, so a reader typing B-U-I-D-L passes through dead prefixes, and a
+       length gate cannot tell "short" from "still typing" - BUID is four
+       characters and USYC, USDY and OUSG are tickers worth answering instantly.
+       Time is the right instrument, and it also stops aria-live reading a
+       sixty-word paragraph out on every keystroke. */
+    return {
+      generic: true,
+      note: "no match",
+      html: beyondTop("Nothing matches &ldquo;" + esc(String(qRaw).trim()) + "&rdquo;",
+                      beyondBounds()),
+    };
+  }
+
   function clear() {
     panel.hidden = true;
     panel.innerHTML = "";
@@ -1560,7 +1743,9 @@ function renderAssetLookup(snap) {
      tabindex, and it swallowed the spacebar - which is page-down - on whichever
      row happened to have focus. */
 
+  let beyondTimer = null;
   find.addEventListener("input", () => {
+    clearTimeout(beyondTimer);
     const q = find.value.trim().toLowerCase();
     if (!q) {
       trs.forEach((tr) => { tr.hidden = false; });
@@ -1586,6 +1771,33 @@ function renderAssetLookup(snap) {
       if (exact < 0 && (rows[i].symbol || "").toLowerCase() === q) exact = i;
       if (exact < 0 && (rows[i].name || "").toLowerCase() === q) exact = i;
     });
+    /* Two ways to answer something that is not an asset, and they are not the
+       same. An EXACT ticker - a token symbol, or one of the tickers this
+       catalogue is known to carry emptily or not at all - beats a substring
+       sitting inside some other asset's name: "BOXX" is a hollow ticker and also
+       a substring of "iShares iBoxx ...", and answering with iBoxx leaves
+       whoever typed a ticker holding an unrelated ETF. It does NOT beat an exact
+       asset symbol, because JAAA is a hollow ticker that this run does carry as
+       an asset, and its own panel is the better answer.
+
+       A fuzzy answer - an issuer name, or a statement of what was searched - is
+       only offered once no asset matched at all. Rows are left exactly as the
+       filter set them either way. */
+    const alt = beyondAssets(find.value, exact < 0, shown === 0, shown);
+    if (alt) {
+      const paint = () => {
+        note.textContent = alt.note;
+        panel.innerHTML = alt.html;
+        /* "Selected asset" is a lie on three of these four branches, and a screen
+           reader announcing it over "BUIDL is not in this catalogue" is worse than
+           no label at all. */
+        panel.setAttribute("aria-label", alt.generic ? "Search result" : alt.note);
+        panel.hidden = false;
+        panel.querySelector(".icclose").addEventListener("click", () => { clear(); find.focus(); });
+      };
+      if (alt.generic) { beyondTimer = setTimeout(paint, 250); } else { paint(); }
+      return;
+    }
     note.textContent = shown === 0 ? "no asset matches that"
                      : shown === 1 ? "1 asset"
                      : exact >= 0 ? `${fmtNum(shown)} assets, showing the exact match`
@@ -1782,7 +1994,7 @@ function renderShock(block) {
    underneath a scoped hero reading 2,572.8 with nothing between them reads as a
    bug in the arithmetic rather than as a scope boundary. */
 function tagUnscoped(id) {
-  document.querySelectorAll("#punchline, #deltastrip, #h-issuers, #h-assetfind, #histcap")
+  document.querySelectorAll("#punchline, #deltastrip, #h-issuers, #h-assetfind, #histcap, .qualwrap summary")
     .forEach((el) => {
       let tag = el.querySelector(".scopetag");
       if (id === "all") { if (tag) tag.remove(); return; }
@@ -2177,7 +2389,11 @@ function renderHistory() {
   ], rows.slice().reverse(),
     "One row per day - the last run of that day - newest first, exactly as the scheduled " +
     "job wrote it to <a href=\"data/history.jsonl\">history.jsonl</a>. Nothing here is " +
-    "recomputed. The per-run snapshots are archived separately, in data/snapshots/.");
+    "recomputed. The per-run snapshots are archived separately, one file per run: " +
+    '<a href="https://github.com/mistryrajan87-lang/backstop/tree/main/docs/data/snapshots"' +
+    ' rel="nofollow noopener">every archived run</a>. ' +
+    "Pages serves no directory index, so the path alone would 404 - which is no use " +
+    "to a reader told that any figure here can be checked against the run that made it.");
 }
 
 function renderCoverage() {
