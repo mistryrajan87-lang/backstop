@@ -1447,6 +1447,16 @@ function serve(dir) {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.waitForTimeout(200);
 
+  /* The gates are folded behind a <details> now, and a closed <details> has no
+     innerText - which is how this check went red on a page that was fine. Open
+     it first: what matters is what a reader sees when they expand it, not
+     whether it happens to be expanded by default. The lead sentence above it is
+     checked separately, because that is the part nobody has to click. */
+  await page.evaluate(() => {
+    const f = document.getElementById("gatefold");
+    if (f) f.open = true;
+  });
+  await page.waitForTimeout(250);
   const gate = await page.evaluate(() => {
     const card = document.getElementById("gatelist");
     if (!card) return null;
@@ -1459,6 +1469,19 @@ function serve(dir) {
         .querySelectorAll("a[href]"))].map((a) => a.getAttribute("href")),
     };
   });
+  /* The one paragraph that is open by default has to carry the claim on its own,
+     because most readers will never open the fold. */
+  const gateLead = await page.evaluate(() => {
+    const h = document.getElementById("h-gates");
+    const sec = h && h.closest("section");
+    const p = sec && sec.querySelector("p.sub");
+    return p ? p.innerText.replace(/\s+/g, " ").trim() : null;
+  });
+  check("the open sentence says what happens when a run fails, without being expanded",
+        !!gateLead && gateLead.length > 120 && /publishes nothing|does not publish/i.test(gateLead)
+          && /not sufficient/i.test(gateLead),
+        JSON.stringify(gateLead));
+
   check("the page says what stops a wrong number being published",
         !!gate && /stops a wrong number/i.test(gate.heading), JSON.stringify(gate && gate.heading));
   check("and every gate it lists carries a sentence, not a stub",
