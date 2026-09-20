@@ -114,12 +114,17 @@ def main() -> None:
         parts.append(f'Underneath it sit two different share vectors \u2014 <b>{com}</b> across '
                      f'commodities, <b>{rest}</b> across everything else. The blended index is '
                      'the shape of neither.')
-    parts.append('The index is inverse-Simpson, a description of this share vector. The 1,500 '
-                 'and 2,500 marks used in merger analysis are deliberately not applied: these '
-                 'are CoinMarketCap issuer labels, not firms shown to compete.')
-    qual = '<span class="qual">' + " ".join(parts) + '</span>'
+    # The band refusal stays in the OPEN paragraph. The page folds .qual behind a
+    # disclosure, and this sentence is the reason the band label was deleted at
+    # all - the one claim this project refuses to make. It does not get folded
+    # away behind any summary. The two-vector decomposition can.
+    band = ('<span class="bandnote">The index is inverse-Simpson, a description of this '
+            'share vector. The 1,500 and 2,500 marks used in merger analysis are '
+            'deliberately not applied: these are CoinMarketCap issuer labels, not firms '
+            'shown to compete.</span>')
+    qual = ('<span class="qual">' + " ".join(parts) + '</span>') if parts else ''
     page = region(page, "punchline",
-                  f'<p class="punchline" id="punchline">{lead}{qual}</p>')
+                  f'<p class="punchline" id="punchline">{lead}{band}{qual}</p>')
 
     # 4. the reconcile line, on the first screen rather than only in Method.
     #    The incomparable six are a category, not a footnote.
