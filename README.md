@@ -98,16 +98,19 @@ assets are actually priced — only what one API field returns.
 
 **Some names are simply not here, and the near-misses are instructive.** Every run
 looks up the tickers a reader arriving from an RWA league table would expect, by
-symbol, in CoinMarketCap's own RWA map. Nine are not in it at all: **BUIDL, BENJI,
-USYC, OUSG, USDY, TBILL, JTRSY, USTBL, FOBXX**.
+symbol, in CoinMarketCap's own RWA map.
 
-Three do match a row — and none of them is the product you would assume:
+<!-- backstop:notinmap:start -->
+Nine are not in it at all: **BUIDL, BENJI, USYC, OUSG, USDY, TBILL, JTRSY, USTBL, FOBXX**.
+
+Three do match a row - and none of them is the product you would assume:
 
 | Ticker | What is actually in the map | State |
 |---|---|---|
 | `USTB` | Victory Portfolios II VictoryShares Short-Term Bond ETF | no tokens, carries nothing |
-| `JAAA` | Janus Henderson AAA CLO ETF | tokens, carries **$65,242** |
+| `JAAA` | Janus Henderson AAA CLO ETF | tokens, carries **$91,248** |
 | `BOXX` | Alpha Architect 1-3 Month Box ETF | no tokens, carries nothing |
+<!-- backstop:notinmap:end -->
 
 All three are conventional ETFs that happen to share a ticker with something an
 RWA reader might be thinking of — not the tokenised treasury funds themselves. So
@@ -116,8 +119,10 @@ as "partly present" when it is not present at all. The run reports three states
 separately — absent from the map, present but carrying nothing, present with value
 — because collapsing them would manufacture exactly that error.
 
-**A single snapshot is a photograph.** The scheduled job runs daily and appends one
-line per run to `docs/data/history.jsonl` — total cap, HHI, top-1 and top-5 share,
+**A single snapshot is a photograph.** The scheduled job writes one line per *day*
+to `docs/data/history.jsonl` — a second run on the same day replaces that day's
+row rather than adding one, and every run is archived whole under
+`docs/data/snapshots/` — total cap, HHI, top-1 and top-5 share,
 the largest asset's share, null-cap token count and the reconciliation ratio. The
 series starts from the first run, so it answers "is this catalogue changing" only
 going forward.
