@@ -572,6 +572,41 @@ function serve(dir) {
   check("and neither the history card nor the delta strip counts its points as runs",
         offenders.length === 0, offenders.join(" "));
 
+  /* The delta heading asserts an adjacency. Check it against the dates rather
+     than against the string it happens to contain today: with a gap in the
+     series "the day before" is false in the same way "the run before this one"
+     was. */
+  const deltaHead = await page.evaluate(() => {
+    const b = document.getElementById("deltastrip");
+    if (!b || b.hidden) return null;
+    const h = b.querySelector("h3");
+    return h ? h.textContent.trim() : null;
+  });
+  if (deltaHead && histRows.length >= 2) {
+    const d1 = Date.parse(histRows[histRows.length - 2].date + "T00:00:00Z");
+    const d2 = Date.parse(histRows[histRows.length - 1].date + "T00:00:00Z");
+    const gap = Math.round((d2 - d1) / 86400000);
+    check("the delta heading claims adjacency only when the two days are adjacent",
+          gap === 1 ? /day before/i.test(deltaHead)
+                    : (/last recorded day/i.test(deltaHead) && deltaHead.includes(String(gap))),
+          `gap ${gap} day(s), heading ${JSON.stringify(deltaHead)}`);
+  }
+
+  /* "Three tickers do match a row" was a typed word over a generated list. */
+  const nicPresent = ((snap.not_in_this_catalogue || {}).present || []).length;
+  if (nicPresent) {
+    const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven",
+                   "eight", "nine", "ten"];
+    const word = WORDS[nicPresent] || String(nicPresent);
+    const refusedTxt = await page.evaluate(() =>
+      (document.getElementById("refused") || {}).innerText || document.body.innerText);
+    const bodyTxt = await page.evaluate(() => document.body.innerText);
+    check("the near-miss ticker count is written from the snapshot, not typed",
+          new RegExp("\\b" + word + " tickers? (?:do|does) match", "i").test(bodyTxt),
+          `expected "${word} ticker(s)"; ` +
+          (bodyTxt.match(/\b\w+ tickers? (?:do|does) match/i) || ["not found"])[0]);
+  }
+
   // Under three days there must be no line: two points drawn as a trend would
   // claim more than the archive knows.
   if (histRows.length < 3) {
@@ -1043,6 +1078,37 @@ function serve(dir) {
   }
   await page.selectOption("#scope", "all");
   await page.waitForTimeout(300);
+  /* CROSS-SURFACE INVARIANT, not a presence check. A positive value may never
+     render as an all-zero percentage: "0.00%" beside $1,111 said the same thing
+     as "0.00%" beside $0, one row apart in the same table. Swept over every
+     scope with every table open, because the two tables that did it are behind
+     a <details> and only one of them is in the default scope. */
+  const zeroPcts = [];
+  for (const sid of scopeIds) {
+    await page.selectOption("#scope", sid);
+    await page.waitForTimeout(240);
+    await page.evaluate(() => document.querySelectorAll("details").forEach((d) => { d.open = true; }));
+    await page.waitForTimeout(200);
+    const bad = await page.evaluate(() => {
+      const out = [];
+      document.querySelectorAll("table tbody tr").forEach((tr) => {
+        const cells = [...tr.querySelectorAll("td")].map((td) => td.textContent.trim());
+        /* A row is a liar when it shows a non-zero money figure and an all-zero
+           percentage in the same row. $0 with 0.00% is honest; $1K with 0.00%
+           is not. */
+        const money = cells.find((c) => /^\$/.test(c) && !/^\$0(\.0+)?$/.test(c));
+        const zero = cells.find((c) => /^0(\.0+)?%$/.test(c));
+        if (money && zero) out.push(cells.join(" | ").slice(0, 90));
+      });
+      return out;
+    });
+    for (const b of bad) zeroPcts.push(sid + ": " + b);
+  }
+  await page.selectOption("#scope", "all");
+  await page.waitForTimeout(300);
+  check("no row shows a real holding as an all-zero percentage",
+        zeroPcts.length === 0, zeroPcts.slice(0, 3).join("  |  "));
+
   check(`counted nouns agree with their number, in all ${scopeIds.length} scopes`,
         pluralBad.length === 0, pluralBad.slice(0, 4).join("  |  "));
 
