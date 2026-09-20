@@ -710,10 +710,19 @@ footer a { color: var(--ink-2); }
        describes. -->
   <section class="card gatecard" aria-labelledby="h-gates">
     <h2 id="h-gates">What stops a wrong number being published</h2>
+    <!-- One sentence open, the rest folded. Six paragraphs of process ahead of
+         the findings reads as a post-mortem rather than as software, and a
+         reader who wants the mechanism will open it. -->
     <p class="sub">The page and the data behind it are rebuilt together every morning by a
-      scheduled job. A run that cannot satisfy the following does not publish: the page, the
-      archive and the repository are left exactly as the previous run left them.</p>
+      scheduled job. The arithmetic is tested before a single API credit is spent; a
+      disagreement between the two prices CoinMarketCap gives each asset can abort the run
+      outright; and the rendered page is checked against its own data before anything is
+      committed &mdash; which is necessary and, on the evidence, not sufficient. A run that
+      fails any of it publishes nothing: the page, the archive and the repository are left
+      exactly as the previous run left them.</p>
 
+    <details class="tableview" id="gatefold">
+      <summary>Each gate, and what it does not cover</summary>
     <ul class="notlist" id="gatelist">
       <li><strong>Two independent price sources have to agree.</strong> CoinMarketCap prices
         each asset twice — once at asset level, and once as the sum of the tokens that
@@ -726,11 +735,11 @@ footer a { color: var(--ink-2); }
         A headless browser loads the built page and re-derives the figures on it, and the
         wording around them, from the same snapshot. It runs before the commit step, so a
         page that disagrees with its own data never reaches the repository. It is not
-        sufficient, and the commit history says so: four wrong statements have shipped past
-        it, each one caught by reading the rendered page rather than by a check. What
-        replaced them tests the class rather than the instance — the bound on small shares
-        is fuzzed over twenty thousand values now, instead of three. The honest claim is
-        that this catches drift, not that it catches everything.</li>
+        sufficient: the suite has missed label and denominator bugs that were found by
+        reading the rendered page, and the checks that replaced them test the class rather
+        than the instance — the bound on small shares is fuzzed over twenty thousand values
+        rather than three, and the plural rule sweeps every counted noun in every scope. The
+        honest claim is that this catches drift, not that it catches everything.</li>
 
       <li><strong>The prose is generated, not typed.</strong> The headline sentence, the line
         beneath it, the no-JavaScript box and the README&rsquo;s figures are written into the
@@ -752,6 +761,8 @@ footer a { color: var(--ink-2); }
         never written to a file, never placed in a URL, and never echoed — the run prints
         how many characters it is and nothing else.</li>
     </ul>
+
+    </details>
 
     <p class="sub" style="margin:16px 0 0">Read them yourself:
       <a href="https://github.com/mistryrajan87-lang/backstop/blob/main/.github/workflows/refresh.yml" rel="noopener">the workflow</a>
