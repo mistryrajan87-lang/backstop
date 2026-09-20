@@ -906,7 +906,13 @@ def build_snapshot(raw: dict, api: CMC) -> dict:
             "value_without_a_chain": unplaced_value,
             "placeholder_issuers": sum(1 for m in meta.values() if m["placeholder"]),
             "reconciliation": {
-                "assets_compared": len(recon_assets),
+                # `comparable`, not `recon_assets`. The note below says the ratio
+                # covers only the assets both endpoints price; until this line was
+                # fixed the count beside it said 791 while the ratio was computed
+                # over 785, because the six token-only assets were counted in the
+                # sentence's denominator but not in the sum's. Splitting (a) from
+                # (b) above is pointless if the reported count re-merges them.
+                "assets_compared": len(comparable),
                 "sum_of_token_caps": token_total,
                 "sum_of_asset_caps": asset_total,
                 "difference": token_total - asset_total,
