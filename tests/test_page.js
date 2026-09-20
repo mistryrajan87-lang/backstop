@@ -108,6 +108,47 @@ function serve(dir) {
     return i >= 0 ? t[i + 1] : null;
   });
   const stampMs = stamp ? Date.parse(stamp) : NaN;
+  /* The method card's three token rows have to add up. "Tokens attributed to an
+     issuer 1,435" sat four rows above "Tokens with no issuer 5" while the issuer
+     rows summed to 1,430 - counts.tokens_attributed is every token SEEN, issuer
+     or not, and the label claimed otherwise. Read the rendered rows and do the
+     arithmetic rather than trusting either label. */
+  const kvPairs = await page.evaluate(() => {
+    const kv = document.getElementById("methodkv");
+    if (!kv) return null;
+    const out = {};
+    kv.querySelectorAll("div").forEach((d) => {
+      const k = d.querySelector(".k"), v = d.querySelector(".v");
+      if (k && v) out[k.textContent.trim()] = v.textContent.trim();
+    });
+    return out;
+  });
+  /* The FIRST number in the cell, not every digit in it: "Tokens with no issuer"
+     renders as "5 ($0)" and stripping all non-digits reads that as 50. */
+  const kvNum = (label) => {
+    const raw = kvPairs && kvPairs[label];
+    if (raw == null) return NaN;
+    const m = String(raw).match(/-?[\d,]*\d/);
+    return m ? Number(m[0].replace(/,/g, "")) : NaN;
+  };
+  const seen = (snap.counts || {}).tokens_attributed;
+  const noIssuer = (snap.coverage || {}).tokens_without_issuer;
+  const issuerSum = (snap.issuers || []).reduce((a, i) => a + (i.tokens || 0), 0);
+  check("the method card's token rows add up to each other and to the snapshot",
+        kvPairs != null && kvNum("Tokens matched to an asset") === seen
+          && kvNum("Tokens with no issuer") === noIssuer
+          && kvNum("Of those, carrying an issuer") === seen - noIssuer,
+        JSON.stringify({ matched: kvNum("Tokens matched to an asset"),
+                         withIssuer: kvNum("Of those, carrying an issuer"),
+                         noIssuer: kvNum("Tokens with no issuer"), seen, snapNoIssuer: noIssuer }));
+  check("and the count carrying an issuer is what the issuer rows actually sum to",
+        seen - noIssuer === issuerSum,
+        `${seen} seen - ${noIssuer} unattributed = ${seen - noIssuer}, issuer rows sum to ${issuerSum}`);
+  check("no row on the method card claims the seen-token count is attributed",
+        kvPairs != null && !Object.keys(kvPairs).some((k) =>
+          /attributed to an issuer/i.test(k) && kvNum(k) === seen),
+        JSON.stringify(Object.keys(kvPairs || {}).filter((k) => /attributed/i.test(k))));
+
   check("the method card's timestamp is the snapshot's own generated_at",
         Number.isFinite(stampMs) && stampMs === Date.parse(snap.generated_at),
         `page shows ${JSON.stringify(stamp)}, json says ${snap.generated_at}`);
@@ -966,11 +1007,44 @@ function serve(dir) {
   check("an exact zero is labelled 0%, and a missing value is not labelled",
         !!sl && sl.zero === "0%" && sl.nul === "", JSON.stringify(sl));
 
-  /* "Other (1 issuers)" was on the page. */
-  const pluralText = await page.evaluate(() => document.body.innerText);
-  check("counted nouns agree with their number",
-        !/\b1 (issuers|assets|tokens|chains|runs)\b/.test(pluralText),
-        (pluralText.match(/\b1 (issuers|assets|tokens|chains|runs)\b/) || ["none"])[0]);
+  /* "Other (1 issuers)" was on the page. So, later, was "1 issuers" under the
+     bar chart in three chain scopes - and this check did not see it, for two
+     reasons worth fixing rather than patching:
+
+       1. it listed five nouns somebody thought of. Any sixth noun was free.
+       2. it ran once, in the default scope. Nine of the eleven scopes were
+          never looked at, and the defect lived in three of them.
+
+     So: any lowercase word ending in s after a bare 1, minus a short list of
+     words that end in s without being plurals, swept across every scope the
+     selector offers. */
+  const NOT_PLURALS = new Set(["is", "was", "has", "its", "this", "thus", "less",
+                               "plus", "across", "minus", "series", "analysis",
+                               "basis", "status", "versus", "always", "perhaps"]);
+  const pluralHits = async () => page.evaluate((allow) => {
+    const out = [];
+    const re = /\b1 ([a-z]{2,}s)\b/g;
+    let m;
+    const text = document.body.innerText;
+    while ((m = re.exec(text)) !== null) {
+      if (!allow.includes(m[1])) {
+        out.push(m[0] + "  …" + text.slice(Math.max(0, m.index - 40), m.index + 40).replace(/\s+/g, " ") + "…");
+      }
+    }
+    return [...new Set(out)];
+  }, [...NOT_PLURALS]);
+
+  const scopeIds = await page.evaluate(() => scopeOptions(SNAP).map((x) => x.id));
+  const pluralBad = [];
+  for (const sid of scopeIds) {
+    await page.selectOption("#scope", sid);
+    await page.waitForTimeout(260);
+    for (const h of await pluralHits()) pluralBad.push(sid + ": " + h);
+  }
+  await page.selectOption("#scope", "all");
+  await page.waitForTimeout(300);
+  check(`counted nouns agree with their number, in all ${scopeIds.length} scopes`,
+        pluralBad.length === 0, pluralBad.slice(0, 4).join("  |  "));
 
   // 11k. TABLE CLIPPING. Several tables overflowed their card by 17-19px - far
   //      too little to read as a scrollable region and exactly enough to read
@@ -1133,9 +1207,30 @@ function serve(dir) {
             to.hidden === false && to.panel.includes(worst.symbol),
             `${worst.symbol}: ${to.panel.replace(/\s+/g, " ").slice(0, 90)}`);
       check("and its panel states the value its tokens do report",
-            /token.{0,40}do report/i.test(to.panel) && /\$/.test(to.panel)
+            /tokens? (?:do|does) report/i.test(to.panel) && /\$/.test(to.panel)
               && !/towards nothing/i.test(to.panel),
             to.panel.replace(/\s+/g, " ").slice(0, 220));
+
+      /* EVERY token-only panel, not just the largest. The sentence conjugates a
+         verb against the token count, and the only single-token asset among
+         them read "Its 1 token do report one". One asset out of six, in the one
+         card built to correct an untruth - and the noun sweep above cannot see
+         a verb. */
+      const verbBad = [];
+      for (const t of tokenOnly) {
+        await page.fill("#assetfind", t.symbol);
+        await page.waitForTimeout(280);
+        const txt = await page.evaluate(() =>
+          ((document.getElementById("assetcard") || {}).innerText || "").replace(/\s+/g, " "));
+        const wrong = txt.match(/\b1 [a-z]+ (?:do|are|were|have|report|mint|carry|hold)\b/gi) || [];
+        const plural = (txt.match(/\b1 [a-z]+s\b/gi) || [])
+          .filter((m) => !/^(represents|mints|carries|reports|holds|is|has|does)$/.test(m.slice(2).toLowerCase()));
+        if (wrong.length || plural.length) verbBad.push(t.symbol + ": " + [...wrong, ...plural].join(", "));
+      }
+      check(`every token-only panel agrees with its own count (${tokenOnly.length} of them)`,
+            verbBad.length === 0, verbBad.join("  |  "));
+      await page.fill("#assetfind", worst.symbol);
+      await page.waitForTimeout(300);
       /* The figures at the top of the panel must agree with the note under it.
          Reading the asset-level zero there printed "Tokenised cap $0 / Share of
          catalogue 0%" four lines above "$56.9m is counted in the catalogue
