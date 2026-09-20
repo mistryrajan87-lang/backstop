@@ -432,7 +432,7 @@ footer a { color: var(--ink-2); }
 <!-- backstop:punchline:end -->
 
     <div class="shock" role="group" aria-labelledby="shocklabel">
-      <span class="sl" id="shocklabel">What does the rest of the market look like without them?</span>
+      <span class="sl" id="shocklabel">Drop the largest and re-share the rest</span>
       <button type="button" data-drop="0" aria-pressed="true">As measured</button>
       <button type="button" data-drop="1" aria-pressed="false">Without the largest</button>
       <button type="button" data-drop="3" aria-pressed="false">Without the top 3</button>
@@ -1742,32 +1742,29 @@ function renderShock(block) {
   }
   const names = (block.leaders || []).slice(0, SHOCK_DROP).map((l) => l.label);
   const who = names.length ? names.join(", ") : SHOCK_DROP + " largest";
-  /* The index almost always RISES here, and that is the interesting part rather
-     than a bug - but only if the sentence says why before it says the number.
-     Labelled "what if the largest issuers were not there?" and answered with
-     "concentration went up", a reader reasonably concludes the tool is broken.
-     What the control actually measures is the shape of the REMAINDER, and the
-     remainder is itself top-heavy: take out the leader and the next name
-     inherits its share of a smaller market. So: name the survivor and its new
-     share first, then the index. */
+  /* Name the OPERATION, then give the numbers, and stop.
+     
+     The label used to ask "what if the largest issuers were not there?", which
+     promises a smaller market; the renormalised index then goes UP and reads as
+     a bug. The first fix for that went too far the other way - it added "removing
+     the leader does not spread this market out, it promotes the next name",
+     which is a moral written onto a counterfactual. A rise is not a lesson about
+     the market, it is what rebasing to 100% does to a top-heavy remainder.
+     
+     So the control says what it does - drop these, rebase the rest - and reports
+     the result. Naming the heir stays, because it is the figure that makes the
+     rise legible without arguing for it. No direction words, no verdict. */
   const rest = (Array.isArray(block.shares) ? block.shares : []).slice(SHOCK_DROP);
   const restTotal = rest.reduce((a, v) => a + v, 0);
   const heirShare = restTotal > 0 && rest.length ? rest[0] / restTotal : null;
   const heir = (block.leaders || [])[SHOCK_DROP];
-  const up = s.hhi > block.hhi;
-  out.innerHTML = "Take " + esc(who) + " out and the remaining " + fmtNum(s.n)
-    + " split the whole market between them"
+  out.innerHTML = "Drop " + esc(who) + " and rebase the remaining " + fmtNum(s.n)
+    + " shares to 100%: HHI <b>" + fmtNum(s.hhi, 1) + "</b>, effective issuers <b>"
+    + fmtNum(s.effective_n, 2) + "</b>."
     + (heir && heirShare != null
-        ? ", which makes <b>" + esc(heir.label) + "</b> <b>" + fmtPct(heirShare)
-          + "</b> of what is left"
+        ? " <b>" + esc(heir.label) + "</b> becomes <b>" + fmtPct(heirShare)
+          + "</b> of what is left."
         : "")
-    + ". Concentration among the survivors " + (up ? "<b>rises</b>" : "falls")
-    + " to <b>" + fmtNum(s.hhi, 1) + "</b> HHI, <b>" + fmtNum(s.effective_n, 2)
-    + "</b> effective issuers"
-    + (up
-        ? " &mdash; removing the " + (SHOCK_DROP === 1 ? "leader" : "top " + fmtNum(SHOCK_DROP))
-          + " does not spread this market out, it promotes the next name."
-        : ".")
     + ' <span class="lanenote" style="display:inline">A what-if on the priced shares in '
     + "this snapshot, not a forecast and not a claim about the solvency of anyone named.</span>";
 }
