@@ -117,6 +117,16 @@ jobs:
                         f"ratio, included in the market total, reported on the page.")
           else:
               print("::warning::No reconciliation ratio - nothing could be compared.")
+          # The entry's answer to "isn't this just gold?" is that the index RISES once
+          # commodities are out. That is a fact about today's market, not arithmetic:
+          # it inverts if the commodity book gains roughly a quarter in value relative
+          # to the rest. Warn, never gate - a market move must not stop the page
+          # publishing, but nobody should find out from a judge.
+          ex = s.get("ex_commodity") or {}
+          if ex.get("hhi") is not None and o.get("hhi") is not None and ex["hhi"] <= o["hhi"]:
+              print(f"::warning::ex-commodity HHI {ex['hhi']} no longer exceeds the "
+                    f"whole-catalogue {o['hhi']}. The submission says the index rises "
+                    f"once commodities are out. That sentence is now false - fix it.")
           if not c["assets_fully_quoted"]:
               print(f"::warning::Partial run - {c['quote_batches_run']} of "
                     f"{c['quote_batches_total']} quote batches. The page says so.")
