@@ -393,9 +393,12 @@ python -m http.server -d docs 8000               # then open localhost:8000
 The numbers are the product, so the arithmetic is tested rather than trusted.
 `tests/test_aggregation.py` runs its checks against fixtures whose answers are
 worked out by hand in the comments — including the Gold case above in miniature,
-where a three-issuer asset must total 200 and not the 460 that per-asset counting
-would produce. It needs no network and runs in the workflow before a single credit
-is spent.
+where the fixture's whole market must total 200 and not the 460 that per-asset
+counting would produce. (200 is the market across all three fixture assets; the
+three-issuer asset itself totals 100. The earlier wording said "a three-issuer
+asset must total 200", which is wrong, and the test file it points at has always
+said otherwise.) It needs no network and runs in the workflow before a single
+credit is spent.
 
 The pipeline also publishes what it could *not* account for: tokens reporting no
 market cap, tokens with no issuer, issuers that appear in token data but not in the
