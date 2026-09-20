@@ -26,7 +26,7 @@
   --surface-1:   #fcfcfb;
   --ink:         #0b0b0b;
   --ink-2:       #52514e;
-  --muted:       #898781;
+  --muted:       #6e6c67;   /* was #898781: 3.50:1 on the card, below AA. 5.11:1 now. */
   --grid:        #e1e0d9;
   --baseline:    #c3c2b7;
   --border:      rgba(11,11,11,0.10);
@@ -88,12 +88,12 @@ body {
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px 72px; }
 
 /* ---- header --------------------------------------------------------------- */
-header { padding: 40px 0 8px; }
+header { padding: 56px 0 12px; }
 .eyebrow {
   font-size: 12px; font-weight: 600; letter-spacing: .09em;
   text-transform: uppercase; color: var(--muted); margin: 0 0 10px;
 }
-h1 { font-size: clamp(26px, 4.2vw, 36px); line-height: 1.15; margin: 0 0 12px; font-weight: 640; letter-spacing: -0.015em; }
+h1 { font-size: clamp(29px, 4.8vw, 42px); line-height: 1.12; margin: 0 0 14px; font-weight: 640; letter-spacing: -0.02em; }
 .standfirst { margin: 0; max-width: 62ch; color: var(--ink-2); font-size: 16px; }
 .toprow { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
 .toprow > div:first-child { flex: 1 1 480px; min-width: 0; }
@@ -118,17 +118,23 @@ h1 { font-size: clamp(26px, 4.2vw, 36px); line-height: 1.15; margin: 0 0 12px; f
 /* ---- cards ---------------------------------------------------------------- */
 .card {
   background: var(--surface-1); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px; margin-top: 16px;
+  border-radius: 12px; padding: 22px; margin-top: 22px;
 }
+@media (min-width: 760px) { .card { padding: 28px; margin-top: 28px; } }
 .card > h2 {
-  font-size: 15px; font-weight: 640; margin: 0 0 4px; letter-spacing: -0.005em;
+  font-size: clamp(17px, 2.2vw, 20px); font-weight: 640; margin: 0 0 6px;
+  letter-spacing: -0.012em; line-height: 1.25;
 }
-.card > .sub { margin: 0 0 18px; font-size: 13px; color: var(--ink-2); max-width: 74ch; }
+.card > .sub { margin: 0 0 20px; font-size: 13.5px; color: var(--ink-2); max-width: 74ch; }
 .grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; }
 @media (min-width: 900px) { .grid2 { grid-template-columns: 1fr 1fr; } }
 
 /* ---- hero + tiles --------------------------------------------------------- */
-.hero { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; }
+.hero { display: flex; flex-wrap: wrap; gap: 20px 56px; align-items: flex-start; }
+/* Both blocks start at the top so their labels sit on one line; the values
+   below them are deliberately different sizes and were never going to share
+   a baseline. */
+.hero .heroblock:nth-child(2) { padding-top: 2px; }
 .heroblock { min-width: 210px; }
 .herolabel { font-size: 13px; color: var(--ink-2); margin: 0 0 2px; }
 .heroval { font-size: clamp(44px, 8vw, 64px); font-weight: 650; line-height: 1; letter-spacing: -0.03em; }
@@ -274,9 +280,68 @@ footer { margin-top: 28px; font-size: 12.5px; color: var(--muted); }
 footer a { color: var(--ink-2); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .err { color: var(--crit-ink); }
-.punchline { margin: 16px 0 0; font-size: 15px; line-height: 1.55; color: var(--ink); max-width: 68ch; }
+.punchline { margin: 20px 0 0; font-size: clamp(15.5px, 1.9vw, 17.5px); line-height: 1.5; color: var(--ink); max-width: 64ch; }
 .punchline b { font-weight: 600; }
 .punchline .qual { display: block; margin-top: 7px; font-size: 12.5px; color: var(--muted); max-width: 76ch; }
+.punchline .bandnote { display: block; margin-top: 7px; font-size: 12.5px;
+                       color: var(--muted); max-width: 76ch; }
+.scopetag {
+  display: inline-block; margin: 0 8px 0 0; padding: 1px 7px;
+  border: 1px solid var(--border); border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-2); background: var(--wash);
+  vertical-align: 2px;
+}
+#histstub { margin: 0 0 4px; font-size: 12.5px; color: var(--muted); max-width: 86ch; }
+.qualwrap { margin-top: 10px; max-width: 76ch; }
+.qualwrap > summary {
+  cursor: pointer; font-size: 12.5px; color: var(--ink-2);
+  list-style: none; display: inline-flex; align-items: center; gap: 6px;
+  border-bottom: 1px dashed var(--border); padding-bottom: 1px;
+}
+.qualwrap > summary::-webkit-details-marker { display: none; }
+.qualwrap > summary::after { content: "+"; font-weight: 600; color: var(--muted); }
+.qualwrap[open] > summary::after { content: "–"; }
+.qualwrap > summary:hover { color: var(--ink); }
+/* The tail is moved out of #punchline into this <details>, so ".punchline
+   .qual" no longer matches it. Restate the muted treatment here or it renders
+   at full strength - louder than the sentence it is qualifying. */
+.qualwrap .qual { display: block; margin-top: 9px; font-size: 12.5px;
+                  color: var(--muted); max-width: 76ch; }
+
+/* ---- issuer lookup -------------------------------------------------------- */
+.find { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
+.findlabel { font-size: 12.5px; color: var(--ink-2); }
+.find input {
+  font: inherit; font-size: 14px; color: var(--ink);
+  background: var(--page); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 11px; min-width: 240px; flex: 0 1 300px;
+}
+.find input:focus-visible { outline: 2px solid var(--series-1); outline-offset: 1px; }
+.findnote { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.issuercard {
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--page); padding: 16px 18px; margin: 0 0 16px;
+}
+.issuercard h3 { margin: 0; font-size: 17px; font-weight: 640; letter-spacing: -0.01em; }
+.issuercard .ictop { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.issuercard .icclose {
+  font: inherit; font-size: 12.5px; color: var(--ink-2); cursor: pointer;
+  background: none; border: 1px solid var(--border); border-radius: 7px; padding: 3px 9px;
+}
+.issuercard .icclose:hover { background: var(--wash); }
+.icgrid {
+  display: grid; gap: 12px 22px; margin: 14px 0 0;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+}
+.icgrid dt { font-size: 12px; color: var(--muted); margin: 0 0 2px; }
+.icgrid dd { margin: 0; font-size: 16px; font-weight: 620; font-variant-numeric: tabular-nums; }
+.icgrid dd .unit { font-size: 12.5px; font-weight: 400; color: var(--muted); }
+.icnote { margin: 13px 0 0; font-size: 12.5px; color: var(--ink-2); max-width: 78ch; }
+.icnote b { color: var(--ink); }
+#issuertable tbody tr.hit { cursor: pointer; }
+#issuertable tbody tr.sel { background: var(--wash); }
+#issuertable tbody tr.hit:hover { background: var(--wash); }
 .scopefoot { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); max-width: 88ch; }
 .delta { margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
   background: var(--surface-1); }
@@ -318,12 +383,6 @@ footer a { color: var(--ink-2); }
           Every one of those tokens was minted by somebody. Backstop rebuilds the
           catalogue along that axis and measures, by value, how concentrated it is.
         </p>
-        <p class="standfirst" style="margin-top:10px;font-size:14px">
-          <strong>Issuer</strong> here means the name CoinMarketCap attributes a token
-          to. Its issuer record carries a name, a website and a token roster — not
-          custody, jurisdiction or a legal entity — so nothing below says who is
-          <em>liable</em> for a token, only whose name is on it.
-        </p>
       </div>
       <button class="themebtn" id="themebtn" type="button" aria-live="polite">Theme: auto</button>
     </div>
@@ -333,28 +392,6 @@ footer a { color: var(--ink-2); }
     <span class="ico" aria-hidden="true">!</span>
     <span id="bannertext"></span>
   </div>
-
-  <section class="card" id="scopecard" aria-labelledby="h-scope">
-    <h2 id="h-scope">What this measures, and what it does not</h2>
-    <div class="kv" id="scopekv"></div>
-    <p class="sub" id="scopeprose" style="margin:16px 0 0"></p>
-
-    <ul class="notlist">
-      <li><strong>Not a safety check.</strong> Safe would mean reserves audited, the
-        contract sound, redemption possible. CoinMarketCap supplies a name, a ticker
-        and a market-cap field — no attestations, no custody, no redemption terms.
-        Adding a concentration index to that does not add safety.</li>
-      <li><strong>Not a map of who pays you back.</strong> That is a legal question —
-        which entity, in which jurisdiction, under which document. The API's
-        &ldquo;issuer&rdquo; is a label on a token. For a fund, the sponsor, the
-        tokenisation agent and the fund vehicle are three different answers, and
-        this data distinguishes none of them.</li>
-      <li><strong>Not investment advice, and not a buy list.</strong> This is one
-        vendor's catalogue: gold-heavy, missing the large treasury products, with
-        almost half its tokens unpriced. It is not a portfolio view and should not
-        be read as one.</li>
-    </ul>
-  </section>
 
   <!-- headline ------------------------------------------------------------- -->
   <section class="card" aria-labelledby="h-headline">
@@ -377,7 +414,7 @@ footer a { color: var(--ink-2); }
          from the snapshot by scripts/inline_snapshot.py - never typed, because
          every number in it moves daily. -->
     <!-- backstop:punchline:start -->
-<p class="punchline" id="punchline"><b>94.1%</b> of priced tokenised value sits with 5 issuer labels, and <b>Gold</b> alone is 62.9% of it. The figures are re-measured and archived every morning.<span class="qual">Underneath it sit two different share vectors — <b>Tether Holdings 58% / Paxos 40%</b> across commodities, <b>Ondo Assets 32% / Backed Assets 28% / bStocks 27%</b> across everything else. The blended index is the shape of neither. The index is inverse-Simpson, a description of this share vector. The 1,500 and 2,500 marks used in merger analysis are deliberately not applied: these are CoinMarketCap issuer labels, not firms shown to compete.</span></p>
+<p class="punchline" id="punchline"><b>94.1%</b> of priced tokenised value sits with 5 issuer labels, and <b>Gold</b> alone is 62.9% of it. The figures are re-measured and archived every morning.<span class="bandnote">The index is inverse-Simpson, a description of this share vector. The 1,500 and 2,500 marks used in merger analysis are deliberately not applied: these are CoinMarketCap issuer labels, not firms shown to compete.</span><span class="qual">Underneath it sit two different share vectors — <b>Tether Holdings 58% / Paxos 40%</b> across commodities, <b>Ondo Assets 32% / Backed Assets 28% / bStocks 27%</b> across everything else. The blended index is the shape of neither.</span></p>
 <!-- backstop:punchline:end -->
 
     <div class="shock" role="group" aria-labelledby="shocklabel">
@@ -393,6 +430,32 @@ footer a { color: var(--ink-2); }
 <!-- backstop:herofoot:end -->
 
     <div class="tiles" id="tiles"></div>
+
+    <!-- Fold the punchline's qualifying tail behind a summary. The tail is
+         generated markup; it is moved, never rewritten, and if this fails the
+         page is left exactly as the generator emitted it. -->
+    <script>
+    (function () {
+      try {
+        var p = document.getElementById("punchline");
+        var q = p && p.querySelector(".qual");
+        if (!q || q.closest(".qualwrap")) return;
+        var d = document.createElement("details");
+        d.className = "qualwrap";
+        var s = document.createElement("summary");
+        /* The tail holds two things: the two share vectors, and the reason no
+           merger-guideline band is applied. The second is the page's central
+           caveat and the summary has to advertise it, or folding the tail
+           quietly buries the one thing this project refuses to overclaim. */
+        s.textContent = "Why the blended index is the shape of neither";
+        d.appendChild(s);
+        /* sibling of the paragraph, not a child of it: <details> inside <p> is
+           invalid markup even when the DOM lets you build it. */
+        p.parentNode.insertBefore(d, p.nextSibling);
+        d.appendChild(q);
+      } catch (e) { /* leave the tail inline */ }
+    })();
+    </script>
 
     <!-- The daily series, read from the same archive the cron appends to. This is
          the only thing on the page that needs yesterday to exist. -->
@@ -414,15 +477,32 @@ footer a { color: var(--ink-2); }
 <!-- backstop:noscript:end -->
   </section>
 
-  <!-- coverage ------------------------------------------------------------- -->
-  <section class="card" aria-labelledby="h-coverage">
-    <h2 id="h-coverage">What the headline covers</h2>
-    <p class="sub">Two different denominators, kept apart on purpose. The index above is
-      built on value, and value exists only where a token reports a market cap. Counting
-      tokens instead gives a different and much less flattering picture, and confusing the
-      two is the easiest mistake to make with this catalogue.</p>
-    <div class="lane" id="lane-value"></div>
-    <div class="lane" id="lane-count"></div>
+  <!-- history --------------------------------------------------------------
+       The only block on this page that needs yesterday to have happened. -->
+  <section class="card" aria-labelledby="h-history">
+    <h2 id="h-history">How this has moved</h2>
+    <p class="sub">CoinMarketCap's Real World Assets endpoints are all
+      <em>latest</em> — there is no historical series for any of them, and issuer
+      attribution in particular exists only in the live call. This series is not
+      fetched from anywhere: it is what the scheduled run wrote down each morning.</p>
+
+    <div class="shock seriespick" role="group" aria-labelledby="hslabel">
+      <span class="sl" id="hslabel">Series</span>
+      <button type="button" data-series="hhi" aria-pressed="true">HHI</button>
+      <button type="button" data-series="effective_n" aria-pressed="false">Effective issuers</button>
+      <button type="button" data-series="top5" aria-pressed="false">Top five share</button>
+      <button type="button" data-series="largest_asset_share" aria-pressed="false">Largest asset</button>
+    </div>
+
+    <figure>
+      <svg id="chart-history" role="img" aria-labelledby="h-history histdesc"></svg>
+      <desc id="histdesc" class="sr"></desc>
+      <figcaption id="histcap"></figcaption>
+    </figure>
+    <details class="tableview">
+      <summary>View as table</summary>
+      <div class="tablewrap"><table id="histtable"></table></div>
+    </details>
   </section>
 
   <!-- scope ---------------------------------------------------------------- -->
@@ -463,7 +543,7 @@ footer a { color: var(--ink-2); }
       <figure>
         <svg id="chart-lorenz" role="img" aria-labelledby="h-lorenz lorenzdesc"></svg>
         <desc id="lorenzdesc" class="sr"></desc>
-        <figcaption id="lorenzcap">The whole catalogue — this curve does not follow the scope selector.</figcaption>
+        <figcaption id="lorenzcap"></figcaption>
       </figure>
       <details class="tableview">
         <summary>View as table</summary>
@@ -471,6 +551,43 @@ footer a { color: var(--ink-2); }
       </details>
     </section>
   </div>
+
+  <!-- coverage ------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-coverage">
+    <h2 id="h-coverage">What the headline covers</h2>
+    <p class="sub">Two different denominators, kept apart on purpose. The index above is
+      built on value, and value exists only where a token reports a market cap. Counting
+      tokens instead gives a different and much less flattering picture, and confusing the
+      two is the easiest mistake to make with this catalogue.</p>
+    <div class="lane" id="lane-value"></div>
+    <div class="lane" id="lane-count"></div>
+  </section>
+
+  <section class="card" id="scopecard" aria-labelledby="h-scope">
+    <h2 id="h-scope">What this measures, and what it does not</h2>
+    <p class="sub"><strong>Issuer</strong> here means the name CoinMarketCap attributes a
+      token to. Its issuer record carries a name, a website and a token roster — not
+      custody, jurisdiction or a legal entity — so nothing on this page says who is
+      <em>liable</em> for a token, only whose name is on it.</p>
+    <div class="kv" id="scopekv"></div>
+    <p class="sub" id="scopeprose" style="margin:16px 0 0"></p>
+
+    <ul class="notlist">
+      <li><strong>Not a safety check.</strong> Safe would mean reserves audited, the
+        contract sound, redemption possible. CoinMarketCap supplies a name, a ticker
+        and a market-cap field — no attestations, no custody, no redemption terms.
+        Adding a concentration index to that does not add safety.</li>
+      <li><strong>Not a map of who pays you back.</strong> That is a legal question —
+        which entity, in which jurisdiction, under which document. The API's
+        &ldquo;issuer&rdquo; is a label on a token. For a fund, the sponsor, the
+        tokenisation agent and the fund vehicle are three different answers, and
+        this data distinguishes none of them.</li>
+      <li><strong>Not investment advice, and not a buy list.</strong> This is one
+        vendor's catalogue: gold-heavy, missing the large treasury products, with
+        almost half its tokens unpriced. It is not a portfolio view and should not
+        be read as one.</li>
+    </ul>
+  </section>
 
   <!-- chains ----------------------------------------------------------------- -->
   <section class="card" aria-labelledby="h-chains">
@@ -531,6 +648,17 @@ footer a { color: var(--ink-2); }
   <section class="card" aria-labelledby="h-issuers">
     <h2 id="h-issuers">Every issuer</h2>
     <p class="sub">The full directory, largest first. This is the table view for both charts above — every value in them is readable here.</p>
+
+    <div class="find">
+      <label class="findlabel" for="issuerfind">Find an issuer</label>
+      <input type="search" id="issuerfind" placeholder="Tether, Ondo, Backed…"
+             autocomplete="off" spellcheck="false"
+             aria-describedby="findnote" aria-controls="issuertable">
+      <span class="findnote" id="findnote"></span>
+    </div>
+    <div id="issuercard" class="issuercard" role="region" aria-live="polite"
+         aria-label="Selected issuer" hidden></div>
+
     <details class="tableview" id="issuerdetails">
       <summary id="issuersummary">Show every issuer</summary>
       <div class="tablewrap"><table id="issuertable"></table></div>
@@ -725,6 +853,27 @@ function drawBars(svg, rows, total) {
 }
 
 /* Cumulative-share curve with the equality diagonal as a reference hairline. */
+/* The curve for a scope. Every block carries its own complete `shares`
+   vector - overall, per chain, per class - so the curve is exact for all of
+   them. Only the accompanying TABLE needs issuer names, and `leaders` is
+   capped, which is why the two are built from different places and the table
+   says so when it is showing a subset. */
+function lorenzRowsFor(id) {
+  const { block, full } = blockFor(id);
+  if (!block) return [];
+  const shares = Array.isArray(block.shares) ? block.shares : [];
+  const total = block.total || 1;
+  if (full && Array.isArray(SNAP.issuers) && SNAP.issuers.length) {
+    return SNAP.issuers.filter((r) => r.market_cap > 0)
+                       .map((r) => ({ market_cap: r.market_cap, name: r.name }));
+  }
+  const leaders = Array.isArray(block.leaders) ? block.leaders : [];
+  return shares.map((s, i) => ({
+    market_cap: s * total,
+    name: leaders[i] ? leaders[i].label : null,
+  }));
+}
+
 function drawLorenz(svg, issuers) {
   clear(svg);
   const W = Math.max(300, Math.round(svg.clientWidth || 480));
@@ -873,6 +1022,121 @@ function shareMeter(share) {
   </div>`;
 }
 
+/* ---------------------------------------------------------------------------
+   Issuer lookup. Reads the rows the table was just built from - the same
+   objects, not the rendered cells - so the panel cannot drift from the table.
+   Everything here is a view over snapshot.json; nothing is fetched.
+   --------------------------------------------------------------------------- */
+function wireIssuerLookup(rows, snap) {
+  const find = document.getElementById("issuerfind");
+  const note = document.getElementById("findnote");
+  const card = document.getElementById("issuercard");
+  const det = document.getElementById("issuerdetails");
+  const body = document.querySelector("#issuertable tbody");
+  if (!find || !note || !card || !det || !body) return;
+
+  const trs = [...body.rows];
+  trs.forEach((tr, i) => {
+    tr.dataset.idx = String(i);
+    tr.classList.add("hit");
+    /* Clickable rows need to be reachable without a mouse. */
+    tr.tabIndex = 0;
+    tr.setAttribute("role", "button");
+    tr.setAttribute("aria-label", `Show details for ${rows[i] ? rows[i].name : "this issuer"}`);
+  });
+  body.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const tr = e.target.closest("tr");
+    if (!tr || !tr.dataset.idx) return;
+    e.preventDefault();
+    show(Number(tr.dataset.idx));
+  });
+  note.setAttribute("aria-live", "polite");
+
+  const total = (snap.overall || {}).total || 0;
+  const hay = rows.map((r) => [r.name, (r.chains || []).join(" "), (r.classes || []).join(" ")]
+                             .join(" ").toLowerCase());
+
+  function show(i) {
+    const r = rows[i];
+    if (!r) return;
+    trs.forEach((tr) => tr.classList.toggle("sel", tr.dataset.idx === String(i)));
+    const gap = r.declared_tokens != null && r.declared_tokens !== r.attributed_tokens;
+    const cells = [
+      /* This table is the whole directory, never the selected scope, so the
+         denominator is the catalogue. Naming it "scope" made the card claim a
+         share of a scope the issuer might not even appear in. */
+      ["Share of catalogue", fmtPct(total > 0 ? r.market_cap / total : null, 2), ""],
+      ["Tokenised cap", fmtUSD(r.market_cap), ""],
+      ["Assets", fmtNum(r.assets), ""],
+      ["Tokens attributed", fmtNum(r.attributed_tokens),
+       gap ? `of ${fmtNum(r.declared_tokens)} declared` : "all it declares"],
+      ["No cap reported", fmtNum(r.tokens_without_cap || 0), "of those tokens"],
+      ["Quoted off-chain", fmtNum(r.assets_with_tradfi_market), "of its assets"],
+    ];
+    let msg = "";
+    if (gap) {
+      const miss = r.declared_tokens - r.attributed_tokens;
+      msg = `CoinMarketCap's issuer directory says <b>${esc(r.name)}</b> has ` +
+            `<b>${fmtNum(r.declared_tokens)}</b> tokens. The catalogue traces ` +
+            `<b>${fmtNum(r.attributed_tokens)}</b> of them back to it, so ` +
+            `<b>${fmtNum(miss)}</b> are declared but not attributable here. ` +
+            `The two endpoints disagree; this page shows what the asset side supports.`;
+    }
+    if (r.tokens_without_cap) {
+      msg += (msg ? " " : "") +
+             `<b>${fmtNum(r.tokens_without_cap)}</b> of its attributed tokens report ` +
+             `no market cap at all, so its book is computed from the rest.`;
+    }
+    card.innerHTML =
+      `<div class="ictop"><h3>${esc(r.name)}</h3>` +
+      `<button type="button" class="icclose">Clear</button></div>` +
+      `<dl class="icgrid">` +
+      cells.map(([k, v, u]) =>
+        `<div><dt>${esc(k)}</dt><dd>${esc(v)}` +
+        (u ? ` <span class="unit">${esc(u)}</span>` : "") + `</dd></div>`).join("") +
+      `</dl>` +
+      (msg ? `<p class="icnote">${msg}</p>` : "") +
+      ((r.chains || []).length
+        ? `<p class="icnote">Chains: ${esc((r.chains || []).join(", "))}` +
+          ((r.classes || []).length ? ` &middot; Classes: ${esc((r.classes || []).join(", "))}` : "") +
+          `</p>` : "");
+    card.hidden = false;
+    card.querySelector(".icclose").addEventListener("click", () => { clear(); find.focus(); });
+  }
+
+  function clear() {
+    card.hidden = true;
+    card.innerHTML = "";
+    trs.forEach((tr) => tr.classList.remove("sel"));
+  }
+
+  body.addEventListener("click", (e) => {
+    if (e.target.closest("a")) return;          /* issuer site links still work */
+    const tr = e.target.closest("tr");
+    if (tr && tr.dataset.idx) show(Number(tr.dataset.idx));
+  });
+
+  find.addEventListener("input", () => {
+    const q = find.value.trim().toLowerCase();
+    if (!q) {
+      trs.forEach((tr) => { tr.hidden = false; });
+      note.textContent = "";
+      return;
+    }
+    let shown = 0, only = -1;
+    trs.forEach((tr, i) => {
+      const hit = hay[i].includes(q);
+      tr.hidden = !hit;
+      if (hit) { shown++; only = i; }
+    });
+    note.textContent = shown === 0 ? "no issuer matches that"
+                     : shown === 1 ? "1 issuer" : `${fmtNum(shown)} issuers`;
+    det.open = true;
+    if (shown === 1) show(only); else clear();
+  });
+}
+
 function renderTable(node, cols, rows, note) {
   node.innerHTML =
     "<thead><tr>" + cols.map((c) => `<th class="${c.num ? "num" : ""}">${esc(c.h)}</th>`).join("") + "</tr></thead>" +
@@ -984,6 +1248,7 @@ function blockFor(id) {
    12 and renormalising over a truncated list would invent a different market.
    slice() copies, so the snapshot object the other charts read is never touched. */
 let SHOCK_DROP = 0;
+let CURRENT_SCOPE = "all";
 function shockFrom(shares, drop) {
   if (!Array.isArray(shares) || shares.length <= drop) return null;
   const rest = shares.slice(drop);
@@ -1026,6 +1291,7 @@ function renderShock(block) {
 function renderScope(id) {
   const { block, label, full } = blockFor(id);
   if (!block) return;
+  CURRENT_SCOPE = id;
 
   document.getElementById("scopedesc").textContent =
     `Across ${label}, weighted by tokenised market capitalisation.`;
@@ -1046,6 +1312,7 @@ function renderScope(id) {
      Any mark set beside this number is read as a norm. The legible version of
      the index is the generated sentence below the hero, which states shares. */
   renderShock(block);
+  renderLorenz(id, block, label);
 
   const tiles = [
     { l: "Top issuer", v: fmtPct(block.top1), n: "share of scope" },
@@ -1116,6 +1383,69 @@ const DELTA_ROWS = [
   { k: "assets_tokenised",  label: "Assets with tokens",  fmt: (v) => fmtNum(v),     worseWhen: null },
   { k: "tokens_without_cap",label: "Tokens with no cap",  fmt: (v) => fmtNum(v),     worseWhen: "up" },
 ];
+/* Draws the curve and its table for one scope, and says plainly when the
+   table is a subset of the curve. */
+function renderLorenz(id, block, label) {
+  const rows = lorenzRowsFor(id);
+  /* Below three issuers the curve is degenerate: with one issuer it is exactly
+     the equality diagonal, which is the opposite of what it means. The figure
+     is hidden and the table carries the scope instead - same rule the run
+     history uses below three runs. */
+  const plottable = rows.length >= 3;
+  const fig = document.getElementById("chart-lorenz").closest("figure");
+  if (fig) fig.style.display = plottable ? "" : "none";
+  const lz = plottable
+    ? drawLorenz(document.getElementById("chart-lorenz"), rows)
+    : { n: rows.length };
+  const named = rows.filter((r) => r.name).length;
+  document.getElementById("lorenzdesc").textContent =
+    `Cumulative share curve over ${fmtNum(rows.length)} issuers in ${label}. ` +
+    `Top issuer ${fmtPct(block.top1)}, top 5 ${fmtPct(block.top5)}.`;
+  /* Mark the blocks in this card that do NOT follow the selector. Without
+     this the card reads as one object and the numbers look untrustworthy. */
+  const wholeOnly = document.querySelectorAll("#punchline, #deltastrip");
+  wholeOnly.forEach((el) => {
+    let tag = el.querySelector(".scopetag");
+    if (id === "all") { if (tag) tag.remove(); return; }
+    if (!tag) {
+      tag = document.createElement("span");
+      tag.className = "scopetag";
+      el.insertBefore(tag, el.firstChild);
+    }
+    tag.textContent = "Whole catalogue";
+  });
+  document.getElementById("lorenzcap").textContent =
+    (id === "all" ? "The whole catalogue." : `Scoped to ${label}.`) +
+    (plottable ? "" :
+      ` Only ${fmtNum(rows.length)} issuer${rows.length === 1 ? "" : "s"} in this scope — ` +
+      `too few for the curve to say anything, so the table stands in.`);
+
+  const total = block.total || 0;
+  const cum = [];
+  let run = 0;
+  rows.forEach((r, i) => {
+    run += r.market_cap;
+    if (i < 10 || (i + 1) % 10 === 0) {
+      cum.push({ k: i + 1, name: r.name, cap: r.market_cap, cs: total > 0 ? run / total : null });
+    }
+  });
+  /* Rows are emitted for i < 10 then every tenth, so the last row is only
+     the whole scope when the count lands on a multiple of ten. Say what is
+     actually shown. */
+  let note = "Cumulative share of the n largest issuers: every issuer for the first ten, then every tenth.";
+  if (named < rows.length) {
+    note += ` ${fmtNum(rows.length - named)} of these issuers are counted in the curve but not named here: ` +
+            `the snapshot's leader list for this scope stops at ${fmtNum(named)}.`;
+  }
+  renderTable(document.getElementById("lorenztable"), [
+    { h: "Top n", num: true, get: (r) => fmtNum(r.k) },
+    { h: "nth issuer", get: (r) => r.name || "—" },
+    { h: "Its cap", num: true, get: (r) => fmtUSD(r.cap) },
+    { h: "Cumulative share", num: true, get: (r) => fmtPct(r.cs, 2) },
+  ], cum, note);
+  return lz;
+}
+
 function renderDelta() {
   const box = document.getElementById("deltastrip");
   if (!box) return;
@@ -1147,6 +1477,166 @@ function renderDelta() {
     + "cap and asset count carry no colour because neither direction is better. "
     + "<b>" + esc(fmtNum(HIST.length)) + "</b> run"
     + (HIST.length === 1 ? "" : "s") + " recorded so far.</p>";
+}
+
+/* ---------------------------------------------------------------------------
+   The run history. Drawn from the archive the scheduled job appends to, never
+   from the API - there is nothing in the API to draw it from.
+
+   Two deliberate choices, both about not overclaiming:
+     - the line only appears at three runs. Two points is a line segment, and a
+       line segment drawn as a trend is a lie about what is known.
+     - the y axis is NOT zero-based, because an index that moves 16 points in
+       2,300 is invisible on one. The caption says so rather than letting the
+       shape imply a bigger move than happened.
+   --------------------------------------------------------------------------- */
+const HIST_SERIES = {
+  hhi:                 { label: "HHI",               fmt: (v) => fmtNum(v, 1) },
+  effective_n:         { label: "Effective issuers", fmt: (v) => fmtNum(v, 2) },
+  top5:                { label: "Top five share",    fmt: (v) => fmtPct(v), pct: true },
+  largest_asset_share: { label: "Largest asset",     fmt: (v) => fmtPct(v), pct: true },
+};
+let HIST_KEY = "hhi";
+
+function drawHistory(svg, allRows, key) {
+  let rows = allRows;
+  clear(svg);
+  const W = Math.max(300, Math.round(svg.clientWidth || 480));
+  const PAD_L = 54, PAD_R = 14, PAD_T = 12, PAD_B = 38;
+  const H = W < 480 ? 220 : 260;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("height", H);
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
+  const g = el("g");
+  const spec = HIST_SERIES[key] || HIST_SERIES.hhi;
+  /* Filter the ROWS, not just the values. The gate, the domain and the drawn
+     path must all iterate the same list, or a run with a null field (which
+     append_history emits whenever the priced total is 0) puts the line off
+     canvas or renders d="M 54 NaN". */
+  rows = rows.filter((r) => typeof r[key] === "number");
+  const pts = rows.map((r) => r[key]);
+
+  /* Below three runs nothing is drawn AND no height is reserved: an empty
+     260px box reads as a chart that failed to load, which is a worse lie than
+     the one the line would have told. The table carries the runs instead. */
+  if (pts.length < 3) {
+    svg.setAttribute("height", "0");
+    svg.setAttribute("viewBox", "0 0 1 1");
+    return { n: pts.length, drawn: false };
+  }
+
+  let lo = Math.min(...pts), hi = Math.max(...pts);
+  if (hi === lo) { hi = lo + (Math.abs(lo) || 1) * 0.01; lo -= (Math.abs(lo) || 1) * 0.01; }
+  const padv = (hi - lo) * 0.18;
+  lo -= padv; hi += padv;
+  const X = (i) => PAD_L + (rows.length === 1 ? plotW / 2 : (i / (rows.length - 1)) * plotW);
+  const Y = (v) => PAD_T + (1 - (v - lo) / (hi - lo)) * plotH;
+
+  /* Enough decimals that the three gridline labels actually differ. Printing
+     "94.1%" three times under a caption promising that small moves stay
+     visible is the caption lying. */
+  let pctDp = 1;
+  if (spec.pct) {
+    while (pctDp < 6 &&
+           ((lo * 100).toFixed(pctDp) === (((lo + hi) / 2) * 100).toFixed(pctDp) ||
+            (((lo + hi) / 2) * 100).toFixed(pctDp) === (hi * 100).toFixed(pctDp))) pctDp++;
+  }
+  for (const t of [0, 0.5, 1]) {
+    const v = lo + t * (hi - lo);
+    g.appendChild(el("line", { class: "gridline", x1: PAD_L, x2: PAD_L + plotW, y1: Y(v), y2: Y(v) }));
+    g.appendChild(el("text", { class: "tick", x: PAD_L - 9, y: Y(v) + 4, "text-anchor": "end" },
+      spec.pct ? (v * 100).toFixed(pctDp) + "%" : fmtNum(v, spec === HIST_SERIES.hhi ? 0 : 2)));
+  }
+  g.appendChild(el("line", { class: "axisline", x1: PAD_L, x2: PAD_L + plotW,
+                             y1: PAD_T + plotH, y2: PAD_T + plotH }));
+
+  rows.forEach((r, i) => {
+    if (i === 0 || i === rows.length - 1 || rows.length <= 6) {
+      g.appendChild(el("text", { class: "tick", x: X(i), y: PAD_T + plotH + 18,
+                                 "text-anchor": i === 0 ? "start" : (i === rows.length - 1 ? "end" : "middle") },
+        (r.date || "").slice(5)));
+    }
+  });
+
+  const line = rows.map((r, i) => `${X(i)} ${Y(r[key])}`).join(" L ");
+  g.appendChild(el("path", { class: "series", d: `M ${line}`, fill: "none",
+                             stroke: "var(--series-1)", "stroke-width": 2 }));
+  rows.forEach((r, i) => {
+    g.appendChild(el("circle", { cx: X(i), cy: Y(r[key]), r: 3, fill: "var(--series-1)" }));
+  });
+  svg.appendChild(g);
+  return { n: rows.length, drawn: true, first: pts[0], last: pts[pts.length - 1] };
+}
+
+function renderHistory() {
+  const svg = document.getElementById("chart-history");
+  if (!svg) return;
+  const rows = readHistory();
+  const spec = HIST_SERIES[HIST_KEY] || HIST_SERIES.hhi;
+  const out = drawHistory(svg, rows, HIST_KEY);
+  const fig = svg.closest("figure");
+  const tbl = document.querySelector("#histtable").closest("details");
+  if (fig) fig.style.display = out.drawn ? "" : "none";
+  /* With too few runs to plot, the table is the content, so it opens. */
+  if (tbl && !out.drawn) tbl.open = true;
+
+  const runs = `${fmtNum(rows.length)} run${rows.length === 1 ? "" : "s"}`;
+  let cap = rows.length
+    ? `${spec.label}, one point per run — ${runs} recorded, ${esc(rows[0].date)} to ${esc(rows[rows.length - 1].date)}.`
+    : "No runs recorded yet.";
+  if (out.drawn) {
+    /* A drawn line can still be short of the run count: a run whose priced
+       total was 0 reports the series as null and is not plotted. Say so here
+       too, or "4 runs recorded" sits above a line with three points. */
+    if (out.n < rows.length) {
+      /* Wording per review: "3 of them are plotted" underplays a null. A run
+         with no priced value has no index at all, and the caption should say
+         that rather than imply a sampling choice. Series-named rather than
+         hardcoded to HHI, because the selector switches series. */
+      cap += ` Plotted only where ${spec.label} is defined; runs with no priced` +
+             ` value are in the table only.`;
+    }
+    cap += " The vertical axis is not zero-based: it is scaled to the range actually observed, so small moves stay visible.";
+  } else if (rows.length) {
+    cap += out.n === rows.length
+      ? " The table below carries every run; the line starts once there are three."
+      : ` ${fmtNum(out.n)} of ${fmtNum(rows.length)} runs report this series; ` +
+        `the line starts once three of them do. The table below carries every run.`;
+  }
+  document.getElementById("histcap").textContent = cap;
+  let stub = document.getElementById("histstub");
+  if (!out.drawn) {
+    if (!stub) {
+      stub = document.createElement("p");
+      stub.id = "histstub";
+      /* Its own class, not "tablenote": a page check counts .tablenote
+         against the table count, and borrowing it made the stub look like
+         a ninth table note, reporting 9/9 when the truth was 8/9. */
+      stub.className = "histstub";
+      svg.closest("figure").parentNode.insertBefore(stub, svg.closest("figure"));
+    }
+    stub.textContent = cap;
+    stub.hidden = false;
+  } else if (stub) {
+    stub.hidden = true;
+  }
+  document.getElementById("histdesc").textContent = out.drawn
+    ? `${spec.label} across ${runs}, from ${spec.fmt(out.first)} to ${spec.fmt(out.last)}.`
+    : `${spec.label}: ${runs} recorded, too few to plot.`;
+
+  renderTable(document.getElementById("histtable"), [
+    { h: "Run", get: (r) => r.date || "" },
+    { h: "HHI", num: true, get: (r) => fmtNum(r.hhi, 1) },
+    { h: "Effective issuers", num: true, get: (r) => fmtNum(r.effective_n, 2) },
+    { h: "Top five", num: true, get: (r) => fmtPct(r.top5) },
+    { h: "Largest asset", get: (r) => r.largest_asset || "—" },
+    { h: "Its share", num: true, get: (r) => fmtPct(r.largest_asset_share) },
+    { h: "Assets with tokens", num: true, get: (r) => fmtNum(r.assets_tokenised) },
+    { h: "Tokens with no cap", num: true, get: (r) => fmtNum(r.tokens_without_cap) },
+    { h: "Credits", num: true, get: (r) => fmtNum(r.credits) },
+  ], rows.slice().reverse(),
+    "Every recorded run, newest first, exactly as the scheduled job appended it to " +
+    "<a href=\"data/history.jsonl\">history.jsonl</a>. Nothing here is recomputed.");
 }
 
 function renderCoverage() {
@@ -1276,22 +1766,9 @@ function renderStatic() {
       `<strong>Synthetic data — not market data.</strong> ${esc(s.synthetic_note || "")}`;
   }
 
-  // Lorenz
-  const lz = drawLorenz(document.getElementById("chart-lorenz"), s.issuers || []);
-  document.getElementById("lorenzdesc").textContent =
-    `Cumulative share curve over ${fmtNum(lz.n || 0)} issuers. Top issuer ${fmtPct(s.overall.top1)}, top 5 ${fmtPct(s.overall.top5)}.`;
-  const cum = [];
-  let run = 0;
-  (s.issuers || []).filter((r) => r.market_cap > 0).forEach((r, i) => {
-    run += r.market_cap;
-    if (i < 10 || (i + 1) % 10 === 0) cum.push({ k: i + 1, name: r.name, cap: r.market_cap, cs: run / s.overall.total });
-  });
-  renderTable(document.getElementById("lorenztable"), [
-    { h: "Top n", num: true, get: (r) => fmtNum(r.k) },
-    { h: "nth issuer", get: (r) => r.name },
-    { h: "Its cap", num: true, get: (r) => fmtUSD(r.cap) },
-    { h: "Cumulative share", num: true, get: (r) => fmtPct(r.cs, 2) },
-  ], cum, "Every issuer for the first ten, then every tenth.");
+  /* The curve is drawn by renderScope, which knows the scope. It used to be
+     drawn once here over the whole catalogue, which is why the caption had to
+     admit it ignored the selector. */
 
   // chains
   const mktTotal = s.overall.total || 0;
@@ -1430,6 +1907,7 @@ function renderStatic() {
   ], irows, "Every issuer with at least one attributed token, largest first. <em>Tokens</em> compares what the token data attributes to an issuer against the count that issuer declares through the issuers endpoint.");
   document.getElementById("issuersummary").textContent =
     `Show all ${fmtNum(irows.length)} issuers`;
+  wireIssuerLookup(irows, s);
 
   // method
   const m = s.method || {}, c = s.coverage || {}, api = s.api || {}, n = s.counts || {};
@@ -1504,7 +1982,8 @@ function renderStatic() {
 function redraw() {
   if (!SNAP) return;
   if (window.__barRows) drawBars(document.getElementById("chart-bars"), window.__barRows, window.__barTotal);
-  drawLorenz(document.getElementById("chart-lorenz"), SNAP.issuers || []);
+  drawLorenz(document.getElementById("chart-lorenz"), lorenzRowsFor(CURRENT_SCOPE));
+  renderHistory();
   const tf = SNAP.tradfi_reference || {};
   drawTradfi(document.getElementById("chart-tradfi"),
     tf.assets_with_tradfi_market || 0,
@@ -1568,18 +2047,57 @@ function inlineSnapshot() {
   }
   const sel = document.getElementById("scope");
   sel.innerHTML = scopeOptions(SNAP).map((o) => `<option value="${esc(o.id)}">${esc(o.label)}</option>`).join("");
-  sel.addEventListener("change", () => renderScope(sel.value));
-  document.querySelectorAll(".shock button").forEach((b) => {
+  sel.addEventListener("change", () => {
+    renderScope(sel.value);
+    /* Put the scope in the URL so a finding can be sent rather than described.
+       replaceState, not pushState: the selector is a filter, not navigation,
+       and it should not stack up in the back button. */
+    try {
+      const u = new URL(location.href);
+      if (sel.value === "all") u.searchParams.delete("scope");
+      else u.searchParams.set("scope", sel.value);
+      history.replaceState(null, "", u);
+    } catch (e) { /* a URL the browser will not rewrite is not worth failing over */ }
+  });
+  /* :not(.seriespick) matters. The history card borrows .shock for its pill
+     styling, and without this the series buttons were bound to the what-if
+     handler: picking a series reset SHOCK_DROP to 0 and cleared the pressed
+     state of whichever group was not clicked. */
+  document.querySelectorAll(".shock:not(.seriespick) button").forEach((b) => {
     b.addEventListener("click", () => {
       SHOCK_DROP = Number(b.dataset.drop) || 0;
-      document.querySelectorAll(".shock button").forEach((x) =>
+      document.querySelectorAll(".shock:not(.seriespick) button").forEach((x) =>
         x.setAttribute("aria-pressed", String(x === b)));
-      renderShock(blockFor(sel.value).block);
+      /* CURRENT_SCOPE, not sel.value: a ?scope= that has no <option> leaves the
+         select blank, and blockFor("") is undefined. */
+      renderShock(blockFor(CURRENT_SCOPE).block);
     });
   });
   renderStatic();
-  renderScope("all");
+  /* A ?scope= that names a block this snapshot does not have falls back to the
+     whole catalogue rather than rendering an empty page. */
+  let want = "all";
+  try {
+    const asked = new URL(location.href).searchParams.get("scope");
+    /* Validate against the options actually offered, not against "is there a
+       block". majorChains() hides chains under the floor, so their blocks exist
+       with no <option>: assigning one left the select blank while the page
+       rendered that scope. And a bare key lookup let ?scope=class:__proto__
+       resolve to Object.prototype and render a page about nothing. */
+    const offered = new Set(scopeOptions(SNAP).map((o) => o.id));
+    if (asked && offered.has(asked)) { want = asked; sel.value = asked; }
+  } catch (e) { /* fall through to "all" */ }
+  renderScope(want);
   renderCoverage();
+  renderHistory();
+  document.querySelectorAll("[data-series]").forEach((b) => {
+    b.addEventListener("click", () => {
+      HIST_KEY = b.dataset.series;
+      document.querySelectorAll("[data-series]").forEach((x) =>
+        x.setAttribute("aria-pressed", String(x === b)));
+      renderHistory();
+    });
+  });
   renderDelta();
 })();
 </script>
