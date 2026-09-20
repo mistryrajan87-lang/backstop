@@ -792,6 +792,167 @@ function serve(dir) {
           cleared === 0, `${cleared} tags left`);
   }
 
+  // 11j. THE BAR CHART. Every bar used to be labelled only if it was one of the
+  //      top three; the rest carried a name, a two-pixel stub and no number,
+  //      and the tooltip meant to carry it cannot be opened on a touch screen.
+  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+  await page.waitForTimeout(500);
+
+  const barGeom = () => {
+    const svg = document.getElementById("chart-bars");
+    if (!svg) return null;
+    const R = svg.getBoundingClientRect();
+    const labs = [...svg.querySelectorAll("text.tiplab")];
+    const bars = [...svg.querySelectorAll("path[fill]")];
+    const names = [...svg.querySelectorAll("text.catlab")];
+    return {
+      bars: bars.length,
+      labels: labs.length,
+      texts: labs.map((l) => l.textContent),
+      names: names.map((l) => l.textContent),
+      /* positive means the widest label still sits inside the chart */
+      rightMargin: labs.length ? Math.round(R.right - Math.max(...labs.map((l) => l.getBoundingClientRect().right))) : null,
+      /* the fraction of the plot the longest bar actually uses */
+      longestPct: bars.length
+        ? Math.round(100 * Math.max(...bars.map((b) => b.getBoundingClientRect().width)) / (R.width - 148))
+        : null,
+      overlap: labs.some((l, i) => {
+        const nx = labs[i + 1];
+        return nx && l.getBoundingClientRect().bottom > nx.getBoundingClientRect().top + 1;
+      }),
+    };
+  };
+
+  const bg = await page.evaluate(barGeom);
+  check("every bar carries its share, not just the top three",
+        !!bg && bg.bars > 3 && bg.labels === bg.bars,
+        JSON.stringify({ bars: bg && bg.bars, labels: bg && bg.labels }));
+  check("no bar label is pushed outside the chart",
+        !!bg && bg.rightMargin >= 0, `right margin ${bg && bg.rightMargin}px`);
+  check("bar labels do not collide with each other",
+        !!bg && bg.overlap === false, JSON.stringify(bg && bg.texts));
+
+  /* The precision bug: choosing decimals from the smallest bar and applying
+     them to every bar printed the leader as "36.6107%". Each label takes the
+     decimals IT needs. So the largest must be short, and the smallest must not
+     read as zero. */
+  check("the leading bar is labelled to one decimal, not to the smallest bar's",
+        !!bg && /^\d+\.\d%$/.test(bg.texts[0]), bg && bg.texts[0]);
+  const tinyLabels = (bg ? bg.texts : []).filter((s) => /^0(\.0+)?%$/.test(s));
+  check("no non-zero bar is labelled as a flat zero",
+        tinyLabels.length === 0, `flat zeroes: ${JSON.stringify(tinyLabels)}`);
+
+  /* The padding bug: sizing the right margin from the WIDEST label reserves
+     space for a label that belongs to the SHORTEST bar, which has the whole
+     plot to its right. It cost 113px of a 490px plot. The longest bar has to
+     use most of the width it is given. */
+  check("the longest bar uses most of the plot rather than a rounded-up axis",
+        !!bg && bg.longestPct >= 70, `longest bar is ${bg && bg.longestPct}% of the plot`);
+
+  /* The scope that holds the genuinely unreadable values. */
+  const stockKey = Object.keys(snap.by_asset_class || {}).find((k) => k === "stock")
+                   || Object.keys(snap.by_asset_class || {})[0];
+  if (stockKey) {
+    await page.selectOption("#scope", `class:${stockKey}`);
+    await page.waitForTimeout(400);
+    const sg = await page.evaluate(barGeom);
+    check("a scope whose smallest share rounds to zero still labels every bar",
+          !!sg && sg.labels === sg.bars && sg.rightMargin >= 0,
+          JSON.stringify({ labels: sg && sg.labels, bars: sg && sg.bars, texts: sg && sg.texts }));
+    const flat = (sg ? sg.texts : []).filter((s) => /^0(\.0+)?%$/.test(s));
+    check("and none of them reads as a flat zero either",
+          flat.length === 0, JSON.stringify(sg && sg.texts));
+    await page.selectOption("#scope", "all");
+    await page.waitForTimeout(350);
+  }
+
+  /* shareLabel is the thing under all of that. Exercised directly, including
+     the two branches no snapshot currently reaches: an exact zero, and a value
+     too small for four decimals. */
+  const sl = await page.evaluate(() => {
+    if (typeof shareLabel !== "function") return null;
+    return {
+      big: shareLabel(0.366107),
+      mid: shareLabel(0.0026),
+      small: shareLabel(0.0000886),
+      tiny: shareLabel(0.0000001486),
+      zero: shareLabel(0),
+      nul: shareLabel(null),
+    };
+  });
+  check("shareLabel gives every value two significant digits, and no more",
+        !!sl && sl.big === "36.6%" && sl.mid === "0.26%" && sl.small === "0.0089%",
+        JSON.stringify(sl));
+  /* The reason two significant digits and not "enough to not be zero": under
+     that rule these two bars, different by a factor of 1.5, both read 0.01%. */
+  const near = await page.evaluate(() =>
+    (typeof shareLabel === "function" ? [shareLabel(0.00014), shareLabel(0.000094)] : null));
+  check("two bars of different size are never given the same label",
+        !!near && near[0] !== near[1], JSON.stringify(near));
+  check("below four decimals it states a bound rather than rounding to zero",
+        !!sl && sl.tiny === "<0.0001%", JSON.stringify(sl));
+  check("an exact zero is labelled 0%, and a missing value is not labelled",
+        !!sl && sl.zero === "0%" && sl.nul === "", JSON.stringify(sl));
+
+  /* "Other (1 issuers)" was on the page. */
+  const pluralText = await page.evaluate(() => document.body.innerText);
+  check("counted nouns agree with their number",
+        !/\b1 (issuers|assets|tokens|chains|runs)\b/.test(pluralText),
+        (pluralText.match(/\b1 (issuers|assets|tokens|chains|runs)\b/) || ["none"])[0]);
+
+  // 11k. TABLE CLIPPING. Several tables overflowed their card by 17-19px - far
+  //      too little to read as a scrollable region and exactly enough to read
+  //      as a cut-off column. The cause was the uppercase letter-spaced HEADER
+  //      being wider than any cell under it.
+  await page.evaluate(() => document.querySelectorAll("details").forEach((d) => { d.open = true; }));
+  await page.waitForTimeout(400);
+  const wraps = await page.evaluate(() => [...document.querySelectorAll(".tablewrap")].map((wr) => {
+    const t = wr.querySelector("table");
+    const ths = [...wr.querySelectorAll("thead th")];
+    const last = ths[ths.length - 1];
+    return {
+      id: t ? t.id : "?",
+      over: wr.scrollWidth - wr.clientWidth,
+      /* a table that does not scroll must not hide its last column either */
+      lastThCut: last ? Math.round(last.getBoundingClientRect().right - wr.getBoundingClientRect().right) : 0,
+      scrollable: wr.tabIndex === 0,
+    };
+  }));
+  const hairline = wraps.filter((w) => w.over > 0 && w.over < 40);
+  check("no table overflows its card by a hairline, which reads as a cut column",
+        hairline.length === 0, JSON.stringify(hairline));
+  const cutOff = wraps.filter((w) => w.over <= 0 && w.lastThCut > 1);
+  check("a table that does not scroll shows its last column in full",
+        cutOff.length === 0, JSON.stringify(cutOff));
+  const unreachable = wraps.filter((w) => w.over > 0 && !w.scrollable);
+  check("every table that does overflow is focusable so it can be scrolled",
+        unreachable.length === 0, JSON.stringify(unreachable));
+
+  // 11l. The issuer lookup was the eleventh card of twelve. It is the one
+  //      interactive thing on the page a reader would go looking for.
+  const lookupPlace = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll("section.card")];
+    const find = document.getElementById("issuerfind");
+    const own = find ? find.closest("section.card") : null;
+    return {
+      total: cards.length,
+      idx: own ? cards.indexOf(own) : -1,
+      ids: cards.map((s) => s.id || (s.querySelector("h2") || {}).id || ""),
+    };
+  });
+  check("the issuer lookup sits in the first half of the page, not the eleventh card",
+        lookupPlace.idx > 0 && lookupPlace.idx < lookupPlace.total / 2,
+        `card ${lookupPlace.idx + 1} of ${lookupPlace.total}: ${lookupPlace.ids.join(" > ")}`);
+  check("and it still comes after the finding and the charts",
+        lookupPlace.ids.indexOf("h-headline") < lookupPlace.idx
+          && lookupPlace.ids.indexOf("h-rank") < lookupPlace.idx,
+        lookupPlace.ids.join(" > "));
+
+  await page.goto(`http://127.0.0.1:${port}/index.html`);
+  await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+  await page.waitForTimeout(300);
+
   // 12. the page must not scroll sideways, at desktop or phone width
   for (const w of [1600, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
