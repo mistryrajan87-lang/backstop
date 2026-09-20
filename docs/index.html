@@ -1463,7 +1463,12 @@ function renderAssetLookup(snap) {
          token figure whenever the reconciliation has it. */
       msg = `The asset endpoint reports no market cap for <b>${esc(r.name || r.symbol)}</b>. `;
       msg += only
-        ? `Its ${fmtNum(r.tokens)} token${r.tokens === 1 ? "" : "s"} do report one — ` +
+        /* The noun was pluralised and the verb was not, so ECHO - the one
+           token-only asset with a single token - read "Its 1 token do report
+           one". The panel sweep never reaches it and its regex could not have
+           matched "1 token do" anyway. */
+        ? `Its ${fmtNum(r.tokens)} token${r.tokens === 1 ? "" : "s"} ` +
+          `${r.tokens === 1 ? "does" : "do"} report one — ` +
           `<b>${fmtUSD(only.token_sum)}</b> — and that is the figure counted in the ` +
           `catalogue total, the index and every chart on this page. The two endpoints ` +
           `disagree about this asset; the reconciliation below is where that gap is reported.`
@@ -1729,7 +1734,12 @@ function renderScope(id) {
   document.getElementById("hero-eff").textContent = block.effective_n == null ? "—" : fmtNum(block.effective_n, 2);
   document.getElementById("hero-effsub").textContent = block.effective_n == null
     ? "No issuer values resolved in this scope."
-    : `${fmtNum(block.n)} issuers are present, but the distribution behaves like ${fmtNum(block.effective_n, 2)} of equal size.`;
+    /* Singular is not cosmetic here: with one issuer the sentence's whole point
+       - that the effective number is smaller than the headcount - is not true,
+       because the two are the same number. Say that instead. */
+    : block.n === 1
+      ? "One issuer holds everything in this scope."
+      : `${fmtNum(block.n)} issuers are present, but the distribution behaves like ${fmtNum(block.effective_n, 2)} of equal size.`;
   document.getElementById("hero-hhi").textContent = block.hhi == null ? "—" : fmtNum(block.hhi, 1);
   /* Nothing is written under the HHI, deliberately, and there is no element to
      write into. The slot held a chip naming an HHI band; the first replacement
@@ -1780,8 +1790,13 @@ function renderScope(id) {
   document.getElementById("barscap").textContent = note;
   document.getElementById("barsdesc").textContent =
     `Horizontal bar chart of the largest issuers by tokenised market cap. Leader ${rows[0] ? rows[0].label : "n/a"} at ${rows[0] ? fmtPct(rows[0].value / block.total) : "n/a"} of the scope.`;
+  /* Three chain scopes hold exactly one issuer, and this line said "1 issuers"
+     in all three while the Lorenz caption a few hundred pixels below got it
+     right. The page-wide plural sweep only ever runs in the default scope, so
+     nothing caught it. */
   document.getElementById("scopecount").textContent =
-    `${fmtNum(block.n)} issuers · ${fmtUSD(block.total)} tokenised cap · HHI ${block.hhi == null ? "—" : fmtNum(block.hhi, 1)}`;
+    `${fmtNum(block.n)} issuer${block.n === 1 ? "" : "s"} · ${fmtUSD(block.total)} ` +
+    `tokenised cap · HHI ${block.hhi == null ? "—" : fmtNum(block.hhi, 1)}`;
 
   drawBars(document.getElementById("chart-bars"), rows, block.total);
   renderTable(document.getElementById("barstable"), [
@@ -2372,7 +2387,15 @@ function renderStatic() {
     ["Assets in the map", fmtNum(n.assets_mapped)],
     ["Of those, tokenised", fmtNum(n.assets_tokenised)],
     ["Assets quoted this run", fmtNum(n.assets_quoted) + (c.assets_fully_quoted ? "" : " (partial run)")],
-    ["Tokens attributed to an issuer", fmtNum(n.tokens_attributed)],
+    /* counts.tokens_attributed is every token seen on a quoted asset, issuer or
+       not - it is the denominator for the null-cap figure below. Labelling it
+       "attributed to an issuer" put it four rows above "Tokens with no issuer 5"
+       and made one of the two false. Both rows are now true, and the count that
+       IS attributed is shown rather than left for the reader to subtract. */
+    ["Tokens matched to an asset", fmtNum(n.tokens_attributed)],
+    ["Of those, carrying an issuer",
+     n.tokens_attributed == null ? "—"
+       : fmtNum(n.tokens_attributed - (c.tokens_without_issuer || 0))],
     ["Issuers in the directory", fmtNum(n.issuers_in_directory)],
     ["Issuers carrying value", fmtNum(n.issuers_with_value)],
     ["Tokens with no issuer", `${fmtNum(c.tokens_without_issuer)} (${fmtUSD(c.value_without_issuer)})`],
