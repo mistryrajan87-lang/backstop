@@ -11,7 +11,8 @@ rather than an object, and the id parameters are `rwa_id` and `issuer_id`.
 
 Test 1 is the one that matters. It encodes the mistake this pipeline exists to
 avoid: crediting an asset's whole market cap to every issuer that mints a token
-for it. Gold alone is $4.68bn across seven issuers, so that error does not blur
+for it. Gold alone is $4.68bn across six issuers - seven tokens, two of them
+Tether's - so that error does not blur
 the answer, it multiplies it.
 
 Run:  python3 tests/test_aggregation.py
@@ -1262,6 +1263,53 @@ def test_readme_nullcaps_are_generated():
     check("and three off says three, naming the worst",
           dirty is not None and "3 assets are more than 1% out" in dirty and "ZZZ" in dirty,
           str(dirty)[:200])
+    # The near-miss table. Three typed figures lived here - "Nine", "Three" and
+    # JAAA at $65,242, which the snapshot had at $91,247 and the page's own
+    # generated prose printed as $91K. Feed the generator a different map and
+    # the block has to follow it.
+    def notinmap_region(mutate):
+        import shutil, subprocess, tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            d = os.path.join(tmp, "docs"); os.makedirs(os.path.join(d, "data"))
+            shutil.copy(page_src, os.path.join(d, "index.html"))
+            shutil.copy(readme_src, os.path.join(tmp, "README.md"))
+            snap = json.loads(open(snap_src, encoding="utf-8").read())
+            mutate(snap)
+            with open(os.path.join(d, "data", "snapshot.json"), "w", encoding="utf-8") as fh:
+                json.dump(snap, fh)
+            rr = subprocess.run([sys.executable,
+                                 os.path.join(root, "scripts", "inline_snapshot.py"), d],
+                                capture_output=True, text=True, cwd=tmp)
+            if rr.returncode != 0:
+                return None
+            md = open(os.path.join(tmp, "README.md"), encoding="utf-8").read()
+            i = md.find("<!-- backstop:notinmap:start -->")
+            j = md.find("<!-- backstop:notinmap:end -->")
+            return md[i:j] if i >= 0 and j >= 0 else None
+
+    base_nm = notinmap_region(lambda s: None)
+    check("the generator writes the near-miss block", base_nm is not None, str(base_nm)[:80])
+    if base_nm is not None:
+        live_nic = json.loads(open(snap_src, encoding="utf-8").read())["not_in_this_catalogue"]
+        for entry in live_nic.get("present", []):
+            v = float(entry.get("attributed_value") or 0.0)
+            if v > 0:
+                check(f"the block carries {entry['symbol']}'s value from the snapshot",
+                      f"${v:,.0f}" in base_nm, f"${v:,.0f} not in block")
+        moved = notinmap_region(lambda s: s["not_in_this_catalogue"].update(
+            absent=["AAA", "BBB"],
+            present=[{"symbol": "ZZZ", "name": "Zed Fund", "has_tokens": True,
+                      "attributed_value": 4242.0}]))
+        check("a different map produces a different block",
+              moved is not None and moved != base_nm, str(moved)[:120])
+        check("and the counts are words written from the list, not typed",
+              moved is not None and "Two are not in it" in moved
+              and "One does match a row" in moved and "$4,242" in moved,
+              str(moved)[:220])
+        check("no hand-typed near-miss figure survives in the README prose",
+              "65,242" not in open(readme_src, encoding="utf-8").read(),
+              "the 19 Sep hand-typed JAAA value is still there")
+
     check("no hand-typed reconciliation figure survives in the README prose",
           "exactly one asset is more than 1% out" not in open(readme_src, encoding="utf-8").read(),
           "the hand-typed 1%-out claim is still there")
