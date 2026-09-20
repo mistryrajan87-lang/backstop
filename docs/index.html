@@ -269,6 +269,12 @@ td a:hover { border-bottom-color: var(--ink-2); }
 }
 .notlist strong { color: var(--ink); }
 
+/* The only links on the page outside a table or the footer. Without this they
+   render as the browser's default blue - which is wrong here in light mode and
+   unreadable in dark. Same treatment as the table links. */
+.gatecard a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--border); }
+.gatecard a:hover, .gatecard a:focus-visible { border-bottom-color: var(--ink-2); }
+
 details.tableview { margin-top: 14px; }
 details.tableview > summary {
   cursor: pointer; font-size: 12.5px; color: var(--ink-2);
@@ -692,6 +698,67 @@ footer a { color: var(--ink-2); }
       <figcaption id="tradficap"></figcaption>
     </figure>
     <div id="venueblock" style="margin-top:22px"></div>
+  </section>
+
+  <!-- gates -----------------------------------------------------------------
+       Everything above is a number. This is the part that says what happens
+       when a number is wrong, which is the only reason to believe the rest.
+       Each line points at a file in the repository; the two bands quoted in
+       the first line are checked against the workflow itself by
+       tests/test_page.js, so this block cannot drift from the gate it
+       describes. -->
+  <section class="card gatecard" aria-labelledby="h-gates">
+    <h2 id="h-gates">What stops a wrong number being published</h2>
+    <p class="sub">The page and the data behind it are rebuilt together every morning by a
+      scheduled job. A run that cannot satisfy the following does not publish: the page, the
+      archive and the repository are left exactly as the previous run left them.</p>
+
+    <ul class="notlist" id="gatelist">
+      <li><strong>Two independent price sources have to agree.</strong> CoinMarketCap prices
+        each asset twice — once at asset level, and once as the sum of the tokens that
+        represent it. The run compares them across every asset both of them price. Outside
+        <b class="gate-band">0.85–1.15&times;</b> it aborts and publishes nothing; inside that but
+        outside <b class="gate-band">0.98–1.02&times;</b> it publishes and records a warning against
+        quoting the headline until someone knows why. <span id="gate-recon"></span></li>
+
+      <li><strong>The rendered page is checked against the data it was built from.</strong>
+        A headless browser loads the built page and re-derives the figures on it, and the
+        wording around them, from the same snapshot. It runs before the commit step, so a
+        page that disagrees with its own data never reaches the repository. It is not
+        sufficient, and the commit history says so: four wrong statements have shipped past
+        it, each one caught by reading the rendered page rather than by a check. What
+        replaced them tests the class rather than the instance — the bound on small shares
+        is fuzzed over twenty thousand values now, instead of three. The honest claim is
+        that this catches drift, not that it catches everything.</li>
+
+      <li><strong>The prose is generated, not typed.</strong> The headline sentence, the line
+        beneath it, the no-JavaScript box and the README&rsquo;s figures are written into the
+        files by the run that writes the data, between markers in the source. The README was
+        the exception: it was regenerated every run and the regeneration was never committed,
+        so the one file whose job is to quote current figures to someone who never opens the
+        page sat two runs behind it. That is fixed, and the fix is in the history.</li>
+
+      <li><strong>Every run is kept.</strong> One snapshot file per run, under its own
+        timestamp, never overwritten. The daily series above is read from a separate
+        one-row-per-day file; the per-run snapshots are the receipts behind it.</li>
+
+      <li><strong>Calls the API refused are reported, not dropped.</strong> They are listed
+        in the method section below. The one endpoint this plan cannot reach is recorded from
+        the live refusal rather than assumed from the documentation.</li>
+
+      <li><strong>The API key is not in the repository.</strong> It is an encrypted
+        repository secret, read from the environment and sent as a request header. It is
+        never written to a file, never placed in a URL, and never echoed — the run prints
+        how many characters it is and nothing else.</li>
+    </ul>
+
+    <p class="sub" style="margin:16px 0 0">Read them yourself:
+      <a href="https://github.com/mistryrajan87-lang/backstop/blob/main/.github/workflows/refresh.yml" rel="noopener">the workflow</a>
+      holds the gates and their order,
+      <a href="https://github.com/mistryrajan87-lang/backstop/tree/main/tests" rel="noopener">tests/</a>
+      holds the checks, and
+      <a href="https://github.com/mistryrajan87-lang/backstop/actions" rel="noopener">Actions</a>
+      holds the log of every run, passed or refused.</p>
   </section>
 
   <!-- method --------------------------------------------------------------- -->
@@ -2312,6 +2379,17 @@ function renderStatic() {
     ["Rate limit", plan.rate_limit_minute ? `${fmtNum(plan.rate_limit_minute)} requests/minute` : "—"],
     ["Growth-tier endpoint reachable", s.market_pairs_probe ? (s.market_pairs_probe.available ? "yes" : "no — plan-gated, recorded from the live response") : "not probed"],
   ];
+  /* The gate card quotes the bands; this is where the run's own figure against
+     them goes. Written from the snapshot rather than typed, for the same reason
+     everything else on the page is: a hand-typed "1.000x" would survive the
+     morning it stopped being true. */
+  document.getElementById("gate-recon").innerHTML = rec.ratio == null
+    ? `<b>No ratio this run</b> — nothing could be compared, which the method ` +
+      `section records as a warning.`
+    : `This run: <b>${fmtNum(rec.ratio, 3)}&times;</b> over ` +
+      `${fmtNum(rec.assets_compared)} assets, with ` +
+      `<b>${fmtNum(rec.assets_off_by_over_1pct)}</b> of them more than 1% out.`;
+
   document.getElementById("methodkv").innerHTML = kv.map(([k, v]) =>
     `<div><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join("") +
     (c.note ? `<div style="grid-column:1/-1;border-bottom:0"><span class="k">${esc(c.note)}</span></div>` : "");
