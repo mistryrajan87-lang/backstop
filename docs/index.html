@@ -581,6 +581,27 @@ footer a { color: var(--ink-2); }
     </details>
   </section>
 
+  <!-- assets lookup -------------------------------------------------------- -->
+  <section class="card" id="assetlookup" aria-labelledby="h-assetfind" hidden>
+    <h2 id="h-assetfind">Every asset</h2>
+    <p class="sub" id="assetfindsub"></p>
+
+    <div class="find">
+      <label class="findlabel" for="assetfind">Find an asset</label>
+      <input type="search" id="assetfind" placeholder="Gold, SPY, Tesla&hellip;"
+             autocomplete="off" spellcheck="false"
+             aria-describedby="assetfindnote" aria-controls="assetindextable">
+      <span class="findnote" id="assetfindnote"></span>
+    </div>
+    <div id="assetcard" class="issuercard" role="region" aria-live="polite"
+         aria-label="Selected asset" hidden></div>
+
+    <details class="tableview" id="assetindexdetails">
+      <summary id="assetindexsummary">Show every asset</summary>
+      <div class="tablewrap"><table id="assetindextable"></table></div>
+    </details>
+  </section>
+
   <!-- coverage ------------------------------------------------------------- -->
   <section class="card" aria-labelledby="h-coverage">
     <h2 id="h-coverage">What the headline covers</h2>
@@ -1198,6 +1219,209 @@ function wireIssuerLookup(rows, snap) {
     det.open = true;
     if (shown === 1) show(only); else clear();
   });
+}
+
+/* ---------------------------------------------------------------------------
+   Asset lookup. Reads snapshot.asset_index, which is columnar: `fields` names
+   the columns and every asset is a row. The column order is read from `fields`
+   rather than hardcoded, because the file documents itself that way and a
+   reader who reorders it should not silently get a page about the wrong numbers.
+
+   The whole card hides itself when the snapshot has no index. That is not
+   defensive habit: this page is regenerated from whatever snapshot.json holds,
+   and an older archived snapshot has no asset_index at all.
+   --------------------------------------------------------------------------- */
+function assetIndexRows(snap) {
+  const ai = snap && snap.asset_index;
+  if (!ai || !Array.isArray(ai.fields) || !Array.isArray(ai.rows)) return null;
+  const at = {};
+  ai.fields.forEach((f, i) => { at[f] = i; });
+  for (const need of ["symbol", "name", "asset_class", "tokenised_market_cap",
+                      "tokens", "issuers", "top_issuer", "tradfi_markets"]) {
+    if (at[need] == null) return null;
+  }
+  const issuers = Array.isArray(snap.issuers) ? snap.issuers : [];
+  return ai.rows.map((r) => ({
+    symbol: r[at.symbol],
+    name: r[at.name],
+    asset_class: r[at.asset_class],
+    cap: r[at.tokenised_market_cap],
+    tokens: r[at.tokens],
+    issuers: r[at.issuers],
+    /* -1 is a real state, not a missing value: an asset can carry tokens that
+       all report no market cap, and then nobody leads it. */
+    lead: r[at.top_issuer] >= 0 && issuers[r[at.top_issuer]]
+      ? issuers[r[at.top_issuer]].name : null,
+    tradfi: r[at.tradfi_markets],
+  }));
+}
+
+function renderAssetLookup(snap) {
+  const card = document.getElementById("assetlookup");
+  const rows = assetIndexRows(snap);
+  if (!card || !rows || !rows.length) return;
+  card.hidden = false;
+
+  /* The sentence the full index makes possible. Generated, never typed: it
+     moves every morning, and the whole point of publishing 791 rows instead of
+     25 is that this ratio is visible at all. */
+  const priced = rows.filter((r) => r.cap > 0).length;
+  const quiet = rows.length - priced;
+  const noLead = rows.filter((r) => r.lead == null).length;
+  document.getElementById("assetfindsub").innerHTML =
+    `The catalogue lists <b>${fmtNum(rows.length)}</b> tokenised assets. ` +
+    `<b>${fmtNum(priced)}</b> of them carry a market cap the API will report; the ` +
+    `other <b>${fmtNum(quiet)}</b> are listed and tokenised and priced at zero. ` +
+    `For <b>${fmtNum(noLead)}</b>, no token reports a value at all, so no issuer ` +
+    `leads them: they are counted in the catalogue and absent from every share ` +
+    `on this page.`;
+
+  const find = document.getElementById("assetfind");
+  const note = document.getElementById("assetfindnote");
+  const panel = document.getElementById("assetcard");
+  const det = document.getElementById("assetindexdetails");
+  const table = document.getElementById("assetindextable");
+  if (!find || !note || !panel || !det || !table) return;
+
+  renderTable(table, [
+    { h: "Asset", raw: true, get: (r) =>
+        `${esc(r.name || r.symbol)} <span style="color:var(--muted)">${esc(r.symbol)}</span>` },
+    { h: "Class", get: (r) => r.asset_class },
+    { h: "Tokenised cap", num: true, get: (r) => fmtUSD(r.cap) },
+    { h: "Tokens", num: true, get: (r) => fmtNum(r.tokens) },
+    { h: "Issuers", num: true, get: (r) => fmtNum(r.issuers) },
+    { h: "Leading issuer", get: (r) => r.lead || "—" },
+    { h: "Quoted off-chain", num: true, get: (r) => fmtNum(r.tradfi) },
+  ], rows,
+    "Every asset the catalogue tokenises, largest first. <em>Tokenised cap</em> is the " +
+    "asset-level figure from <code>quotes/latest</code>, not the sum of its tokens — the two " +
+    "disagree, and the reconciliation below says by how much. A dash under <em>leading issuer</em> " +
+    "means no token for that asset reports any market cap, so there is nothing to lead.");
+
+  const body = table.querySelector("tbody");
+  const trs = [...body.rows];
+  trs.forEach((tr, i) => {
+    tr.dataset.idx = String(i);
+    tr.classList.add("hit");
+    tr.tabIndex = 0;
+    tr.setAttribute("role", "button");
+    tr.setAttribute("aria-label", `Show details for ${rows[i] ? rows[i].name || rows[i].symbol : "this asset"}`);
+  });
+  note.setAttribute("aria-live", "polite");
+
+  /* top_assets carries the issuer split for the largest 25. Where the selected
+     asset is one of them, the panel shows who else mints it - which is the
+     single clearest illustration of why value is attributed per token. */
+  const split = {};
+  (snap.top_assets || []).forEach((a) => { if (a.symbol) split[a.symbol] = a; });
+  const total = (snap.overall || {}).total || 0;
+  const hay = rows.map((r) => `${r.symbol} ${r.name} ${r.asset_class}`.toLowerCase());
+
+  function show(i) {
+    const r = rows[i];
+    if (!r) return;
+    trs.forEach((tr) => tr.classList.toggle("sel", tr.dataset.idx === String(i)));
+    const cells = [
+      ["Tokenised cap", fmtUSD(r.cap), ""],
+      /* Of the catalogue, never of the selected scope: this card is the whole
+         directory, the same denominator the issuer panel names. */
+      ["Share of catalogue", total > 0 ? shareLabel(r.cap / total) : "—", ""],
+      ["Tokens", fmtNum(r.tokens), r.tokens === 1 ? "representing it" : "representing it"],
+      ["Issuers", fmtNum(r.issuers), r.issuers === 1 ? "mints it" : "mint it"],
+      ["Quoted off-chain", fmtNum(r.tradfi), "traditional markets"],
+    ];
+    let msg = "";
+    if (!(r.cap > 0)) {
+      msg = `<b>${esc(r.name || r.symbol)}</b> is in the catalogue and carries ` +
+            `${fmtNum(r.tokens)} token${r.tokens === 1 ? "" : "s"}, but the asset endpoint ` +
+            `prices it at zero. It counts towards the ${fmtNum(rows.length)} assets and ` +
+            `towards nothing else on this page.`;
+    }
+    if (r.lead == null && r.issuers > 0) {
+      /* "none of its 1 issuer" was the first wording. One issuer and several
+         issuers are different sentences, not the same sentence with an -s. */
+      msg += (msg ? " " : "") + `No token for it reports a market cap, so ` +
+             (r.issuers === 1
+               ? `its only issuer cannot be called the largest either.`
+               : `none of its ${fmtNum(r.issuers)} issuers can be called the largest.`);
+    }
+    const top = split[r.symbol];
+    let splitHtml = "";
+    if (top && Array.isArray(top.split) && top.split.length > 1) {
+      splitHtml = `<p class="icnote">Minted by ` +
+        /* shareLabel, not fmtPct: the tail of a split runs small, and a fixed
+           one decimal printed the sixth issuer of Gold as "0.0%" - which is a
+           different claim from "too small to show at one decimal". */
+        top.split.map((s) => `<b>${esc(s.issuer)}</b> ${shareLabel(s.share)}`).join(", ") +
+        `. Each mints its own token with its own market cap, which is why this ` +
+        `asset's value is split rather than credited to one of them.</p>`;
+    }
+    panel.innerHTML =
+      `<div class="ictop"><h3>${esc(r.name || r.symbol)} <span style="color:var(--muted);font-weight:400">${esc(r.symbol)}</span></h3>` +
+      `<button type="button" class="icclose">Clear</button></div>` +
+      `<dl class="icgrid">` +
+      cells.map(([k, v, u]) =>
+        `<div><dt>${esc(k)}</dt><dd>${esc(v)}` +
+        (u ? ` <span class="unit">${esc(u)}</span>` : "") + `</dd></div>`).join("") +
+      `</dl>` +
+      (msg ? `<p class="icnote">${msg}</p>` : "") +
+      splitHtml +
+      `<p class="icnote">Class: ${esc(r.asset_class)}</p>`;
+    panel.hidden = false;
+    panel.querySelector(".icclose").addEventListener("click", () => { clear(); find.focus(); });
+  }
+
+  function clear() {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    trs.forEach((tr) => tr.classList.remove("sel"));
+  }
+
+  body.addEventListener("click", (e) => {
+    if (e.target.closest("a")) return;
+    const tr = e.target.closest("tr");
+    if (tr && tr.dataset.idx) show(Number(tr.dataset.idx));
+  });
+  body.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const tr = e.target.closest("tr");
+    if (!tr || !tr.dataset.idx) return;
+    e.preventDefault();
+    show(Number(tr.dataset.idx));
+  });
+
+  find.addEventListener("input", () => {
+    const q = find.value.trim().toLowerCase();
+    if (!q) {
+      trs.forEach((tr) => { tr.hidden = false; });
+      note.textContent = "";
+      return;
+    }
+    let shown = 0, only = -1, exact = -1;
+    trs.forEach((tr, i) => {
+      const hit = hay[i].includes(q);
+      tr.hidden = !hit;
+      if (!hit) return;
+      shown++;
+      only = i;
+      /* "Gold" matches seven assets, one of which IS Gold. Without this the
+         reader who typed the name of the largest asset in the catalogue gets a
+         filtered list and no panel. Symbol first: tickers are unambiguous. */
+      if (exact < 0 && (rows[i].symbol || "").toLowerCase() === q) exact = i;
+      if (exact < 0 && (rows[i].name || "").toLowerCase() === q) exact = i;
+    });
+    note.textContent = shown === 0 ? "no asset matches that"
+                     : shown === 1 ? "1 asset"
+                     : exact >= 0 ? `${fmtNum(shown)} assets, showing the exact match`
+                     : `${fmtNum(shown)} assets`;
+    det.open = true;
+    if (shown === 1) show(only);
+    else if (exact >= 0) show(exact);
+    else clear();
+  });
+
+  document.getElementById("assetindexsummary").textContent =
+    `Show every asset (${fmtNum(rows.length)})`;
 }
 
 function renderTable(node, cols, rows, note) {
@@ -1974,6 +2198,7 @@ function renderStatic() {
   document.getElementById("issuersummary").textContent =
     `Show all ${fmtNum(irows.length)} issuers`;
   wireIssuerLookup(irows, s);
+  renderAssetLookup(s);
 
   // method
   const m = s.method || {}, c = s.coverage || {}, api = s.api || {}, n = s.counts || {};
