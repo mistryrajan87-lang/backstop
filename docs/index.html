@@ -820,7 +820,23 @@ const fmtAxis = (v) => {
   if (a >= 1e3)  return "$" + trim(v / 1e3, 0) + "K";
   return "$" + trim(v, 0);
 };
-const fmtPct = (v, dp = 1) => (v == null || !isFinite(v)) ? "—" : (v * 100).toFixed(dp) + "%";
+/* A positive value must never render as "0.00%". Hyperliquid Assets holds
+   $1,111.44 of a $7.5bn book; at two decimals that rounded to "0.00%", printed
+   in the issuer table one row above six issuers holding literally nothing, and
+   read as the same statement about both. That is the TSLA "0%" bug again in a
+   different formatter - fixed there by moving one call site, which left every
+   other call site free to repeat it. So the rule lives in the formatter: below
+   what `dp` can show, say so as a bound rather than rounding a real holding to
+   nothing. Exact zero still prints as zero, because that is what it is. */
+const fmtPct = (v, dp = 1) => {
+  if (v == null || !isFinite(v)) return "—";
+  const out = (v * 100).toFixed(dp);
+  if (v !== 0 && Number(out) === 0) {
+    const bound = (Math.pow(10, -dp)).toFixed(dp);
+    return (v > 0 ? "<" : ">-") + bound + "%";
+  }
+  return out + "%";
+};
 const fmtNum = (v, dp = 0) =>
   (v == null || !isFinite(v)) ? "—" : v.toLocaleString("en-GB", { minimumFractionDigits: dp, maximumFractionDigits: dp });
 /* The decimals a share needs, and no more: enough for TWO significant digits,
@@ -1928,7 +1944,18 @@ function renderDelta() {
   }
   if (!items.length) { box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = "<h3>Since the day before — " + esc(was.date) + " to " + esc(now.date)
+  /* "the day before" is only true when the two rows are consecutive dates. One
+     missed cron and the sentence is wrong in exactly the way "the run before
+     this one" was wrong before it - a label asserting an adjacency the data
+     does not have. history.jsonl already has a gap of this kind at 2026-09-17,
+     from before the file existed. */
+  const dayMs = 86400000;
+  const gapDays = Math.round((Date.parse(now.date + "T00:00:00Z")
+                            - Date.parse(was.date + "T00:00:00Z")) / dayMs);
+  const heading = gapDays === 1
+    ? "Since the day before"
+    : `Since the last recorded day, ${fmtNum(gapDays)} days earlier`;
+  box.innerHTML = "<h3>" + esc(heading) + " — " + esc(was.date) + " to " + esc(now.date)
     + "</h3><div class=\"deltarow\">" + items.join("") + "</div>"
     + '<p class="deltafoot">Arithmetic on two rows of <a href="data/history.jsonl">history.jsonl</a>, '
     + "which the scheduled job writes once a day, keeping that day's last run. Red means more "
@@ -2212,7 +2239,15 @@ function renderStatic() {
       const pres = (nic.present || []).map((p) =>
         typeof p === "string" ? { symbol: p } : p);
       if (pres.length) {
-        line += " Three tickers do match a row, and none is the product you would " +
+        /* "Three" was typed, inside prose the gate card calls generated. Drop
+           one entry from the snapshot and the page said Three over a list of
+           two, with every check green. */
+        const WORDS = ["no", "one", "two", "three", "four", "five", "six",
+                       "seven", "eight", "nine", "ten"];
+        const count = WORDS[pres.length] || fmtNum(pres.length);
+        line += ` ${count.charAt(0).toUpperCase() + count.slice(1)} ticker` +
+          `${pres.length === 1 ? " does" : "s do"} match a row, and ` +
+          `${pres.length === 1 ? "it is not" : "none is"} the product you would ` +
           "assume: " + pres.map((p) => {
             const state = p.attributed_value
               ? "carries " + fmtUSD(p.attributed_value)
