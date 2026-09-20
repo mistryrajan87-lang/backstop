@@ -231,6 +231,14 @@ table { border-collapse: collapse; width: 100%; font-size: 13px; }
 caption { text-align: left; font-size: 12.5px; color: var(--muted); padding: 0 4px 10px; }
 th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
 th { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+/* Headers wrap; data does not. Uppercase plus letter-spacing made the HEADER
+   the widest thing in several tables, which pushed them 17-19px past their
+   card - far too little to look like a scrollable region and exactly enough to
+   look like a cut-off column. Wrapping the headers removes the hairline
+   overflow in every table where the header was the cause, and leaves the two
+   genuinely wide tables (assets, issuers) scrolling as they should. */
+thead th { white-space: normal; vertical-align: bottom; }
+@media (max-width: 480px) { th, td { padding: 8px 7px; } }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 tbody tr:hover { background: var(--wash); }
 tbody tr:last-child td { border-bottom: 0; }
@@ -552,6 +560,27 @@ footer a { color: var(--ink-2); }
     </section>
   </div>
 
+  <!-- issuers -------------------------------------------------------------- -->
+  <section class="card" aria-labelledby="h-issuers">
+    <h2 id="h-issuers">Every issuer</h2>
+    <p class="sub">The full directory, largest first. This is the table view for both charts above — every value in them is readable here.</p>
+
+    <div class="find">
+      <label class="findlabel" for="issuerfind">Find an issuer</label>
+      <input type="search" id="issuerfind" placeholder="Tether, Ondo, Backed…"
+             autocomplete="off" spellcheck="false"
+             aria-describedby="findnote" aria-controls="issuertable">
+      <span class="findnote" id="findnote"></span>
+    </div>
+    <div id="issuercard" class="issuercard" role="region" aria-live="polite"
+         aria-label="Selected issuer" hidden></div>
+
+    <details class="tableview" id="issuerdetails">
+      <summary id="issuersummary">Show every issuer</summary>
+      <div class="tablewrap"><table id="issuertable"></table></div>
+    </details>
+  </section>
+
   <!-- coverage ------------------------------------------------------------- -->
   <section class="card" aria-labelledby="h-coverage">
     <h2 id="h-coverage">What the headline covers</h2>
@@ -644,27 +673,6 @@ footer a { color: var(--ink-2); }
     <div id="venueblock" style="margin-top:22px"></div>
   </section>
 
-  <!-- issuers -------------------------------------------------------------- -->
-  <section class="card" aria-labelledby="h-issuers">
-    <h2 id="h-issuers">Every issuer</h2>
-    <p class="sub">The full directory, largest first. This is the table view for both charts above — every value in them is readable here.</p>
-
-    <div class="find">
-      <label class="findlabel" for="issuerfind">Find an issuer</label>
-      <input type="search" id="issuerfind" placeholder="Tether, Ondo, Backed…"
-             autocomplete="off" spellcheck="false"
-             aria-describedby="findnote" aria-controls="issuertable">
-      <span class="findnote" id="findnote"></span>
-    </div>
-    <div id="issuercard" class="issuercard" role="region" aria-live="polite"
-         aria-label="Selected issuer" hidden></div>
-
-    <details class="tableview" id="issuerdetails">
-      <summary id="issuersummary">Show every issuer</summary>
-      <div class="tablewrap"><table id="issuertable"></table></div>
-    </details>
-  </section>
-
   <!-- method --------------------------------------------------------------- -->
   <section class="card" aria-labelledby="h-method">
     <h2 id="h-method">Method, coverage and cost</h2>
@@ -726,6 +734,32 @@ const fmtAxis = (v) => {
 const fmtPct = (v, dp = 1) => (v == null || !isFinite(v)) ? "—" : (v * 100).toFixed(dp) + "%";
 const fmtNum = (v, dp = 0) =>
   (v == null || !isFinite(v)) ? "—" : v.toLocaleString("en-GB", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+/* The decimals a share needs, and no more: enough for TWO significant digits,
+   capped at four decimal places.
+
+   "Enough to not be zero" was the first rule and it is not enough. It labels
+   0.014% and 0.0094% both "0.01%" - two visibly different bars carrying the
+   same number, which is the same failure as the history axis printing "94.1%"
+   three times. Two significant digits keeps them apart.
+
+   Past four decimals the exact figure stops being anything a reader can use,
+   so it becomes an explicit bound rather than a rounded-down zero: today's
+   smallest is Hyperliquid Assets at 0.0000149% of the whole catalogue, and
+   "0.0000%" would be a different claim from "too small to show" - a false one.
+   An exact zero prints "0%", so the absent bar beside it is explained rather
+   than looking like a chart that failed to draw. */
+function shareLabel(s) {
+  if (s == null || !isFinite(s)) return "";
+  if (s === 0) return "0%";
+  const pct = s * 100;
+  for (let dp = 1; dp <= 4; dp++) {
+    const fixed = pct.toFixed(dp);
+    const sig = fixed.replace("-", "").replace(".", "").replace(/^0+/, "").length;
+    if (sig >= 2) return fixed + "%";
+  }
+  return s > 0 ? "<0.0001%" : ">-0.0001%";
+}
+
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -794,19 +828,47 @@ function drawBars(svg, rows, total) {
   const W = Math.max(300, Math.round(svg.clientWidth || 520));
   const narrow = W < 520;
   const BAR = 18, BAND = narrow ? 28 : 30, PAD_T = 8, PAD_B = 34;
-  const LABW = narrow ? 118 : 148, PAD_R = narrow ? 46 : 58;
+  const LABW = narrow ? 118 : 148;
   const MAXCHARS = narrow ? 16 : 22;
   const n = rows.length;
   const H = PAD_T + n * BAND + PAD_B;
+
+  // The axis domain runs to the tick ABOVE the largest bar, so no bar ever
+  // extends past the last gridline with nothing to read it against. It depends
+  // only on the values, so it is settled before the plot width is.
+  const max = Math.max(...rows.map((r) => r.value), 0);
+  /* Three ticks when narrow, not two. Two rounds so coarsely that today's
+     largest bar (2.74B) sat against a 4B domain and ended at 68% of the plot -
+     which compresses every bar below it by the same third, and the bars that
+     could least afford it are the ones this chart was just taught to label. */
+  const tk = ticks(max, narrow ? 3 : 4);
+  const domain = Math.max(max, tk[tk.length - 1]);
+
+  /* Every bar carries its share. Previously only the top three were labelled:
+     the rest of the chart was a name, a two-pixel stub and no number, and on a
+     touch screen the tooltip that was meant to carry it cannot be opened at
+     all. shareLabel() gives each value the decimals it needs and no more. */
+  const labels = rows.map((r) => shareLabel(total > 0 ? r.value / total : null));
+
+  /* The right padding is what the labels need, but only the bars long enough to
+     reach the right-hand end can consume it - a wide label on a short bar has
+     the whole plot to its right. Measuring the widest label instead cost 113px
+     of a 490px plot, because the widest label in this chart belongs to the
+     SMALLEST bar. Two passes: guess, measure the shortfall, settle. */
+  const CH = 7, GAP = 8, PAD_R_MIN = narrow ? 46 : 58;
+  let PAD_R = PAD_R_MIN;
+  for (let pass = 0; pass < 2; pass++) {
+    const pw = Math.max(90, W - LABW - PAD_R);
+    const need = Math.max(PAD_R_MIN, ...rows.map((r, i) => {
+      if (!labels[i]) return 0;
+      const end = domain > 0 ? (r.value / domain) * pw : 0;
+      return end + GAP + labels[i].length * CH - pw;
+    }));
+    PAD_R = Math.ceil(need);
+  }
   const plotW = Math.max(90, W - LABW - PAD_R);
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.setAttribute("height", H);
-
-  // The axis domain runs to the tick ABOVE the largest bar, so no bar ever
-  // extends past the last gridline with nothing to read it against.
-  const max = Math.max(...rows.map((r) => r.value), 0);
-  const tk = ticks(max, narrow ? 2 : 4);
-  const domain = Math.max(max, tk[tk.length - 1]);
   const x = (v) => (domain > 0 ? (v / domain) * plotW : 0);
   const g = el("g");
 
@@ -833,10 +895,11 @@ function drawBars(svg, rows, total) {
     const name = r.label.length > MAXCHARS ? r.label.slice(0, MAXCHARS - 1) + "…" : r.label;
     g.appendChild(el("text", { class: "catlab", x: LABW - 10, y: yTop + BAR / 2 + 4, "text-anchor": "end" }, name));
 
-    // Label the three extremes only; the axis and the tooltip carry the rest.
-    if (i < 3) {
+    /* Every bar, not the top three. A bar too short to read is exactly the one
+       whose number the reader cannot infer from the axis. */
+    if (labels[i]) {
       g.appendChild(el("text", { class: "tiplab", x: LABW + w + 8, y: yTop + BAR / 2 + 4 },
-        fmtPct(total > 0 ? r.value / total : null)));
+        labels[i]));
     }
 
     // Hit area spans the whole band (>=24px tall) so hover is not a pinpoint task.
@@ -1331,7 +1394,9 @@ function renderScope(id) {
     const all = SNAP.issuers.filter((r) => r.market_cap > 0);
     const head = all.slice(0, 14).map((r) => ({ label: r.name, value: r.market_cap, assets: r.assets }));
     const tail = all.slice(14).reduce((a, r) => a + r.market_cap, 0);
-    if (tail > 0) head.push({ label: `Other (${all.length - 14} issuers)`, value: tail });
+    /* Plural agreement: with 15 priced issuers this read "Other (1 issuers)". */
+    const others = all.length - 14;
+    if (tail > 0) head.push({ label: `Other (${fmtNum(others)} issuer${others === 1 ? "" : "s"})`, value: tail });
     rows = head;
     note = `Top 14 of ${fmtNum(all.length)} issuers; the remainder is folded into a single bar rather than given its own colour.`;
   } else {
@@ -1339,7 +1404,8 @@ function renderScope(id) {
     const shown = leaders.reduce((a, r) => a + r.value, 0);
     const rest = Math.max(0, block.total - shown);
     rows = leaders.slice();
-    if (rest > 1 && block.n > leaders.length) rows.push({ label: `Other (${fmtNum(block.n - leaders.length)} issuers)`, value: rest });
+    const others = block.n - leaders.length;
+    if (rest > 1 && others > 0) rows.push({ label: `Other (${fmtNum(others)} issuer${others === 1 ? "" : "s"})`, value: rest });
     note = `Ranked leaders within this scope, with the remainder folded into one bar.`;
   }
 
