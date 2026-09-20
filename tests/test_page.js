@@ -1252,6 +1252,94 @@ function serve(dir) {
     check(`the page does not scroll sideways at ${w}px`, over <= 1, `overflows by ${over}px`);
   }
 
+  // 13. the gate card: the claims about what stops a wrong number shipping
+  //
+  //     A card that says "the run refuses outside 0.85-1.15x" is a promise about
+  //     a file the card cannot see. Quoting it on the page and defining it in the
+  //     workflow makes two sources of truth, and the page is the one nobody edits
+  //     when the gate moves. So the bands are read back out of the workflow here.
+  //     If this check ever fails, the workflow is right and the page is lying.
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.waitForTimeout(200);
+
+  const gate = await page.evaluate(() => {
+    const card = document.getElementById("gatelist");
+    if (!card) return null;
+    return {
+      heading: (document.getElementById("h-gates") || {}).textContent || "",
+      items: [...card.querySelectorAll("li")].map((li) => li.innerText.replace(/\s+/g, " ").trim()),
+      bands: [...card.querySelectorAll(".gate-band")].map((b) => b.textContent.trim()),
+      recon: ((document.getElementById("gate-recon") || {}).innerText || "").replace(/\s+/g, " ").trim(),
+      links: [...(document.getElementById("h-gates").closest("section")
+        .querySelectorAll("a[href]"))].map((a) => a.getAttribute("href")),
+    };
+  });
+  check("the page says what stops a wrong number being published",
+        !!gate && /stops a wrong number/i.test(gate.heading), JSON.stringify(gate && gate.heading));
+  check("and every gate it lists carries a sentence, not a stub",
+        !!gate && gate.items.length >= 6 && gate.items.every((t) => t.length > 80),
+        gate ? JSON.stringify(gate.items.map((t) => t.length)) : "no card");
+
+  // The run's own figure against the band, taken from the snapshot rather than
+  // typed. Three numbers, all of which move.
+  if (gate) {
+    const rec = (snap.coverage || {}).reconciliation || {};
+    if (rec.ratio == null) {
+      check("with no ratio this run, the gate line says so rather than showing a blank",
+            /no ratio this run/i.test(gate.recon), gate.recon);
+    } else {
+      // Matched as phrases, not as a bag of numbers: "0 of them more than 1% out"
+      // contains a bare 1, so a set-membership test would accept the wrong count
+      // whenever the right one happened to be 1.
+      const gb = (v) => Number(v).toLocaleString("en-GB");
+      const want = [rec.ratio.toFixed(3) + "×",
+                    gb(rec.assets_compared) + " assets",
+                    gb(rec.assets_off_by_over_1pct) + " of them"];
+      const missing = want.filter((w) => !gate.recon.includes(w));
+      check("the gate line reports this run's own reconciliation, not a typed one",
+            missing.length === 0,
+            `missing ${JSON.stringify(missing)} from ${JSON.stringify(gate.recon)}`);
+      // Whether assets_compared is the right count is the generator's problem,
+      // not the page's - it said 791 while the ratio covered 785 until that was
+      // fixed, and the page rendered the field faithfully either way. The
+      // invariant is pinned in tests/test_aggregation.py [13], against a fixture,
+      // so it cannot depend on which day's snapshot happens to be committed.
+    }
+
+    // The bands, against the workflow that enforces them.
+    const wfPath = path.resolve(__dirname, "..", ".github", "workflows", "refresh.yml");
+    if (!fs.existsSync(wfPath)) {
+      check("the workflow is present so the quoted bands can be checked against it",
+            false, wfPath);
+    } else {
+      const wf = fs.readFileSync(wfPath, "utf8");
+      // Both gates are written as a Python chained comparison on the ratio.
+      const bands = [...wf.matchAll(/([\d.]+)\s*<=\s*r\["ratio"\]\s*<=\s*([\d.]+)/g)]
+        .map((m) => [m[1], m[2]]);
+      check("the workflow states two bands on the reconciliation ratio",
+            bands.length === 2, JSON.stringify(bands));
+      const pageBands = gate.bands.map((t) => (t.match(/[\d.]+/g) || []));
+      check("and the page quotes both of them exactly as the workflow enforces them",
+            bands.length === 2 && pageBands.length === 2 &&
+            JSON.stringify(pageBands) === JSON.stringify(bands),
+            `page ${JSON.stringify(pageBands)} vs workflow ${JSON.stringify(bands)}`);
+      // Order matters to the sentence: the aborting band has to be the wider one,
+      // or the page describes the warning as the refusal.
+      check("the aborting band is the wider of the two, as the sentence claims",
+            bands.length === 2 &&
+            Number(bands[0][0]) < Number(bands[1][0]) &&
+            Number(bands[0][1]) > Number(bands[1][1]),
+            JSON.stringify(bands));
+    }
+
+    // Every link in the card has to point somewhere in this repository. A gate
+    // card whose evidence link 404s is worse than no gate card.
+    check("every link in the gate card points into this repository",
+          gate.links.length >= 3 &&
+          gate.links.every((h) => /^https:\/\/github\.com\/mistryrajan87-lang\/backstop(\/|$)/.test(h)),
+          JSON.stringify(gate.links));
+  }
+
   await browser.close();
   srv.close();
 
