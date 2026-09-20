@@ -4,8 +4,10 @@ Backstop - issuer concentration in the tokenised real-world-asset market.
 
 THE QUESTION
 ------------
-CoinMarketCap's RWA map lists 7,811 rows, but only 790 of them carry tokens. Those
-790 hold $7.42bn of reported cap and are what Backstop measures. A tokenised asset
+CoinMarketCap's RWA map lists a shade under 8,000 rows, but fewer than 800 of them
+carry tokens. Those hold on the order of $7.5bn of reported cap and are what
+Backstop measures. (Exact figures for any given run are generated into README.md
+and stamped on the page; prose that repeats them goes stale on the next refresh.) A tokenised asset
 is not one thing: "Gold" is a single row with a single market cap, and behind it
 sit seven tokens minted by six different issuers - Tether mints two of them.
 Backstop rebuilds the catalogue along that second axis and measures how
