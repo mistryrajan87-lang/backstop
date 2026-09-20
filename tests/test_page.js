@@ -953,6 +953,136 @@ function serve(dir) {
   await page.waitForSelector("#assettable tbody tr", { timeout: 15000 });
   await page.waitForTimeout(300);
 
+  // 11m. THE ASSET LOOKUP. The snapshot used to publish 25 of 791 assets, so the
+  //      asset side was the one place where the page showed a sample and read
+  //      like a whole. Everything here is asserted against the snapshot's own
+  //      asset_index rather than against a number typed into this file.
+  const ai = snap.asset_index;
+  check("the snapshot carries an index over the whole catalogue",
+        !!ai && Array.isArray(ai.rows) && ai.rows.length === snap.counts.assets_tokenised,
+        `${ai && ai.rows ? ai.rows.length : "none"} rows vs ${snap.counts.assets_tokenised} tokenised`);
+
+  if (ai && ai.rows && ai.rows.length) {
+    const col = {};
+    ai.fields.forEach((f, i) => { col[f] = i; });
+
+    const look = await page.evaluate(() => ({
+      hidden: (document.getElementById("assetlookup") || {}).hidden,
+      rows: document.querySelectorAll("#assetindextable tbody tr").length,
+      lead: (document.getElementById("assetfindsub") || {}).textContent || "",
+      summary: (document.getElementById("assetindexsummary") || {}).textContent || "",
+      panelHidden: (document.getElementById("assetcard") || {}).hidden,
+      tab: (document.querySelector("#assetindextable tbody tr") || {}).tabIndex,
+      role: (document.querySelector("#assetindextable tbody tr") || {}).getAttribute
+        ? document.querySelector("#assetindextable tbody tr").getAttribute("role") : null,
+      live: (document.getElementById("assetfindnote") || {}).getAttribute
+        ? document.getElementById("assetfindnote").getAttribute("aria-live") : null,
+    }));
+    check("the lookup renders one row per asset in the index",
+          look.hidden === false && look.rows === ai.rows.length,
+          `hidden=${look.hidden} rows=${look.rows} vs ${ai.rows.length}`);
+    check("its rows are reachable by keyboard and the match count is announced",
+          look.tab === 0 && look.role === "button" && look.live === "polite",
+          JSON.stringify(look));
+    check("no asset panel is shown until one is asked for",
+          look.panelHidden === true, String(look.panelHidden));
+    check("the disclosure says how many assets are behind it",
+          look.summary.includes(ai.rows.length.toLocaleString("en-GB")), look.summary);
+
+    // The sentence the full index makes possible, checked against the index.
+    const priced = ai.rows.filter((r) => r[col.tokenised_market_cap] > 0).length;
+    const quiet = ai.rows.length - priced;
+    const noLead = ai.rows.filter((r) => r[col.top_issuer] < 0).length;
+    const n = (x) => x.toLocaleString("en-GB");
+    check("the lead sentence counts the priced and the unpriced from the data",
+          look.lead.includes(n(ai.rows.length)) && look.lead.includes(n(priced))
+            && look.lead.includes(n(quiet)),
+          look.lead.slice(0, 180));
+    check("and says how many assets no issuer leads",
+          look.lead.includes(n(noLead)) && /no issuer/i.test(look.lead),
+          look.lead.slice(0, 180));
+
+    // An asset priced at zero is the case the index exists to show. It must be
+    // listed, and the panel must say what the zero means rather than print it.
+    const zeroRow = ai.rows.find((r) => r[col.tokenised_market_cap] === 0);
+    if (zeroRow) {
+      await page.fill("#assetfind", zeroRow[col.symbol]);
+      await page.waitForTimeout(350);
+      const z = await page.evaluate(() => ({
+        panel: (document.getElementById("assetcard") || {}).innerText || "",
+        hidden: (document.getElementById("assetcard") || {}).hidden,
+        note: (document.getElementById("assetfindnote") || {}).textContent || "",
+      }));
+      check("an asset priced at zero is in the lookup and explains its zero",
+            z.hidden === false && /prices it at zero/i.test(z.panel),
+            z.panel.replace(/\s+/g, " ").slice(0, 160));
+      check("and it does not claim a leading issuer it does not have",
+            zeroRow[col.top_issuer] >= 0 || /cannot be called the largest|can be called the largest/i.test(z.panel),
+            z.panel.replace(/\s+/g, " ").slice(0, 200));
+      // "none of its 1 issuer" was the first wording.
+      check("its issuer count reads as English, singular or plural",
+            !/\bits 1 issuers\b|\bnone of its 1 issuer\b/i.test(z.panel),
+            (z.panel.match(/none of its \d+ issuers?/i) || ["n/a"])[0]);
+    }
+
+    // The largest asset is the one a reader is most likely to type, and it is
+    // also the one whose name is a substring of several others.
+    const biggest = ai.rows[0];
+    await page.fill("#assetfind", biggest[col.name]);
+    await page.waitForTimeout(400);
+    const big = await page.evaluate(() => ({
+      panel: (document.getElementById("assetcard") || {}).innerText || "",
+      hidden: (document.getElementById("assetcard") || {}).hidden,
+      note: (document.getElementById("assetfindnote") || {}).textContent || "",
+      shown: [...document.querySelectorAll("#assetindextable tbody tr")].filter((r) => !r.hidden).length,
+    }));
+    check("typing an asset's exact name opens that asset, not just a filtered list",
+          big.hidden === false && big.panel.includes(biggest[col.symbol]),
+          `note="${big.note}" panel="${big.panel.replace(/\s+/g, " ").slice(0, 90)}"`);
+    check("and the note says so when other assets also matched",
+          big.shown === 1 || /exact match/i.test(big.note),
+          `${big.shown} shown, note "${big.note}"`);
+
+    // The panel's numbers come from the index, not from anywhere else.
+    const want = {
+      cap: biggest[col.tokenised_market_cap],
+      tokens: biggest[col.tokens].toLocaleString("en-GB"),
+      issuers: biggest[col.issuers].toLocaleString("en-GB"),
+    };
+    check("the panel's token and issuer counts match the index row",
+          big.panel.includes(want.tokens) && big.panel.includes(want.issuers),
+          `want tokens ${want.tokens}, issuers ${want.issuers} in: ${big.panel.replace(/\s+/g, " ").slice(0, 140)}`);
+
+    // Where top_assets carries the split, the panel shows who else mints it.
+    const topEntry = (snap.top_assets || []).find((a) => a.symbol === biggest[col.symbol]);
+    if (topEntry && (topEntry.split || []).length > 1) {
+      check("an asset minted by several issuers shows how its value splits",
+            /Minted by/i.test(big.panel) && big.panel.includes(topEntry.split[0].issuer),
+            big.panel.replace(/\s+/g, " ").slice(0, 200));
+      // The tail of a split runs small; a fixed one decimal printed it as 0.0%.
+      const flat = (big.panel.match(/\b0\.0%/g) || []);
+      check("the small end of a split is not flattened to 0.0%",
+            flat.length === 0, JSON.stringify(flat));
+    }
+
+    await page.fill("#assetfind", "zzzzzznotanasset");
+    await page.waitForTimeout(300);
+    const none = await page.evaluate(() => ({
+      note: (document.getElementById("assetfindnote") || {}).textContent || "",
+      hidden: (document.getElementById("assetcard") || {}).hidden,
+      shown: [...document.querySelectorAll("#assetindextable tbody tr")].filter((r) => !r.hidden).length,
+    }));
+    check("a search that matches nothing says so and shows no panel",
+          none.shown === 0 && none.hidden === true && /no asset matches/i.test(none.note),
+          JSON.stringify(none));
+
+    await page.fill("#assetfind", "");
+    await page.waitForTimeout(300);
+    const back = await page.evaluate(() =>
+      [...document.querySelectorAll("#assetindextable tbody tr")].every((r) => !r.hidden));
+    check("clearing the search restores every asset", back);
+  }
+
   // 12. the page must not scroll sideways, at desktop or phone width
   for (const w of [1600, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
