@@ -258,7 +258,44 @@ def main() -> None:
                     recon_txt += f" (worst: {worst['symbol']} at {worst.get('ratio')})"
                 recon_txt += "."
 
+        # The near-miss tickers. This was a hand-typed sentence and a hand-typed
+        # table: "Nine are not in it", "Three do match", and JAAA "carries
+        # $65,242" - which the snapshot had at $91,247 and the page's own
+        # generated prose printed as $91K. Three typed figures in the file the
+        # page points at for method, nine lines below a block this script
+        # rewrites every run. Generated now, so it moves with the map.
+        WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven",
+                 "eight", "nine", "ten", "eleven", "twelve"]
+        def count_word(n: int) -> str:
+            return WORDS[n] if n < len(WORDS) else f"{n:,}"
+
+        nic = snap.get("not_in_this_catalogue") or {}
+        absent = [a for a in (nic.get("absent") or []) if a]
+        present = [x if isinstance(x, dict) else {"symbol": x}
+                   for x in (nic.get("present") or [])]
+        nm = []
+        if absent:
+            nm.append(
+                f"{count_word(len(absent)).capitalize()} "
+                f"{'is' if len(absent) == 1 else 'are'} not in it at all: "
+                + "**" + ", ".join(absent) + "**.")
+        if present:
+            nm.append("")
+            nm.append(
+                f"{count_word(len(present)).capitalize()} "
+                f"{'does' if len(present) == 1 else 'do'} match a row - and "
+                f"{'it is not' if len(present) == 1 else 'none of them is'} "
+                "the product you would assume:")
+            nm.append("")
+            nm.append("| Ticker | What is actually in the map | State |")
+            nm.append("|---|---|---|")
+            for x in present:
+                val = float(x.get("attributed_value") or 0.0)
+                tok = "tokens" if x.get("has_tokens") else "no tokens"
+                state = f"{tok}, carries **${val:,.0f}**" if val > 0 else f"{tok}, carries nothing"
+                nm.append(f"| `{x.get('symbol','')}` | {x.get('name','')} | {state} |")
         txt = readme.read_text(encoding="utf-8")
+        txt = region(txt, "notinmap", "\n".join(nm), readme)
         txt = region(txt, "readme", body, readme)
         txt = region(txt, "recon", recon_txt, readme)
         txt = region(txt, "nullcaps", nulls, readme)
