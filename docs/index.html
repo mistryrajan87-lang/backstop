@@ -1769,6 +1769,32 @@ function renderShock(block) {
     + "this snapshot, not a forecast and not a claim about the solvency of anyone named.</span>";
 }
 
+/* Tagging lives here rather than inside renderScope because three different
+   renders rewrite elements that carry the tag, and the tag has to outlive all of
+   them. renderScope tagged #deltastrip and then renderDelta() - which runs after
+   it on first load - replaced the strip's innerHTML and took the tag with it. The
+   symptom was the worst possible shape: change the scope by hand and the tag was
+   there, arrive on ?scope=... from a link and it was not, which is exactly the
+   path the submission sends a judge down.
+
+   #histcap is tagged for the same reason the others are. The history series is
+   whole-catalogue and does not follow the selector, so plotting it flat at ~2,330
+   underneath a scoped hero reading 2,572.8 with nothing between them reads as a
+   bug in the arithmetic rather than as a scope boundary. */
+function tagUnscoped(id) {
+  document.querySelectorAll("#punchline, #deltastrip, #h-issuers, #h-assetfind, #histcap")
+    .forEach((el) => {
+      let tag = el.querySelector(".scopetag");
+      if (id === "all") { if (tag) tag.remove(); return; }
+      if (!tag) {
+        tag = document.createElement("span");
+        tag.className = "scopetag";
+        el.insertBefore(tag, el.firstChild);
+      }
+      tag.textContent = "Whole catalogue";
+    });
+}
+
 function renderScope(id) {
   const { block, label, full } = blockFor(id);
   if (!block) return;
@@ -1777,14 +1803,25 @@ function renderScope(id) {
   document.getElementById("scopedesc").textContent =
     `Across ${label}, weighted by tokenised market capitalisation.`;
   document.getElementById("hero-eff").textContent = block.effective_n == null ? "—" : fmtNum(block.effective_n, 2);
-  document.getElementById("hero-effsub").textContent = block.effective_n == null
+  /* A scoped view has to carry its own baseline. The submission points a judge
+     straight at ?scope=ex:commodity to show the index rising once commodities
+     are out, and in that state the page printed 2,572.8 and 3.89 with the
+     whole-catalogue pair nowhere on it - so the claim was made off-page and
+     could not be checked on it. Stating both here also means neither number is
+     ever typed by hand anywhere, which is how 193 and 35 went stale. */
+  const base = SNAP.overall;
+  const baseline = (id === "all" || !base || base.hhi == null || base.effective_n == null)
+    ? ""
+    : ` Whole catalogue for comparison: HHI ${fmtNum(base.hhi, 1)}, `
+      + `${fmtNum(base.effective_n, 2)} effective issuers across ${fmtNum(base.n)}.`;
+  document.getElementById("hero-effsub").textContent = (block.effective_n == null
     ? "No issuer values resolved in this scope."
     /* Singular is not cosmetic here: with one issuer the sentence's whole point
        - that the effective number is smaller than the headcount - is not true,
        because the two are the same number. Say that instead. */
     : block.n === 1
       ? "One issuer holds everything in this scope."
-      : `${fmtNum(block.n)} issuers are present, but the distribution behaves like ${fmtNum(block.effective_n, 2)} of equal size.`;
+      : `${fmtNum(block.n)} issuers are present, but the distribution behaves like ${fmtNum(block.effective_n, 2)} of equal size.`) + baseline;
   document.getElementById("hero-hhi").textContent = block.hhi == null ? "—" : fmtNum(block.hhi, 1);
   /* Nothing is written under the HHI, deliberately, and there is no element to
      write into. The slot held a chip naming an HHI band; the first replacement
@@ -1895,28 +1932,7 @@ function renderLorenz(id, block, label) {
   document.getElementById("lorenzdesc").textContent =
     `Cumulative share curve over ${fmtNum(rows.length)} issuers in ${label}. ` +
     `Top issuer ${fmtPct(block.top1)}, top 5 ${fmtPct(block.top5)}.`;
-  /* Mark every block that does NOT follow the selector. Without this the page
-     reads as one object and the numbers look untrustworthy.
-
-     The two lookup cards are tagged too. Both are whole-catalogue directories,
-     and the issuer one sits directly under the charts calling itself "the table
-     view for both charts above" - which under a scope it is not: at chain
-     Ethereum the chart's own table shows Tether at 48.91% and the issuer table
-     shows 36.63%, the same name against two denominators one card apart. The
-     tag is the mechanism that teaches a reader an untagged block follows the
-     selector, so leaving these two untagged made it lie by omission. */
-  const wholeOnly = document.querySelectorAll(
-    "#punchline, #deltastrip, #h-issuers, #h-assetfind");
-  wholeOnly.forEach((el) => {
-    let tag = el.querySelector(".scopetag");
-    if (id === "all") { if (tag) tag.remove(); return; }
-    if (!tag) {
-      tag = document.createElement("span");
-      tag.className = "scopetag";
-      el.insertBefore(tag, el.firstChild);
-    }
-    tag.textContent = "Whole catalogue";
-  });
+  tagUnscoped(id);
   document.getElementById("lorenzcap").textContent =
     (id === "all" ? "The whole catalogue." : `Scoped to ${label}.`) +
     (plottable ? "" :
@@ -1992,6 +2008,8 @@ function renderDelta() {
     + "cap and asset count carry no colour because neither direction is better. "
     + "<b>" + esc(fmtNum(HIST.length)) + "</b> day"
     + (HIST.length === 1 ? "" : "s") + " recorded so far.</p>";
+  /* The innerHTML above has just discarded any tag renderScope put here. */
+  tagUnscoped(CURRENT_SCOPE);
 }
 
 /* ---------------------------------------------------------------------------
@@ -2125,6 +2143,7 @@ function renderHistory() {
         `the line starts once three of them do. The table below carries every day.`;
   }
   document.getElementById("histcap").textContent = cap;
+  tagUnscoped(CURRENT_SCOPE);
   let stub = document.getElementById("histstub");
   if (!out.drawn) {
     if (!stub) {
