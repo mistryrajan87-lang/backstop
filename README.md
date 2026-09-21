@@ -11,12 +11,12 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 ## What it found
 
 <!-- backstop:readme:start -->
-From the run of **Sun, 20 Sep 2026 14:34:43 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
-[`2026-09-20T14-34-43Z.json`](docs/data/snapshots/2026-09-20T14-34-43Z.json), and rewritten here by
+From the run of **Mon, 21 Sep 2026 05:51:33 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
+[`2026-09-21T05-51-33Z.json`](docs/data/snapshots/2026-09-21T05-51-33Z.json), and rewritten here by
 `scripts/inline_snapshot.py` each time the pipeline runs.
 
 > In CoinMarketCap's tokenised real-world-asset catalogue, **791 assets**
-> carry tokens, holding **$7.48bn** of reported market cap. **15**
+> carry tokens, holding **$7.50bn** of reported market cap. **15**
 > issuers hold all of it. The top five hold **94.1%**. Almost half the
 > tokens — 670 of 1,435 — report
 > no market cap at all. And every one of the 778 off-chain
@@ -25,14 +25,14 @@ From the run of **Sun, 20 Sep 2026 14:34:43 GMT** — 107 calls, 73 credits. Eve
 | | |
 |---|---|
 | Assets in `map` / carrying tokens | 7,811 / **791** |
-| Reported tokenised cap | **$7.48bn** |
+| Reported tokenised cap | **$7.50bn** |
 | Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
-| HHI over issuers, by value | **2,336.9** — 4.28 effective issuers |
-| Top 1 / 3 / 5 share | 36.6% / 73.8% / **94.1%** |
-| Largest single asset | Gold — 62.9% of the catalogue |
+| HHI over issuers, by value | **2,320.6** — 4.31 effective issuers |
+| Top 1 / 3 / 5 share | 36.4% / 73.5% / **94.1%** |
+| Largest single asset | Gold — 62.6% of the catalogue |
 | Tokens reporting no market cap | **670 of 1,435** |
 | Off-chain listings, and where | 778 — **every one of them Binance** |
-| Chain concentration | Ethereum 74.4%; 1.73 effective chains |
+| Chain concentration | Ethereum 74.1%; 1.74 effective chains |
 <!-- backstop:readme:end -->
 
 ## What this catalogue is, and what it is not
@@ -82,7 +82,7 @@ Those six account for **$105.9m** of the $106m. They cannot be reconciled — on
 side of the comparison is missing — so they are excluded from the ratio and
 reported as their own category, while their value stays in the market total
 because it is real. <!-- backstop:recon:start -->
-Over the assets both endpoints price, the ratio rounds to **1.0001**, and no asset is more than 1% out.
+Over the assets both endpoints price, the ratio rounds to **0.9999**, and no asset is more than 1% out.
 <!-- backstop:recon:end -->
 
 That is the single most reusable thing here for anyone else building on these
