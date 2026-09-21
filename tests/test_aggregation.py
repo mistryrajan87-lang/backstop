@@ -294,8 +294,10 @@ def test_per_token_attribution():
           f"got {snap['coverage']['reconciliation']['ratio']}")
     check("Growth-tier refusal recorded, not raised", len(snap["api"]["refused"]) == 1,
           f"got {snap['api']['refused']}")
-    check("all seven RWA endpoints plus the cross-family one are declared",
-          len(snap["endpoints"]) == 8, f"got {len(snap['endpoints'])}")
+    check("all seven RWA endpoints plus crypto_info and key_info are declared",
+          len(snap["endpoints"]) == 9
+          and snap["endpoints"].get("key_info", {}).get("path") == "/v1/key/info",
+          f"got {len(snap['endpoints'])} {sorted(snap['endpoints'])}")
     check("info enrichment reached the top assets",
           gold["industry"] == "Mining", f"got {gold['industry']!r}")
 
@@ -667,6 +669,8 @@ def test_client_envelopes():
     check("a missing code is success", error_code({}) is None)
     check("an unparseable code is not waved through",
           error_code({"error_code": "nope"}) == "nope")
+    check("the endpoint table declares /v1/key/info",
+          ENDPOINTS.get("key_info", {}).get("path") == "/v1/key/info")
 
     # v5 success: string "0", data under an envelope key
     api = client_with([StubResponse(

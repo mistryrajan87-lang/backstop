@@ -128,7 +128,7 @@ def main() -> None:
 
     # 4. the reconcile line, on the first screen rather than only in Method.
     #    The incomparable six are a category, not a footnote.
-    foot = (f'{tokenised} assets &middot; two endpoints &middot; '
+    foot = (f'{tokenised} assets &middot; token cap vs asset cap &middot; '
             f'{incomparable} incomparable &middot; snapshot {html.escape(stamp_short)}')
     page = region(page, "herofoot", f'<p class="herofoot" id="herofoot">{foot}</p>')
 

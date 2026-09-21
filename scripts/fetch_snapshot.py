@@ -154,6 +154,12 @@ ENDPOINTS: dict[str, dict[str, str]] = {
         "credits": "1 per 100 ids",
         "why": "the only route to a chain - no RWA endpoint carries one, so each token's crypto_id is taken across to the main cryptocurrency family for its platform",
     },
+    "key_info": {
+        "path": "/v1/key/info",
+        "tier": "Basic",
+        "credits": "free",
+        "why": "plan limits and remaining credits, so the run adapts its own throttle and publishes what it spent",
+    },
 }
 
 # Parameter names, confirmed live. `id` is rejected with error 4002 on every one
