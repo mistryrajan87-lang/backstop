@@ -365,6 +365,27 @@ No server. A GitHub Actions cron runs the pipeline where the API is reachable,
 commits `docs/data/snapshot.json`, and GitHub Pages serves a static page that reads
 it. The key lives only as an encrypted repository secret.
 
+Every run walks the same path, and every arrow that points down is a gate that can
+stop it. A refused run publishes nothing: the page, the archive and the repository
+are left exactly as the previous run left them.
+
+```mermaid
+flowchart TD
+    T["tests/test_aggregation.py<br/>hand-calculated checks — no key, no credits"] -->|pass| K{"CMC_API_KEY<br/>present?"}
+    T -->|fail| X0["stop — nothing spent, nothing published"]
+    K -->|no| X0
+    K -->|yes| F["scripts/fetch_snapshot.py<br/>map → assets/list → quotes/latest → info → issuers → market-pairs probe → /v2/cryptocurrency/info"]
+    F --> A["per-token attribution<br/>each token's own market_cap, grouped by issuer_id"]
+    A --> R["reconcile per-token totals<br/>against CoinMarketCap's asset-level caps"]
+    R --> G{"publish gates<br/>not synthetic · some issuer carries value · HHI in range · top-N shares monotonic · reconciliation within 0.85–1.15"}
+    G -->|any fails| X1["refuse — page, archive and repo untouched"]
+    G -->|all pass| I["scripts/inline_snapshot.py<br/>snapshot → docs/index.html and the README headline block"]
+    I --> P["tests/test_page.js<br/>the rendered page against its own snapshot"]
+    P -->|fail| X1
+    P -->|pass| C["archive under this run's timestamp · commit · push"]
+    C --> S["GitHub Pages serves static files"]
+```
+
 ```
 .github/workflows/refresh.yml   cron + manual; tests, builds, sanity-checks, commits
 scripts/
