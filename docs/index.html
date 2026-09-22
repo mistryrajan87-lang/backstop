@@ -103,6 +103,8 @@ h1 { font-size: clamp(29px, 4.8vw, 42px); line-height: 1.12; margin: 0 0 14px; f
   border-radius: 8px; padding: 6px 11px; cursor: pointer;
 }
 .themebtn:hover { background: var(--wash); }
+.exportrow { margin: 12px 0 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.exportrow .unit { color: var(--muted); font-size: 12.5px; }
 
 /* ---- banner --------------------------------------------------------------- */
 .banner {
@@ -588,6 +590,7 @@ footer a { color: var(--ink-2); }
       <summary id="issuersummary">Show every issuer</summary>
       <div class="tablewrap"><table id="issuertable"></table></div>
     </details>
+    <p class="exportrow" id="issuercsvrow" hidden><button type="button" class="themebtn" id="issuercsv" aria-describedby="issuercsvnote">Download every issuer as a spreadsheet (CSV)</button><span class="unit" id="issuercsvnote"></span></p>
   </section>
 
   <!-- assets lookup -------------------------------------------------------- -->
@@ -609,6 +612,7 @@ footer a { color: var(--ink-2); }
       <summary id="assetindexsummary">Show every asset</summary>
       <div class="tablewrap"><table id="assetindextable"></table></div>
     </details>
+    <p class="exportrow"><button type="button" class="themebtn" id="assetcsv" aria-describedby="assetcsvnote">Download every asset as a spreadsheet (CSV)</button><span class="unit" id="assetcsvnote"></span></p>
   </section>
 
   <!-- coverage ------------------------------------------------------------- -->
@@ -897,6 +901,42 @@ function shareLabel(s) {
 
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* A spreadsheet of what the table shows, nothing more: the same rows, the same
+   figures, plain numbers rather than the abbreviated ones on screen. Column
+   names are written for a person opening the file, not for a parser. The run
+   timestamp goes in the file name so two downloads a day apart can be told
+   apart without opening them. */
+const csvCell = (v) => {
+  if (v == null) return "";
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  const t = String(v);
+  return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+};
+function downloadCSV(name, header, rows) {
+  const lines = [header.map(csvCell).join(",")]
+    .concat(rows.map((r) => r.map(csvCell).join(",")));
+  const blob = new Blob(["\ufeff" + lines.join("\r\n") + "\r\n"], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+}
+const runStamp = (s) => {
+  const d = new Date(String((s && s.generated_at) || ""));
+  return Number.isNaN(d.getTime()) ? "snapshot" : d.toISOString().slice(0, 19).replace(/:/g, "-") + "Z";
+};
+const runLabel = (s) => {
+  const d = new Date(String((s && s.generated_at) || ""));
+  return Number.isNaN(d.getTime()) ? "this run" : d.toISOString().slice(0, 16).replace("T", " ") + " UTC";
+};
+/* The info endpoint returns an SEC CIK for the equities among the largest
+   assets. EDGAR's company page is the one place that number is useful to a
+   reader, so link it there and nowhere else. */
+const edgarURL = (cik) => {
+  const c = String(cik == null ? "" : cik).replace(/\D/g, "");
+  return c ? `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${c}&owner=include&count=40` : "";
+};
 
 /* There is deliberately no band(hhi) here any more, and nothing that turns an
    HHI into a word. The three names it produced - top-heavy, uneven, broadly
@@ -1542,6 +1582,7 @@ function renderAssetLookup(snap) {
         `. Each mints its own token with its own market cap, which is why this ` +
         `asset's value is split rather than credited to one of them.</p>`;
     }
+    const edgar = top ? edgarURL(top.cik) : "";
     panel.innerHTML =
       `<div class="ictop"><h3>${esc(r.name || r.symbol)} <span style="color:var(--muted);font-weight:400">${esc(r.symbol)}</span></h3>` +
       `<button type="button" class="icclose">Clear</button></div>` +
@@ -1552,7 +1593,14 @@ function renderAssetLookup(snap) {
       `</dl>` +
       (msg ? `<p class="icnote">${msg}</p>` : "") +
       splitHtml +
-      `<p class="icnote">Class: ${esc(r.asset_class)}</p>`;
+      `<p class="icnote">Class: ${esc(r.asset_class)}` +
+      (top && (top.industry || top.primary_exchange)
+        ? ` · ${esc([top.industry, top.primary_exchange].filter(Boolean).join(", "))}` : "") +
+      `</p>` +
+      (edgar
+        ? `<p class="icnote"><a href="${esc(edgar)}" rel="nofollow noopener external" target="_blank">` +
+          `Company filings at SEC EDGAR</a> <span class="unit">CIK ${esc(top.cik)}, from the info endpoint</span></p>`
+        : "");
     panel.hidden = false;
     panel.querySelector(".icclose").addEventListener("click", () => { clear(); find.focus(); });
   }
@@ -1810,6 +1858,25 @@ function renderAssetLookup(snap) {
 
   document.getElementById("assetindexsummary").textContent =
     `Show every asset (${fmtNum(rows.length)})`;
+
+  const csvBtn = document.getElementById("assetcsv");
+  const csvNote = document.getElementById("assetcsvnote");
+  if (csvBtn) {
+    const tokenOnlyN = Object.keys(tokenOnlyBy).length;
+    if (csvNote) csvNote.textContent =
+      `${fmtNum(rows.length)} rows, the same columns as the table plus what the tokens report where the ` +
+      `asset endpoint says $0` + (tokenOnlyN ? ` (${fmtNum(tokenOnlyN)} assets)` : "") +
+      `, figures in full US dollars, from the run of ${runLabel(snap)}.`;
+    csvBtn.addEventListener("click", () => downloadCSV(
+      `backstop-assets-${runStamp(snap)}.csv`,
+      ["Asset", "Ticker", "Class", "Tokenised market cap (USD)", "Reported by its tokens where the asset endpoint says 0 (USD)",
+       "Tokens", "Issuers", "Leading issuer", "Quoted off-chain (markets)"],
+      rows.map((r) => {
+        const only = tokenOnlyBy[r.symbol];
+        return [r.name || r.symbol, r.symbol, r.asset_class, r.cap, only ? only.token_sum : "",
+                r.tokens, r.issuers, r.lead || "", r.tradfi];
+      })));
+  }
 }
 
 function renderTable(node, cols, rows, note) {
@@ -2587,7 +2654,11 @@ function renderStatic() {
     { h: "Underlying", raw: true, get: (r) => r.tradfi_markets > 0
         ? `<span class="bandtag band-good"><span class="gly" aria-hidden="true">●</span>${fmtNum(r.tradfi_markets)}</span>`
         : `<span class="bandtag band-none"><span class="gly" aria-hidden="true">–</span>none</span>` },
-    { h: "Industry", get: (r) => r.industry || r.primary_exchange || "—" },
+    { h: "Industry", raw: true, get: (r) => {
+        const label = esc(r.industry || r.primary_exchange || "—");
+        const u = edgarURL(r.cik);
+        return u ? `${label} · <a href="${esc(u)}" rel="nofollow noopener external" target="_blank">SEC filings</a>` : label;
+      } },
   ], ta, "The 25 largest by tokenised market cap. <em>Tokens</em> is how many separate tokens <code>quotes/latest</code> returns for the asset; <em>issuers</em> is how many distinct issuers are behind them — the two differ wherever one issuer mints more than one token, which is the case the per-token method exists for. <em>Its share</em> is the largest issuer's portion of that one asset; <em>underlying</em> counts the traditional markets <code>quotes/latest</code> reports for it. Industry and exchange come from the <code>info</code> endpoint.");
 
   // classes
@@ -2670,6 +2741,23 @@ function renderStatic() {
         : `<span class="bandtag band-warning"><span class="gly" aria-hidden="true">◆</span>no</span>` },
     { h: "Classes", wrap: true, get: (r) => (r.classes || []).join(", ") },
   ], irows, "Every issuer with at least one attributed token, largest first. <em>Tokens</em> compares what the token data attributes to an issuer against the count that issuer declares through the issuers endpoint.");
+  const icsv = document.getElementById("issuercsv");
+  const icsvNote = document.getElementById("issuercsvnote");
+  if (icsv) {
+    const icsvRow = document.getElementById("issuercsvrow");
+    if (icsvRow) icsvRow.hidden = false;
+    if (icsvNote) icsvNote.textContent =
+      `${fmtNum(irows.length)} rows, the same columns as the table, figures in full US dollars, from the run of ${runLabel(s)}.`;
+    icsv.addEventListener("click", () => downloadCSV(
+      `backstop-issuers-${runStamp(s)}.csv`,
+      ["Issuer", "Website", "Tokenised market cap (USD)", "Share of catalogue (%)", "Cumulative share (%)", "Assets", "Tokens attributed", "Tokens declared", "Tokens with no cap", "Assets quoted off-chain", "Chains", "In issuer directory", "Asset classes"],
+      irows.map((r) => [r.name, r.site || "", r.market_cap,
+        s.overall.total > 0 ? Math.round(r.market_cap / s.overall.total * 1e4) / 100 : "",
+        r._cum == null ? "" : Math.round(r._cum * 1e4) / 100,
+        r.assets, r.attributed_tokens, r.declared_tokens == null ? "" : r.declared_tokens,
+        r.tokens_without_cap || 0, r.assets_with_tradfi_market,
+        (r.chains || []).join("; "), r.in_directory ? "yes" : "no", (r.classes || []).join("; ")])));
+  }
   document.getElementById("issuersummary").textContent =
     `Show all ${fmtNum(irows.length)} issuers`;
   wireIssuerLookup(irows, s);
