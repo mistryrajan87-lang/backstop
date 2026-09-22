@@ -1859,6 +1859,81 @@ function serve(dir) {
   check("the archived runs are linked somewhere a reader can actually open",
         !!archLink && /^https:\/\/github\.com\//.test(archLink), String(archLink));
 
+  // 20. Taking the data away. Each full table has a download button, the file
+  //     it produces has the same row count as the table, and the figures in it
+  //     are the snapshot's own, unabbreviated. A button that downloads a file a
+  //     spreadsheet cannot open, or one with the wrong rows, is worse than none.
+  {
+    const dlCtx = await browser.newContext({ acceptDownloads: true, viewport: { width: 1600, height: 1000 } });
+    const dp = await dlCtx.newPage();
+    await dp.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: "networkidle" });
+    await dp.waitForSelector("#assettable tbody tr", { timeout: 15000 });
+    const parseCsv = (txt) => txt.replace(/^\ufeff/, "").split(/\r\n/).filter((l) => l.length)
+      .map((l) => {
+        // one cell per match; the regex also matches the empty string at end of
+        // line, which is not a column
+        const cells = l.match(/("([^"]|"")*"|[^,]*)(,|$)/g).map((c) => c.replace(/,$/, "").replace(/^"|"$/g, "").replace(/""/g, '"'));
+        if (cells.length > 1 && cells[cells.length - 1] === "" && !l.endsWith(",")) cells.pop();
+        return cells;
+      });
+    const idxRows = ((snap.asset_index || {}).rows || []).length;
+    // the issuer table is every issuer with an attributed token, including the
+    // ones carrying $0 - the page says so in its note, and the file must agree
+    const issRows = (snap.issuers || []).length;
+    for (const [btn, want, name] of [["#assetcsv", idxRows, "asset"], ["#issuercsv", issRows, "issuer"]]) {
+      const present = await dp.$(btn);
+      check(`the ${name} table has a download button`, !!present);
+      if (!present) continue;
+      const [dl] = await Promise.all([dp.waitForEvent("download", { timeout: 10000 }), dp.click(btn)]);
+      const fname = dl.suggestedFilename();
+      const body = fs.readFileSync(await dl.path(), "utf8");
+      const rows = parseCsv(body);
+      check(`the ${name} CSV carries the run timestamp in its name`, /backstop-\w+-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}Z\.csv$/.test(fname), fname);
+      check(`the ${name} CSV has one row per table row (${rows.length - 1} vs ${want})`, rows.length - 1 === want);
+      check(`the ${name} CSV's columns are named for a reader, not a parser`,
+            rows[0].every((h) => /^[A-Z]/.test(h) && !/_/.test(h)), rows[0].join(" | "));
+      const capCol = rows[0].findIndex((h) => /market cap/i.test(h));
+      check(`the ${name} CSV's largest cap is the snapshot's own unabbreviated figure`,
+            capCol >= 0 && Math.abs(Number(rows[1][capCol]) -
+              (name === "asset" ? (snap.asset_index.rows[0][3]) : snap.issuers[0].market_cap)) < 0.01,
+            capCol >= 0 ? rows[1][capCol] : "no cap column");
+      const noteTxt = (await dp.textContent(btn + "note")).replace(/,/g, "");
+      check(`the ${name} CSV note beside the button says how many rows and which run`,
+            noteTxt.includes(String(want)) && /\d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC/.test(noteTxt), noteTxt);
+    }
+    await dlCtx.close();
+  }
+
+  // 21. SEC EDGAR links appear exactly where the run has a CIK - one per such
+  //     asset in the largest-assets table, one in the panel for that asset, and
+  //     none for a commodity, which has no filer.
+  {
+    const withCik = (snap.top_assets || []).filter((a) => a.cik);
+    const tableLinks = await page.evaluate(() =>
+      [...document.querySelectorAll('#assettable a[href*="sec.gov"]')].map((a) => a.href));
+    check(`the largest-assets table links EDGAR for every asset with a CIK (${tableLinks.length}/${withCik.length})`,
+          tableLinks.length === withCik.length);
+    check("every EDGAR link carries the CIK the info endpoint returned",
+          withCik.every((a) => tableLinks.some((h) => h.includes(`CIK=${String(a.cik).replace(/\D/g, "")}`))));
+    const eq = withCik[0];
+    if (eq) {
+      await page.fill("#assetfind", eq.symbol);
+      await page.waitForTimeout(600);
+      const panelLinks = await page.evaluate(() =>
+        [...document.querySelectorAll('#assetcard a[href*="sec.gov"]')].map((a) => a.href));
+      check(`the panel for ${eq.symbol} links its EDGAR filings once`,
+            panelLinks.length === 1 && panelLinks[0].includes(`CIK=${String(eq.cik).replace(/\D/g, "")}`), panelLinks.join(" "));
+    }
+    const commodity = (snap.top_assets || []).find((a) => a.asset_class === "commodity" && !a.cik);
+    if (commodity) {
+      await page.fill("#assetfind", commodity.symbol);
+      await page.waitForTimeout(600);
+      const n = await page.evaluate(() => document.querySelectorAll('#assetcard a[href*="sec.gov"]').length);
+      check(`no EDGAR link is invented for ${commodity.symbol}, which has no filer`, n === 0);
+    }
+    await page.fill("#assetfind", "");
+  }
+
   await browser.close();
   srv.close();
 
