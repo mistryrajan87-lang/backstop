@@ -337,6 +337,27 @@ footer a { color: var(--ink-2); }
 }
 .find input:focus-visible { outline: 2px solid var(--series-1); outline-offset: 1px; }
 .findnote { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* The every-asset table's own controls. They live inside the disclosure, so a
+   reader only meets them once the list is open. 16px for the same iOS reason as
+   the search box above. */
+.tablectl { margin: 12px 0 10px; }
+.tablectl select {
+  font: inherit; font-size: 16px; color: var(--ink); background: var(--page);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; max-width: 100%;
+}
+/* Sortable headers are real buttons, so they are reachable by keyboard and
+   announced; the arrow is drawn in CSS from aria-sort inside an aria-hidden
+   span, so neither the header's text nor its accessible name gains a triangle -
+   aria-sort already tells a screen reader the direction. */
+th .sortbtn {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0;
+  margin: 0; text-align: inherit; cursor: pointer; letter-spacing: inherit;
+  text-transform: inherit;
+}
+th .sortbtn:hover { color: var(--ink); }
+th .sortbtn:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; border-radius: 3px; }
+th[aria-sort="ascending"] .sortarrow::after { content: "\00A0\25B2"; font-size: 9px; }
+th[aria-sort="descending"] .sortarrow::after { content: "\00A0\25BC"; font-size: 9px; }
 .issuercard {
   border: 1px solid var(--border); border-radius: 10px;
   background: var(--page); padding: 16px 18px; margin: 0 0 16px;
@@ -610,6 +631,11 @@ footer a { color: var(--ink-2); }
 
     <details class="tableview" id="assetindexdetails">
       <summary id="assetindexsummary">Show every asset</summary>
+      <div class="find tablectl">
+        <label class="findlabel" for="assetclass">Class</label>
+        <select id="assetclass" aria-controls="assetindextable" autocomplete="off"></select>
+        <span class="findnote" id="assetviewnote" aria-live="polite"></span>
+      </div>
       <div class="tablewrap"><table id="assetindextable"></table></div>
     </details>
     <p class="exportrow"><button type="button" class="themebtn" id="assetcsv" aria-describedby="assetcsvnote">Download every asset as a spreadsheet (CSV)</button><span class="unit" id="assetcsvnote"></span></p>
@@ -1448,22 +1474,29 @@ function renderAssetLookup(snap) {
   const table = document.getElementById("assetindextable");
   if (!find || !note || !panel || !det || !table) return;
 
-  renderTable(table, [
+  /* `sort` is what a header click orders by: the underlying figure, never the
+     formatted string ("$1.2bn" sorts below "$950m" as text). A null sorts last
+     in both directions - a dash is an absence, not a smallest value. */
+  const clsOf = (r) => (r.asset_class ? String(r.asset_class) : "");
+  const cols = [
     { h: "Asset", raw: true, get: (r) =>
-        `${esc(r.name || r.symbol)} <span style="color:var(--muted)">${esc(r.symbol)}</span>` },
-    { h: "Class", get: (r) => r.asset_class },
-    { h: "Tokenised cap", num: true, get: (r) => fmtUSD(r.cap) },
-    { h: "Tokens", num: true, get: (r) => fmtNum(r.tokens) },
-    { h: "Issuers", num: true, get: (r) => fmtNum(r.issuers) },
-    { h: "Leading issuer", get: (r) => r.lead || "—" },
-    { h: "Quoted off-chain", num: true, get: (r) => fmtNum(r.tradfi) },
-  ], rows,
+        `${esc(r.name || r.symbol)} <span style="color:var(--muted)">${esc(r.symbol)}</span>`,
+      text: true, sort: (r) => String(r.name || r.symbol || "") },
+    { h: "Class", get: (r) => r.asset_class, text: true, sort: (r) => clsOf(r) || null },
+    { h: "Tokenised cap", num: true, get: (r) => fmtUSD(r.cap), sort: (r) => r.cap },
+    { h: "Tokens", num: true, get: (r) => fmtNum(r.tokens), sort: (r) => r.tokens },
+    { h: "Issuers", num: true, get: (r) => fmtNum(r.issuers), sort: (r) => r.issuers },
+    { h: "Leading issuer", get: (r) => r.lead || "—", text: true, sort: (r) => r.lead || null },
+    { h: "Quoted off-chain", num: true, get: (r) => fmtNum(r.tradfi), sort: (r) => r.tradfi },
+  ];
+  renderTable(table, cols, rows,
     "Every asset the catalogue tokenises, ordered by the asset-level cap. <em>Tokenised cap</em> " +
     "is that asset-level figure from <code>quotes/latest</code>, <strong>not</strong> the sum of its " +
     "tokens — and where it reads $0 the tokens may still report value, which is why some assets " +
     "worth tens of millions sort to the bottom of this list. The reconciliation below counts them. " +
     "A dash under <em>leading issuer</em> means no token for that asset reports any market cap, so " +
-    "there is nothing to lead. Type a name or ticker above to open any row.");
+    "there is nothing to lead. Type a name or ticker above to open any row. Click a column " +
+    "heading to sort by it and again to reverse it; the list always opens in cap order.");
 
   const body = table.querySelector("tbody");
   const trs = [...body.rows];
@@ -1471,6 +1504,112 @@ function renderAssetLookup(snap) {
     tr.dataset.idx = String(i);
     tr.classList.add("hit");
   });
+
+  /* Class filter and column sort. Neither touches rows[] or data-idx: every
+     <tr> keeps the index of its own row in rows[] for life, and sorting only
+     moves the nodes. trs[i], hay[i], show(i) and the CSV all read by that
+     index, so no ordering of the table can make a click open the wrong asset -
+     which is what re-rendering in sorted order and numbering the new rows
+     0..n would have done. */
+  const classSel = document.getElementById("assetclass");
+  const viewNote = document.getElementById("assetviewnote");
+  const searchHit = rows.map(() => true);   // what the find box last matched
+  let searching = false;
+  let classOn = "";                          // "" = every class
+  /* Lower-cased so "ETF" and "etf" from some future run are one option, not
+     two that each filter half the rows. */
+  const classKey = (r) => (clsOf(r) || "(none)").toLowerCase();
+  const classLabel = (k) => (k === "etf" ? "ETF" : k === "(none)" ? "No class"
+                             : k.charAt(0).toUpperCase() + k.slice(1));
+  const collator = new Intl.Collator("en", { sensitivity: "base", numeric: true });
+  const ths = [...table.querySelectorAll("thead th")];
+  /* rows[] arrives largest asset-level cap first. aria-sort says so only if
+     it is true of the rows actually delivered. */
+  const CAP = cols.findIndex((c) => c.h === "Tokenised cap");
+  const capOrdered = rows.every((r, i) => i === 0 || !(r.cap > rows[i - 1].cap));
+  let sortCol = capOrdered ? CAP : -1, sortDir = -1;
+
+  function applyView() {
+    let vis = 0, elsewhere = 0;
+    trs.forEach((tr, i) => {
+      const on = searchHit[i] && (!classOn || classKey(rows[i]) === classOn);
+      tr.hidden = !on;
+      if (on) vis++;
+      else if (searchHit[i]) elsewhere++;
+    });
+    /* The find note already counts search matches; this only speaks when the
+       class filter or the order changes what the reader is looking at, so a
+       screen reader is not told the same count twice per keystroke. */
+    const bits = [];
+    if (classOn) {
+      bits.push(`showing ${fmtNum(vis)} of ${fmtNum(rows.length)}`);
+      if (searching && elsewhere)
+        bits.push(`${fmtNum(elsewhere)} more match${elsewhere === 1 ? "es" : ""} the search in other classes`);
+    }
+    if (sortCol >= 0 && !(sortCol === CAP && sortDir < 0 && capOrdered)) {
+      const c = cols[sortCol];
+      bits.push(`sorted by ${c.h.toLowerCase()}, ` +
+        (c.text ? (sortDir > 0 ? "A to Z" : "Z to A") : (sortDir > 0 ? "smallest first" : "largest first")));
+    }
+    /* Written only when it changes: a live region rewritten with the same
+       words on every keystroke can be re-announced by some screen readers. */
+    const say = bits.join(" · ");
+    if (viewNote && viewNote.textContent !== say) viewNote.textContent = say;
+  }
+
+  function sortBy(ci, dir) {
+    const c = cols[ci];
+    const keys = rows.map(c.sort);
+    const blank = (v) => v == null || v === "" || (typeof v === "number" && !isFinite(v));
+    const order = rows.map((_, i) => i).sort((a, b) => {
+      const x = keys[a], y = keys[b], xb = blank(x), yb = blank(y);
+      if (xb !== yb) return xb ? 1 : -1;
+      if (!xb) {
+        const d = c.text ? collator.compare(String(x), String(y)) : x - y;
+        if (d) return d * dir;
+      }
+      return a - b;   // ties keep cap order, so the default order is recoverable
+    });
+    body.append(...order.map((i) => trs[i]));
+    sortCol = ci; sortDir = dir;
+    ths.forEach((th, j) => {
+      if (j === ci) th.setAttribute("aria-sort", dir > 0 ? "ascending" : "descending");
+      else th.removeAttribute("aria-sort");
+    });
+    applyView();
+  }
+
+  ths.forEach((th, ci) => {
+    if (!cols[ci] || !cols[ci].sort) return;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "sortbtn";
+    b.textContent = th.textContent;
+    const arrow = document.createElement("span");
+    arrow.className = "sortarrow";
+    arrow.setAttribute("aria-hidden", "true");
+    b.appendChild(arrow);
+    th.textContent = "";
+    th.appendChild(b);
+    if (ci === sortCol) th.setAttribute("aria-sort", "descending");
+    /* Figures open largest first and names A to Z - a reader clicking
+       "Tokens" is asking which asset has the most. */
+    b.addEventListener("click", () =>
+      sortBy(ci, ci === sortCol ? -sortDir : (cols[ci].text ? 1 : -1)));
+  });
+
+  if (classSel) {
+    const counts = new Map();
+    rows.forEach((r) => counts.set(classKey(r), (counts.get(classKey(r)) || 0) + 1));
+    /* Generated from the rows, never typed: the classes and their counts are
+       whatever the morning run delivered. */
+    const opts = [["", `All classes (${fmtNum(rows.length)})`]].concat(
+      [...counts].sort((a, b) => b[1] - a[1] || collator.compare(a[0], b[0]))
+        .map(([k, n]) => [k, `${classLabel(k)} (${fmtNum(n)})`]));
+    classSel.innerHTML = opts.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join("");
+    classSel.value = "";
+    classSel.addEventListener("change", () => { classOn = classSel.value; applyView(); });
+  }
   /* Same reason as the issuer table: role="button" on 791 rows removed every
      figure from the accessibility tree and put 791 stops in the tab order.
      Click opens a row; typing opens a row; the table stays a table. */
@@ -1795,8 +1934,10 @@ function renderAssetLookup(snap) {
   find.addEventListener("input", () => {
     clearTimeout(beyondTimer);
     const q = find.value.trim().toLowerCase();
+    searching = !!q;
     if (!q) {
-      trs.forEach((tr) => { tr.hidden = false; });
+      searchHit.fill(true);
+      applyView();
       note.textContent = "";
       /* Fold it back. Searching force-opens the list; leaving it open on an
          empty query drops all 791 rows back in - 29,000px on a phone, with the
@@ -1809,7 +1950,7 @@ function renderAssetLookup(snap) {
     let shown = 0, only = -1, exact = -1;
     trs.forEach((tr, i) => {
       const hit = hay[i].includes(q);
-      tr.hidden = !hit;
+      searchHit[i] = hit;
       if (!hit) return;
       shown++;
       only = i;
@@ -1819,6 +1960,7 @@ function renderAssetLookup(snap) {
       if (exact < 0 && (rows[i].symbol || "").toLowerCase() === q) exact = i;
       if (exact < 0 && (rows[i].name || "").toLowerCase() === q) exact = i;
     });
+    applyView();
     /* Two ways to answer something that is not an asset, and they are not the
        same. An EXACT ticker - a token symbol, or one of the tickers this
        catalogue is known to carry emptily or not at all - beats a substring
@@ -1851,6 +1993,15 @@ function renderAssetLookup(snap) {
                      : exact >= 0 ? `${fmtNum(shown)} assets, showing the exact match`
                      : `${fmtNum(shown)} assets`;
     if (!det.open) { det.open = true; openedBySearch = true; }
+    /* The find box searches every class. If what it is about to open sits in
+       a class the filter is hiding, drop the filter rather than open a panel
+       with no row behind it and a count the table does not show. */
+    const opening = shown === 1 ? only : exact;
+    if (opening >= 0 && classOn && classKey(rows[opening]) !== classOn) {
+      classOn = "";
+      if (classSel) classSel.value = "";
+      applyView();
+    }
     if (shown === 1) show(only);
     else if (exact >= 0) show(exact);
     else clear();
@@ -1866,7 +2017,8 @@ function renderAssetLookup(snap) {
     if (csvNote) csvNote.textContent =
       `${fmtNum(rows.length)} rows, the same columns as the table plus what the tokens report where the ` +
       `asset endpoint says $0` + (tokenOnlyN ? ` (${fmtNum(tokenOnlyN)} assets)` : "") +
-      `, figures in full US dollars, from the run of ${runLabel(snap)}.`;
+      `, figures in full US dollars, from the run of ${runLabel(snap)}. Always every row, ` +
+      `largest asset-level cap first, however the table is filtered or sorted.`;
     csvBtn.addEventListener("click", () => downloadCSV(
       `backstop-assets-${runStamp(snap)}.csv`,
       ["Asset", "Ticker", "Class", "Tokenised market cap (USD)", "Reported by its tokens where the asset endpoint says 0 (USD)",
