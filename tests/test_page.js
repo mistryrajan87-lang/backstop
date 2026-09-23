@@ -1880,6 +1880,28 @@ function serve(dir) {
     // the issuer table is every issuer with an attributed token, including the
     // ones carrying $0 - the page says so in its note, and the file must agree
     const issRows = (snap.issuers || []).length;
+    /* Filter and re-sort the every-asset table first. The note beside the
+       button promises every row, largest cap first, whatever the table shows -
+       so the checks below only mean something if the table is NOT showing that. */
+    const skewed = await dp.evaluate(() => {
+      const det = document.getElementById("assetindexdetails");
+      const sel = document.getElementById("assetclass");
+      if (!det || !sel) return null;
+      det.open = true;
+      // a run with a single class has nothing to filter; the sort still applies
+      const filtered = sel.options.length >= 3;
+      if (filtered) {
+        sel.value = sel.options[sel.options.length - 1].value;
+        sel.dispatchEvent(new Event("change"));
+      }
+      const b = document.querySelector("#assetindextable thead th .sortbtn");
+      if (b) b.click();
+      let trs = [...document.querySelectorAll("#assetindextable tbody tr")];
+      if (b && trs[0].dataset.idx === "0") { b.click(); trs = [...document.querySelectorAll("#assetindextable tbody tr")]; }
+      return { filtered, visible: trs.filter((t) => !t.hidden).length, firstIdx: trs[0].dataset.idx };
+    });
+    check("before downloading, the asset table is filtered and re-sorted",
+          !!skewed && (!skewed.filtered || skewed.visible < idxRows) && skewed.firstIdx !== "0", JSON.stringify(skewed));
     for (const [btn, want, name] of [["#assetcsv", idxRows, "asset"], ["#issuercsv", issRows, "issuer"]]) {
       const present = await dp.$(btn);
       check(`the ${name} table has a download button`, !!present);
@@ -1900,6 +1922,12 @@ function serve(dir) {
       const noteTxt = (await dp.textContent(btn + "note")).replace(/,/g, "");
       check(`the ${name} CSV note beside the button says how many rows and which run`,
             noteTxt.includes(String(want)) && /\d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC/.test(noteTxt), noteTxt);
+      if (name === "asset") {
+        check("the asset CSV note says the file ignores the table's filter and sort",
+              /every row/i.test(noteTxt) && /filtered or sorted/i.test(noteTxt), noteTxt);
+        check("and the file bears it out: its rows are the snapshot's, in the snapshot's order",
+              rows.slice(1).every((r, i) => r[1] === String(snap.asset_index.rows[i][0])));
+      }
     }
     await dlCtx.close();
   }
@@ -1932,6 +1960,242 @@ function serve(dir) {
       check(`no EDGAR link is invented for ${commodity.symbol}, which has no filer`, n === 0);
     }
     await page.fill("#assetfind", "");
+  }
+
+  // 22. CLASS FILTER AND COLUMN SORT on the every-asset table. The trap is the
+  //     lookup: each row carries data-idx pointing into rows[], and the panel
+  //     opens rows[idx]. Re-rendering in sorted order and renumbering the rows
+  //     would make a click on the first row after a sort open whatever asset
+  //     used to be first. So every sort below is followed by clicking rows and
+  //     checking the panel names the asset that row displays.
+  if (ai && ai.rows && ai.rows.length) {
+    const errsBefore = consoleErrors.length;
+    const col = {};
+    ai.fields.forEach((f, i) => { col[f] = i; });
+    const R = ai.rows;
+    const n = (x) => x.toLocaleString("en-GB");
+    const clsCount = {};
+    const ck = (r) => String(r[col.asset_class] || "(none)").toLowerCase();
+    R.forEach((r) => { const k = ck(r); clsCount[k] = (clsCount[k] || 0) + 1; });
+    await page.fill("#assetfind", "");
+    await page.evaluate(() => { document.getElementById("assetindexdetails").open = true; });
+    await page.waitForTimeout(200);
+    const view = () => page.evaluate(() => [...document.querySelectorAll("#assetindextable tbody tr")]
+      .map((tr) => ({ idx: Number(tr.dataset.idx), on: !tr.hidden,
+                      cells: [...tr.cells].map((c) => c.textContent.trim()) })));
+    const vnote = () => page.evaluate(() => (document.getElementById("assetviewnote") || {}).textContent || "");
+
+    // the control is generated from the rows
+    const opts = await page.evaluate(() =>
+      [...document.querySelectorAll("#assetclass option")].map((o) => ({ v: o.value, t: o.textContent })));
+    check("the class filter offers every class in the run plus all of them",
+          opts.length === Object.keys(clsCount).length + 1 && opts[0].v === "" &&
+          opts[0].t.includes(n(R.length)), JSON.stringify(opts));
+    check("each class option carries that class's row count from the snapshot",
+          opts.slice(1).every((o) => clsCount[o.v] != null && o.t.includes(`(${n(clsCount[o.v])})`)),
+          JSON.stringify(opts));
+
+    // each class shows exactly its own rows
+    const heads = await page.evaluate(() =>
+      [...document.querySelectorAll("#assetindextable thead th")].map((t) => t.textContent.trim()));
+    const H = (name) => heads.findIndex((h) => h.toLowerCase() === name.toLowerCase());
+    const cClass = H("Class");
+    let classOk = true, classDetail = "";
+    for (const o of opts.slice(1)) {
+      await page.selectOption("#assetclass", o.v);
+      const v = (await view()).filter((r) => r.on);
+      const note = await vnote();
+      const ok = v.length === clsCount[o.v] && v.every((r) => ck(R[r.idx]) === o.v)
+        && v.every((r) => r.cells[cClass] === (R[r.idx][col.asset_class] || ""))
+        && note.includes(`showing ${n(clsCount[o.v])} of ${n(R.length)}`);
+      if (!ok) { classOk = false; classDetail = `${o.v}: ${v.length} shown vs ${clsCount[o.v]}; note "${note}"`; }
+    }
+    check("choosing a class shows exactly that class's rows and says how many", classOk, classDetail);
+    await page.selectOption("#assetclass", "");
+    check("choosing all classes brings every row back and clears the note",
+          (await view()).every((r) => r.on) && (await vnote()) === "", await vnote());
+
+    // filter and search intersect, and the note says what the filter is hiding
+    const hayOf = (r) => `${r[col.symbol]} ${r[col.name]} ${r[col.asset_class]}`.toLowerCase();
+    let probe = null;
+    for (const r of R) {
+      for (const w of String(r[col.name] || "").toLowerCase().split(/[^a-z0-9]+/)) {
+        if (w.length < 4) continue;
+        const hits = R.filter((x) => hayOf(x).includes(w));
+        const by = {};
+        hits.forEach((x) => { const k = ck(x); by[k] = (by[k] || 0) + 1; });
+        // no asset may be named or tickered exactly w: an exact match opens a
+        // panel, and that is tested separately below
+        const exactly = R.some((x) => String(x[col.symbol]).toLowerCase() === w || String(x[col.name]).toLowerCase() === w);
+        if (!exactly && Object.keys(by).length >= 2 && hits.length < R.length) { probe = { w, hits: hits.length, by }; break; }
+      }
+      if (probe) break;
+    }
+    check("the snapshot has a search word that spans two classes, to test the intersection", !!probe);
+    if (probe) {
+      const k = Object.keys(probe.by).sort((a, b) => probe.by[a] - probe.by[b])[0];
+      await page.selectOption("#assetclass", k);
+      await page.fill("#assetfind", probe.w);
+      await page.waitForTimeout(400);
+      const v = (await view()).filter((r) => r.on);
+      const note = await vnote();
+      const others = probe.hits - probe.by[k];
+      check(`searching "${probe.w}" under ${k} shows only the matches in that class (${v.length}/${probe.by[k]})`,
+            v.length === probe.by[k] && v.every((r) => hayOf(R[r.idx]).includes(probe.w)
+              && ck(R[r.idx]) === k), note);
+      check("and says how many more match in other classes",
+            note.includes(`${n(others)} more match`), note);
+      // clearing the search must leave the class filter in force
+      await page.fill("#assetfind", "");
+      await page.waitForTimeout(200);
+      await page.evaluate(() => { document.getElementById("assetindexdetails").open = true; });
+      let vv = (await view()).filter((r) => r.on);
+      check("clearing the search with a class chosen shows that class, not every row",
+            vv.length === clsCount[k] && vv.every((r) => ck(R[r.idx]) === k), `${vv.length} vs ${clsCount[k]}`);
+      // a search that answers with a non-asset panel still respects the filter
+      await page.fill("#assetfind", "zzzzzznotanasset");
+      await page.waitForTimeout(600);
+      check("a search nothing matches shows no rows under a class filter",
+            (await view()).every((r) => !r.on));
+      await page.fill("#assetfind", probe.w);
+      await page.waitForTimeout(400);
+      await page.selectOption("#assetclass", "");
+      check("clearing the class filter keeps the search and shows all its matches",
+            (await view()).filter((r) => r.on).length === probe.hits);
+      await page.fill("#assetfind", "");
+      await page.waitForTimeout(200);
+      await page.evaluate(() => { document.getElementById("assetindexdetails").open = true; });
+    }
+
+    // typing a ticker from a class the filter hides opens it AND shows its row:
+    // the find box searches everything, so the filter gives way
+    const clsKeys = Object.keys(clsCount);
+    if (clsKeys.length >= 2) {
+      const symN = {};
+      R.forEach((r) => { symN[r[col.symbol]] = (symN[r[col.symbol]] || 0) + 1; });
+      const other = R.find((r) => ck(r) !== clsKeys[0] && symN[r[col.symbol]] === 1);
+      await page.selectOption("#assetclass", clsKeys[0]);
+      await page.click("#assetindextable tbody tr:not([hidden]) td:nth-child(2)");
+      await page.click("#assetcard .icclose");
+      check("the Clear button leaves the class filter in force",
+            (await view()).filter((r) => r.on).length === clsCount[clsKeys[0]]);
+      await page.fill("#assetfind", other[col.symbol]);
+      await page.waitForTimeout(400);
+      const st = await page.evaluate(() => ({
+        h3: ((document.querySelector("#assetcard h3") || {}).textContent || "").trim(),
+        sel: (document.getElementById("assetclass") || {}).value,
+        rowOn: [...document.querySelectorAll("#assetindextable tbody tr.sel")].filter((t) => !t.hidden).length,
+      }));
+      check(`searching ${other[col.symbol]} while ${clsKeys[0]} is chosen opens it and drops the filter`,
+            st.h3.endsWith(" " + other[col.symbol]) && st.sel === "" && st.rowOn === 1, JSON.stringify(st));
+      await page.fill("#assetfind", "");
+      await page.waitForTimeout(200);
+      await page.selectOption("#assetclass", "");
+      await page.evaluate(() => { document.getElementById("assetindexdetails").open = true; });
+    }
+
+    // headers are buttons, and the header text is still just the column name
+    const hb = await page.evaluate(() => [...document.querySelectorAll("#assetindextable thead th")].map((t) => {
+      const b = t.querySelector("button.sortbtn");
+      const hid = b && b.querySelector('[aria-hidden="true"]');
+      return { btn: !!b, text: t.textContent, sort: t.getAttribute("aria-sort"),
+               own: b ? getComputedStyle(b, "::after").content : "", arrow: hid ? getComputedStyle(hid, "::after").content : "" };
+    }));
+    check("every heading of the asset table is a sort button", hb.length > 0 && hb.every((h) => h.btn), JSON.stringify(hb));
+    check("the table opens marked as sorted by cap, largest first, and nothing else",
+          hb.filter((h) => h.sort).length === 1 && hb[H("Tokenised cap")].sort === "descending", JSON.stringify(hb));
+    check("sorting does not put arrows into the heading text", hb.every((h) => !/[\u25B2\u25BC]/.test(h.text)));
+    check("the arrow is drawn only inside an aria-hidden span, so it is not read as the heading's name",
+          hb.every((h) => !/[\u25B2\u25BC]/.test(h.own)) && /\u25BC/.test(hb[H("Tokenised cap")].arrow),
+          JSON.stringify(hb.map((h) => [h.own, h.arrow])));
+
+    const clickHead = (i) => page.click(`#assetindextable thead th:nth-child(${i + 1}) .sortbtn`);
+    const nonInc = (a) => a.every((x, i) => i === 0 || !(x > a[i - 1]));
+    const nonDec = (a) => a.every((x, i) => i === 0 || !(x < a[i - 1]));
+
+    // numeric column: first click largest first, second smallest first
+    const cTok = H("Tokens");
+    await clickHead(cTok);
+    let v = await view();
+    check("clicking Tokens orders the rows most tokens first",
+          nonInc(v.map((r) => R[r.idx][col.tokens])) &&
+          v.every((r) => r.cells[cTok] === n(R[r.idx][col.tokens])), (await vnote()));
+    let sorts = await page.evaluate(() => [...document.querySelectorAll("#assetindextable thead th[aria-sort]")]
+      .map((t) => [t.textContent.trim(), t.getAttribute("aria-sort")]));
+    check("and moves aria-sort to that heading alone", sorts.length === 1 && sorts[0][1] === "descending"
+          && sorts[0][0].toLowerCase() === "tokens", JSON.stringify(sorts));
+    check("and the note says so", (await vnote()).includes("sorted by tokens, largest first"), await vnote());
+    await clickHead(cTok);
+    v = await view();
+    check("clicking it again reverses it", nonDec(v.map((r) => R[r.idx][col.tokens])));
+
+    // THE TRAP: after sorting, a click opens the asset the row displays
+    const trap = async (label) => {
+      const vis = (await view()).filter((r) => r.on);
+      const picks = [0, Math.floor(vis.length / 2), vis.length - 1].map((p) => vis[p]);
+      const bad = [];
+      for (const r of picks) {
+        await page.click(`#assetindextable tbody tr[data-idx="${r.idx}"] td:nth-child(2)`);
+        const got = await page.evaluate(() => {
+          const h = document.querySelector("#assetcard h3");
+          return h ? h.textContent.trim() : "";
+        });
+        const want = `${R[r.idx][col.name] || R[r.idx][col.symbol]} ${R[r.idx][col.symbol]}`;
+        if (got !== r.cells[0] || got !== want) bad.push(`row "${r.cells[0]}" opened "${got}"`);
+      }
+      check(`after sorting by ${label}, clicking a row opens the asset that row shows`, bad.length === 0, bad.join("; "));
+    };
+    await trap("tokens");
+
+    const cAsset = H("Asset");
+    await clickHead(cAsset);
+    v = await view();
+    const coll = new Intl.Collator("en", { sensitivity: "base", numeric: true });
+    const names = v.map((r) => String(R[r.idx][col.name] || R[r.idx][col.symbol]));
+    check("clicking Asset orders the rows A to Z",
+          names.every((x, i) => i === 0 || coll.compare(names[i - 1], x) <= 0) && v.some((r, i) => r.idx !== i),
+          names.slice(0, 3).join(", "));
+    await trap("asset");
+
+    // a blank is an absence, not a smallest value - it sorts last both ways
+    const cLead = H("Leading issuer");
+    // same rule as the page: no leader unless top_issuer points at a real issuer
+    const blanks = R.filter((r) => !(r[col.top_issuer] >= 0 && (snap.issuers || [])[r[col.top_issuer]])).length;
+    if (blanks) {
+      await clickHead(cLead);
+      const a = await view();
+      await clickHead(cLead);
+      const b = await view();
+      const tailBlank = (x) => x.slice(-blanks).every((r) => r.cells[cLead] === "—") &&
+                               x.slice(0, -blanks).every((r) => r.cells[cLead] !== "—");
+      check(`assets no issuer leads (${blanks}) sort last in both directions`, tailBlank(a) && tailBlank(b));
+    }
+
+    // search after a sort still opens the right asset
+    const symCountOf = (sym) => R.filter((r) => r[col.symbol] === sym).length;
+    const target = R.slice(Math.floor(R.length / 3)).find((r) => symCountOf(r[col.symbol]) === 1) || R[0];
+    const symCount = symCountOf(target[col.symbol]);
+    await page.fill("#assetfind", target[col.symbol]);
+    await page.waitForTimeout(400);
+    const hit = await page.evaluate(() => ({
+      h3: ((document.querySelector("#assetcard h3") || {}).textContent || "").trim(),
+      sel: [...document.querySelectorAll("#assetindextable tbody tr.sel")].map((t) => Number(t.dataset.idx)),
+    }));
+    check(`after sorting, searching ${target[col.symbol]} opens it and highlights its own row`,
+          symCount === 1 && (hit.h3.endsWith(" " + target[col.symbol]) && hit.sel.length === 1
+            && R[hit.sel[0]][col.symbol] === target[col.symbol]), JSON.stringify(hit));
+    await page.fill("#assetfind", "");
+    await page.waitForTimeout(200);
+
+    // cap, largest first, is the order the rows arrived in - exactly
+    await clickHead(H("Tokenised cap"));
+    v = await view();
+    check("sorting by cap again restores the original order exactly",
+          v.every((r, i) => r.idx === i), v.slice(0, 5).map((r) => r.idx).join(","));
+    check("and the note stops mentioning a sort", !(await vnote()).includes("sorted"), await vnote());
+    check("filtering and sorting raised no page errors", consoleErrors.length === errsBefore,
+          consoleErrors.slice(errsBefore).join(" | "));
+    await page.evaluate(() => { document.getElementById("assetindexdetails").open = false; });
   }
 
   await browser.close();
