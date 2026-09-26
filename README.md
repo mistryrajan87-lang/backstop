@@ -11,28 +11,28 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 ## What it found
 
 <!-- backstop:readme:start -->
-From the run of **Fri, 25 Sep 2026 05:51:55 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
-[`2026-09-25T05-51-55Z.json`](docs/data/snapshots/2026-09-25T05-51-55Z.json), and rewritten here by
+From the run of **Sat, 26 Sep 2026 05:50:15 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
+[`2026-09-26T05-50-15Z.json`](docs/data/snapshots/2026-09-26T05-50-15Z.json), and rewritten here by
 `scripts/inline_snapshot.py` each time the pipeline runs.
 
-> In CoinMarketCap's tokenised real-world-asset catalogue, **791 assets**
-> carry tokens, holding **$7.44bn** of reported market cap. **15**
+> In CoinMarketCap's tokenised real-world-asset catalogue, **792 assets**
+> carry tokens, holding **$7.43bn** of reported market cap. **15**
 > issuers hold all of it. The top five hold **94.2%**. Almost half the
-> tokens — 670 of 1,440 — report
-> no market cap at all. And every one of the 778 off-chain
+> tokens — 670 of 1,442 — report
+> no market cap at all. And every one of the 779 off-chain
 > listings the API returns is Binance.
 
 | | |
 |---|---|
-| Assets in `map` / carrying tokens | 7,811 / **791** |
-| Reported tokenised cap | **$7.44bn** |
+| Assets in `map` / carrying tokens | 7,811 / **792** |
+| Reported tokenised cap | **$7.43bn** |
 | Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
-| HHI over issuers, by value | **2,296.9** — 4.35 effective issuers |
-| Top 1 / 3 / 5 share | 36.0% / 73.1% / **94.2%** |
-| Largest single asset | Gold — 61.9% of the catalogue |
-| Tokens reporting no market cap | **670 of 1,440** |
-| Off-chain listings, and where | 778 — **every one of them Binance** |
-| Chain concentration | Ethereum 73.7%; 1.76 effective chains |
+| HHI over issuers, by value | **2,306.9** — 4.33 effective issuers |
+| Top 1 / 3 / 5 share | 36.1% / 73.3% / **94.2%** |
+| Largest single asset | Gold — 62.2% of the catalogue |
+| Tokens reporting no market cap | **670 of 1,442** |
+| Off-chain listings, and where | 779 — **every one of them Binance** |
+| Chain concentration | Ethereum 73.9%; 1.75 effective chains |
 <!-- backstop:readme:end -->
 
 ## What this catalogue is, and what it is not
@@ -60,7 +60,7 @@ all. The residue is not *missing* issuers. It is *empty* ones.
 
 **Every share is a share of the tokens that report a cap.**
 <!-- backstop:nullcaps:start -->
-**670 of 1,440** tokens (47% of them) return `market_cap: null`. 625 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
+**670 of 1,442** tokens (46% of them) return `market_cap: null`. 625 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
 <!-- backstop:nullcaps:end -->
 
 **The reconciliation gap is resolved, and it was a data-quality finding.** The
@@ -82,7 +82,7 @@ Those six account for **$105.9m** of the $106m. They cannot be reconciled — on
 side of the comparison is missing — so they are excluded from the ratio and
 reported as their own category, while their value stays in the market total
 because it is real. <!-- backstop:recon:start -->
-Over the assets both endpoints price, the ratio rounds to **1.0000**, and 2 assets are more than 1% out (worst: OPENAI at 1.0208).
+Over the assets both endpoints price, the ratio rounds to **1.0000**, and 1 asset is more than 1% out (worst: CLW at 1.0166).
 <!-- backstop:recon:end -->
 
 That is the single most reusable thing here for anyone else building on these
@@ -328,7 +328,7 @@ to end.
    layer, which is a better finding than the one I expected.
 6. **The null market caps are the largest single caveat on every share.**
 <!-- backstop:nullcaps2:start -->
-   **670 of 1,440** tokens (47% of them) return `market_cap: null`. 625 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
+   **670 of 1,442** tokens (46% of them) return `market_cap: null`. 625 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
 <!-- backstop:nullcaps2:end -->
    They are real tokens with no reported value,
    so every share Backstop
