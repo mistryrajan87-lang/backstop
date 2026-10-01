@@ -11,14 +11,14 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 ## What it found
 
 <!-- backstop:readme:start -->
-From the run of **Wed, 30 Sep 2026 09:43:43 GMT** — 107 calls, 73 credits. Every figure below is that one run, archived at
-[`2026-09-30T09-43-43Z.json`](docs/data/snapshots/2026-09-30T09-43-43Z.json), and rewritten here by
+From the run of **Thu, 01 Oct 2026 08:55:37 GMT** — 108 calls, 74 credits. Every figure below is that one run, archived at
+[`2026-10-01T08-55-37Z.json`](docs/data/snapshots/2026-10-01T08-55-37Z.json), and rewritten here by
 `scripts/inline_snapshot.py` each time the pipeline runs.
 
 > In CoinMarketCap's tokenised real-world-asset catalogue, **794 assets**
 > carry tokens, holding **$7.74bn** of reported market cap. **15**
 > issuers hold all of it. The top five hold **94.2%**. Almost half the
-> tokens — 671 of 1,463 — report
+> tokens — 664 of 1,463 — report
 > no market cap at all. And every one of the 781 off-chain
 > listings the API returns is Binance.
 
@@ -27,12 +27,12 @@ From the run of **Wed, 30 Sep 2026 09:43:43 GMT** — 107 calls, 73 credits. Eve
 | Assets in `map` / carrying tokens | 7,811 / **794** |
 | Reported tokenised cap | **$7.74bn** |
 | Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
-| HHI over issuers, by value | **2,394.2** — 4.18 effective issuers |
-| Top 1 / 3 / 5 share | 38.6% / 73.6% / **94.2%** |
-| Largest single asset | Gold — 63.4% of the catalogue |
-| Tokens reporting no market cap | **671 of 1,463** |
+| HHI over issuers, by value | **2,375.0** — 4.21 effective issuers |
+| Top 1 / 3 / 5 share | 38.3% / 73.2% / **94.2%** |
+| Largest single asset | Gold — 62.9% of the catalogue |
+| Tokens reporting no market cap | **664 of 1,463** |
 | Off-chain listings, and where | 781 — **every one of them Binance** |
-| Chain concentration | Ethereum 74.4%; 1.73 effective chains |
+| Chain concentration | Ethereum 74.0%; 1.75 effective chains |
 <!-- backstop:readme:end -->
 
 ## What this catalogue is, and what it is not
@@ -60,7 +60,7 @@ all. The residue is not *missing* issuers. It is *empty* ones.
 
 **Every share is a share of the tokens that report a cap.**
 <!-- backstop:nullcaps:start -->
-**671 of 1,463** tokens (46% of them) return `market_cap: null`. 619 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
+**664 of 1,463** tokens (45% of them) return `market_cap: null`. 619 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
 <!-- backstop:nullcaps:end -->
 
 **The reconciliation gap is resolved, and it was a data-quality finding.** The
@@ -82,7 +82,7 @@ Those six account for **$105.9m** of the $106m. They cannot be reconciled — on
 side of the comparison is missing — so they are excluded from the ratio and
 reported as their own category, while their value stays in the market total
 because it is real. <!-- backstop:recon:start -->
-Over the assets both endpoints price, the ratio rounds to **1.0000**, and 1 asset is more than 1% out (worst: OPENAI at 0.9689).
+Over the assets both endpoints price, the ratio rounds to **1.0002**, and 3 assets are more than 1% out (worst: ANTHROPIC at 0.9604).
 <!-- backstop:recon:end -->
 
 That is the single most reusable thing here for anyone else building on these
@@ -108,7 +108,7 @@ Three do match a row - and none of them is the product you would assume:
 | Ticker | What is actually in the map | State |
 |---|---|---|
 | `USTB` | Victory Portfolios II VictoryShares Short-Term Bond ETF | no tokens, carries nothing |
-| `JAAA` | Janus Henderson AAA CLO ETF | tokens, carries **$87,710** |
+| `JAAA` | Janus Henderson AAA CLO ETF | tokens, carries **$110,495** |
 | `BOXX` | Alpha Architect 1-3 Month Box ETF | no tokens, carries nothing |
 <!-- backstop:notinmap:end -->
 
@@ -328,7 +328,7 @@ to end.
    layer, which is a better finding than the one I expected.
 6. **The null market caps are the largest single caveat on every share.**
 <!-- backstop:nullcaps2:start -->
-   **671 of 1,463** tokens (46% of them) return `market_cap: null`. 619 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
+   **664 of 1,463** tokens (45% of them) return `market_cap: null`. 619 of those belong to one issuer, Backed Assets, whose book is computed from the minority of its tokens that report anything.
 <!-- backstop:nullcaps2:end -->
    They are real tokens with no reported value,
    so every share Backstop
