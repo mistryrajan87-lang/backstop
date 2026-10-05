@@ -11,13 +11,13 @@ Live dashboard: **https://mistryrajan87-lang.github.io/backstop/**
 ## What it found
 
 <!-- backstop:readme:start -->
-From the run of **Sun, 04 Oct 2026 08:55:32 GMT** — 108 calls, 74 credits. Every figure below is that one run, archived at
-[`2026-10-04T08-55-32Z.json`](docs/data/snapshots/2026-10-04T08-55-32Z.json), and rewritten here by
+From the run of **Mon, 05 Oct 2026 09:01:07 GMT** — 108 calls, 74 credits. Every figure below is that one run, archived at
+[`2026-10-05T09-01-07Z.json`](docs/data/snapshots/2026-10-05T09-01-07Z.json), and rewritten here by
 `scripts/inline_snapshot.py` each time the pipeline runs.
 
 > In CoinMarketCap's tokenised real-world-asset catalogue, **794 assets**
-> carry tokens, holding **$7.78bn** of reported market cap. **15**
-> issuers hold all of it. The top five hold **94.3%**. Almost half the
+> carry tokens, holding **$7.82bn** of reported market cap. **15**
+> issuers hold all of it. The top five hold **94.4%**. Almost half the
 > tokens — 664 of 1,463 — report
 > no market cap at all. And every one of the 781 off-chain
 > listings the API returns is Binance.
@@ -25,10 +25,10 @@ From the run of **Sun, 04 Oct 2026 08:55:32 GMT** — 108 calls, 74 credits. Eve
 | | |
 |---|---|
 | Assets in `map` / carrying tokens | 7,811 / **794** |
-| Reported tokenised cap | **$7.78bn** |
+| Reported tokenised cap | **$7.82bn** |
 | Issuers: listed / seen on a token / carrying value | 25 / 21 / **15** |
-| HHI over issuers, by value | **2,354.2** — 4.25 effective issuers |
-| Top 1 / 3 / 5 share | 38.0% / 72.7% / **94.3%** |
+| HHI over issuers, by value | **2,355.3** — 4.25 effective issuers |
+| Top 1 / 3 / 5 share | 38.0% / 72.6% / **94.4%** |
 | Largest single asset | Gold — 62.4% of the catalogue |
 | Tokens reporting no market cap | **664 of 1,463** |
 | Off-chain listings, and where | 781 — **every one of them Binance** |
@@ -82,7 +82,7 @@ Those six account for **$105.9m** of the $106m. They cannot be reconciled — on
 side of the comparison is missing — so they are excluded from the ratio and
 reported as their own category, while their value stays in the market total
 because it is real. <!-- backstop:recon:start -->
-Over the assets both endpoints price, the ratio rounds to **1.0000**, and 1 asset is more than 1% out (worst: PBR at 1.0101).
+Over the assets both endpoints price, the ratio rounds to **0.9998**, and no asset is more than 1% out.
 <!-- backstop:recon:end -->
 
 That is the single most reusable thing here for anyone else building on these
