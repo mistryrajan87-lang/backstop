@@ -1,0 +1,11720 @@
+{
+ "generated_at": "2026-10-17T08:56:54+00:00",
+ "method": {
+  "metric": "Herfindahl-Hirschman Index over issuer shares of tokenised market cap",
+  "scale": "0-10000, the sum of squared percentage shares. Read as a description of this share vector. The 1500 and 2500 marks used in merger analysis are deliberately NOT applied: these are CoinMarketCap issuer labels, not firms shown to compete in a defined market. No block carries a derived band, verdict or shape label - earlier versions did, computed from exactly those two cut-points, which contradicted this sentence",
+  "effective_n": "1 / sum of squared shares - the number of equal-sized issuers that would produce the same HHI",
+  "weight": "each token's own market cap in USD, from quotes/latest tokens[], summed by issuer - never the asset's cap, which several issuers share",
+  "ex_commodity": "the ex_commodity scope is rebuilt from every token whose asset_class is not 'commodity', not added up from the stock and ETF blocks - those two agree with it only while those are the only other classes in the catalogue",
+  "shares": "every block carries shares[]: the full list of participant shares, largest first, so a reader can recompute the index or ask what it would be without the largest holders",
+  "asset_mix": "the one block NOT weighted by the token sum. asset_mix is over assets, weighted by each asset's own market cap from quotes/latest, so its denominator omits the assets the asset-level endpoint prices at zero while their tokens report a value (coverage.reconciliation.value_priced_only_by_tokens is exactly that gap). Its shares are therefore NOT comparable with the issuer, chain or class blocks, which all use the token sum: an asset's share of asset_mix and its share of overall.total are different denominators and neither is wrong"
+ },
+ "counts": {
+  "assets_mapped": 7811,
+  "assets_tokenised": 836,
+  "assets_quoted": 836,
+  "issuers_in_directory": 25,
+  "issuers_seen": 22,
+  "issuers_with_value": 16,
+  "tokens_attributed": 1611
+ },
+ "coverage": {
+  "quote_batches_run": 9,
+  "quote_batches_total": 9,
+  "assets_fully_quoted": true,
+  "tokens_without_issuer": 5,
+  "value_without_issuer": 0.0,
+  "tokens_without_market_cap": 738,
+  "issuers_outside_directory": 0,
+  "chains_resolved": 9,
+  "value_without_a_chain": 0.0,
+  "placeholder_issuers": 6,
+  "reconciliation": {
+   "assets_compared": 313,
+   "sum_of_token_caps": 8150087413.87,
+   "sum_of_asset_caps": 8150607158.091717,
+   "difference": -519744.2217168808,
+   "ratio": 0.9999,
+   "assets_compared_note": "the ratio covers only assets both endpoints price",
+   "assets_off_by_over_1pct": 1,
+   "worst_assets": [
+    {
+     "rwa_id": "3179",
+     "symbol": "HTZ",
+     "name": "Hertz Global Holdings, Inc",
+     "asset_cap": 180.36986715502468,
+     "token_sum": 664.3199999999999,
+     "ratio": 3.6831
+    }
+   ],
+   "assets_priced_only_by_tokens": 7,
+   "value_priced_only_by_tokens": 106056587.56,
+   "token_only_examples": [
+    {
+     "rwa_id": "6918",
+     "symbol": "EWG",
+     "name": "iShares MSCI Germany ETF",
+     "asset_cap": 0.0,
+     "token_sum": 56880853.08
+    },
+    {
+     "rwa_id": "5407",
+     "symbol": "NLR",
+     "name": "VanEck Uranium and Nuclear ETF",
+     "asset_cap": 0.0,
+     "token_sum": 47813995.73
+    },
+    {
+     "rwa_id": "7950",
+     "symbol": "VOO",
+     "name": "Vanguard S&P 500 ETF",
+     "asset_cap": 0.0,
+     "token_sum": 816526.53
+    },
+    {
+     "rwa_id": "5920",
+     "symbol": "VUG",
+     "name": "Vanguard Growth ETF",
+     "asset_cap": 0.0,
+     "token_sum": 275906.98
+    },
+    {
+     "rwa_id": "3674",
+     "symbol": "SPCE",
+     "name": "Virgin Galactic Holdings, Inc.",
+     "asset_cap": 0.0,
+     "token_sum": 163395.31
+    },
+    {
+     "rwa_id": "3133",
+     "symbol": "RCAT",
+     "name": "Red Cat Holdings, Inc.",
+     "asset_cap": 0.0,
+     "token_sum": 105878.53
+    },
+    {
+     "rwa_id": "353",
+     "symbol": "ECHO",
+     "name": "Echostar Corporation",
+     "asset_cap": 0.0,
+     "token_sum": 31.4
+    }
+   ]
+  },
+  "unmatched_crypto_ids": 0,
+  "null_caps_by_issuer": [
+   {
+    "issuer": "Backed Assets",
+    "tokens_without_cap": 619
+   },
+   {
+    "issuer": "Coinbase",
+    "tokens_without_cap": 72
+   },
+   {
+    "issuer": "Dinari Assets",
+    "tokens_without_cap": 27
+   },
+   {
+    "issuer": "Robinhood",
+    "tokens_without_cap": 7
+   },
+   {
+    "issuer": "Ondo Assets",
+    "tokens_without_cap": 6
+   },
+   {
+    "issuer": "NA (Derivatives)",
+    "tokens_without_cap": 4
+   },
+   {
+    "issuer": "Superstate Assets",
+    "tokens_without_cap": 1
+   }
+  ],
+  "note": "Issuer weights are summed from each token's own market cap. A material share of tokens report market_cap as null; they are counted here but carry no value and cannot move a concentration figure, so every share below is a share of the value that IS reported. The reconciliation compares the per-token total against the asset-level tokenised market cap CoinMarketCap gives for the same assets; a ratio far from 1.0 means the token lists do not account for the whole of those assets."
+ },
+ "plan": {
+  "credit_limit_monthly": 15000,
+  "rate_limit_minute": 50,
+  "credit_limit_monthly_reset_timestamp": "2026-11-01T00:00:00.000Z",
+  "credits_used_this_month": 1193,
+  "credits_left_this_month": 13807
+ },
+ "overall": {
+  "total": 8256144001.430001,
+  "hhi": 2281.3,
+  "effective_n": 4.38,
+  "top1": 0.3691,
+  "top3": 0.7337,
+  "top5": 0.942,
+  "n": 16,
+  "shares": [
+   0.369073579,
+   0.221929978,
+   0.142667208,
+   0.105957182,
+   0.102340337,
+   0.015527273,
+   0.013755907,
+   0.008507552,
+   0.008306607,
+   0.004369171,
+   0.002493083,
+   0.002260311,
+   0.002045928,
+   0.000684029,
+   8.1122e-05,
+   7.34e-07
+  ],
+  "leaders": [
+   {
+    "key": "68904e9cabae9b5b9fb358ac",
+    "label": "Tether Holdings",
+    "value": 3047124618.1000004,
+    "share": 0.3691
+   },
+   {
+    "key": "68904c24abae9b5b9fb35815",
+    "label": "Paxos",
+    "value": 1832285859.31,
+    "share": 0.2219
+   },
+   {
+    "key": "6a2aed5097c45356b1a5f710",
+    "label": "bStocks",
+    "value": 1177881015.6200006,
+    "share": 0.1427
+   },
+   {
+    "key": "6878977dcbbf471de3366e85",
+    "label": "Backed Assets",
+    "value": 874797749.7299999,
+    "share": 0.106
+   },
+   {
+    "key": "688ca4ccabae9b5b9fb3167a",
+    "label": "Ondo Assets",
+    "value": 844936557.2100003,
+    "share": 0.1023
+   },
+   {
+    "key": "6a465832fbe3004b1a0ea2dd",
+    "label": "Robinhood",
+    "value": 128195402.41,
+    "share": 0.0155
+   },
+   {
+    "key": "6a43600c282e7240b76c8bbb",
+    "label": "Reality",
+    "value": 113570745.45000002,
+    "share": 0.0138
+   },
+   {
+    "key": "68905a7babae9b5b9fb35a8d",
+    "label": "Matrixdock",
+    "value": 70239574.45,
+    "share": 0.0085
+   },
+   {
+    "key": "6a436076282e7240b76c8bf9",
+    "label": "Republic",
+    "value": 68580542.28,
+    "share": 0.0083
+   },
+   {
+    "key": "6a72fe7072996604d45c6733",
+    "label": "Coinbase",
+    "value": 36072501.250000015,
+    "share": 0.0044
+   },
+   {
+    "key": "6a2d54b697c45356b1a634f4",
+    "label": "Backpack",
+    "value": 20583251.4,
+    "share": 0.0025
+   },
+   {
+    "key": "68904cceabae9b5b9fb35839",
+    "label": "Comtech Gold",
+    "value": 18661450.92,
+    "share": 0.0023
+   }
+  ]
+ },
+ "by_chain": {
+  "Ethereum": {
+   "total": 5822468944.330001,
+   "hhi": 3906.2,
+   "effective_n": 2.56,
+   "top1": 0.5204,
+   "top3": 0.9785,
+   "top5": 0.999,
+   "n": 6,
+   "shares": [
+    0.520370476,
+    0.314692251,
+    0.143468782,
+    0.012063538,
+    0.008435014,
+    0.000969939
+   ],
+   "leaders": [
+    {
+     "key": "68904e9cabae9b5b9fb358ac",
+     "label": "Tether Holdings",
+     "value": 3029840934.09,
+     "share": 0.5204
+    },
+    {
+     "key": "68904c24abae9b5b9fb35815",
+     "label": "Paxos",
+     "value": 1832285859.31,
+     "share": 0.3147
+    },
+    {
+     "key": "688ca4ccabae9b5b9fb3167a",
+     "label": "Ondo Assets",
+     "value": 835342524.7700005,
+     "share": 0.1435
+    },
+    {
+     "key": "68905a7babae9b5b9fb35a8d",
+     "label": "Matrixdock",
+     "value": 70239574.45,
+     "share": 0.0121
+    },
+    {
+     "key": "6878977dcbbf471de3366e85",
+     "label": "Backed Assets",
+     "value": 49112609.17,
+     "share": 0.0084
+    },
+    {
+     "key": "68905b43abae9b5b9fb35a95",
+     "label": "VNX",
+     "value": 5647442.54,
+     "share": 0.001
+    }
+   ]
+  },
+  "BNB": {
+   "total": 1183793811.2300005,
+   "hhi": 9900.6,
+   "effective_n": 1.01,
+   "top1": 0.995,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 2,
+   "shares": [
+    0.995005215,
+    0.004994785
+   ],
+   "leaders": [
+    {
+     "key": "6a2aed5097c45356b1a5f710",
+     "label": "bStocks",
+     "value": 1177881015.6200006,
+     "share": 0.995
+    },
+    {
+     "key": "6878977dcbbf471de3366e85",
+     "label": "Backed Assets",
+     "value": 5912795.609999999,
+     "share": 0.005
+    }
+   ]
+  },
+  "Solana": {
+   "total": 931730081.6300001,
+   "hhi": 7722.4,
+   "effective_n": 1.29,
+   "top1": 0.8752,
+   "top3": 0.9709,
+   "top5": 0.9993,
+   "n": 6,
+   "shares": [
+    0.875157993,
+    0.07360559,
+    0.022091432,
+    0.018129151,
+    0.010297008,
+    0.000718826
+   ],
+   "leaders": [
+    {
+     "key": "6878977dcbbf471de3366e85",
+     "label": "Backed Assets",
+     "value": 815411028.0000001,
+     "share": 0.8752
+    },
+    {
+     "key": "6a436076282e7240b76c8bf9",
+     "label": "Republic",
+     "value": 68580542.28,
+     "share": 0.0736
+    },
+    {
+     "key": "6a2d54b697c45356b1a634f4",
+     "label": "Backpack",
+     "value": 20583251.4,
+     "share": 0.0221
+    },
+    {
+     "key": "689612983f270c6ff4781b96",
+     "label": "PreStocks Assets",
+     "value": 16891475.61,
+     "share": 0.0181
+    },
+    {
+     "key": "688ca4ccabae9b5b9fb3167a",
+     "label": "Ondo Assets",
+     "value": 9594032.440000001,
+     "share": 0.0103
+    },
+    {
+     "key": "6a0be4e680ee5978ec4455ce",
+     "label": "Tessera Assets",
+     "value": 669751.9,
+     "share": 0.0007
+    }
+   ]
+  },
+  "Robinhood": {
+   "total": 128195402.41,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "shares": [
+    1.0
+   ],
+   "leaders": [
+    {
+     "key": "6a465832fbe3004b1a0ea2dd",
+     "label": "Robinhood",
+     "value": 128195402.41,
+     "share": 1.0
+    }
+   ]
+  },
+  "Arbitrum": {
+   "total": 113570745.45000002,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "shares": [
+    1.0
+   ],
+   "leaders": [
+    {
+     "key": "6a43600c282e7240b76c8bbb",
+     "label": "Reality",
+     "value": 113570745.45000002,
+     "share": 1.0
+    }
+   ]
+  },
+  "Base": {
+   "total": 36072501.250000015,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "shares": [
+    1.0
+   ],
+   "leaders": [
+    {
+     "key": "6a72fe7072996604d45c6733",
+     "label": "Coinbase",
+     "value": 36072501.250000015,
+     "share": 1.0
+    }
+   ]
+  },
+  "XDC Network": {
+   "total": 18661450.92,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "shares": [
+    1.0
+   ],
+   "leaders": [
+    {
+     "key": "68904cceabae9b5b9fb35839",
+     "label": "Comtech Gold",
+     "value": 18661450.92,
+     "share": 1.0
+    }
+   ]
+  },
+  "Hyperliquid": {
+   "total": 17289747.26,
+   "hhi": 9993.0,
+   "effective_n": 1.0,
+   "top1": 0.9996,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 2,
+   "shares": [
+    0.999649315,
+    0.000350685
+   ],
+   "leaders": [
+    {
+     "key": "68904e9cabae9b5b9fb358ac",
+     "label": "Tether Holdings",
+     "value": 17283684.01,
+     "share": 0.9996
+    },
+    {
+     "key": "699ed38db54c9320b15928e3",
+     "label": "Hyperliquid Assets",
+     "value": 6063.25,
+     "share": 0.0004
+    }
+   ]
+  },
+  "OKB": {
+   "total": 4361316.95,
+   "hhi": 10000.0,
+   "effective_n": 1.0,
+   "top1": 1.0,
+   "top3": 1.0,
+   "top5": 1.0,
+   "n": 1,
+   "shares": [
+    1.0
+   ],
+   "leaders": [
+    {
+     "key": "6878977dcbbf471de3366e85",
+     "label": "Backed Assets",
+     "value": 4361316.95,
+     "share": 1.0
+    }
+   ]
+  }
+ },
+ "chain_mix": {
+  "total": 8256144001.429996,
+  "hhi": 5311.0,
+  "effective_n": 1.88,
+  "top1": 0.7052,
+  "top3": 0.9615,
+  "top5": 0.9907,
+  "n": 9,
+  "shares": [
+   0.705228608,
+   0.143383377,
+   0.112852935,
+   0.015527273,
+   0.013755907,
+   0.004369171,
+   0.002260311,
+   0.002094167,
+   0.000528251
+  ],
+  "leaders": [
+   {
+    "key": "Ethereum",
+    "label": "Ethereum",
+    "value": 5822468944.329995,
+    "share": 0.7052
+   },
+   {
+    "key": "BNB",
+    "label": "BNB",
+    "value": 1183793811.2300007,
+    "share": 0.1434
+   },
+   {
+    "key": "Solana",
+    "label": "Solana",
+    "value": 931730081.63,
+    "share": 0.1129
+   },
+   {
+    "key": "Robinhood",
+    "label": "Robinhood",
+    "value": 128195402.41,
+    "share": 0.0155
+   },
+   {
+    "key": "Arbitrum",
+    "label": "Arbitrum",
+    "value": 113570745.45000002,
+    "share": 0.0138
+   },
+   {
+    "key": "Base",
+    "label": "Base",
+    "value": 36072501.250000015,
+    "share": 0.0044
+   },
+   {
+    "key": "XDC Network",
+    "label": "XDC Network",
+    "value": 18661450.92,
+    "share": 0.0023
+   },
+   {
+    "key": "Hyperliquid",
+    "label": "Hyperliquid",
+    "value": 17289747.26,
+    "share": 0.0021
+   },
+   {
+    "key": "OKB",
+    "label": "OKB",
+    "value": 4361316.95,
+    "share": 0.0005
+   }
+  ]
+ },
+ "asset_mix": {
+  "total": 8150607158.091717,
+  "hhi": 3793.1,
+  "effective_n": 2.64,
+  "top1": 0.6103,
+  "top3": 0.6928,
+  "top5": 0.7454,
+  "n": 313,
+  "shares": [
+   0.610256888,
+   0.045729256,
+   0.036822009,
+   0.030674989,
+   0.021931652,
+   0.018771434,
+   0.018522933,
+   0.015736622,
+   0.015078647,
+   0.013688823,
+   0.012622355,
+   0.0105595,
+   0.007387996,
+   0.006341174,
+   0.005696074,
+   0.004626619,
+   0.004288126,
+   0.004048339,
+   0.003933506,
+   0.003810244,
+   0.003745997,
+   0.003682259,
+   0.003438889,
+   0.003373717,
+   0.003098777,
+   0.003071096,
+   0.002541626,
+   0.002493523,
+   0.002412579,
+   0.002398027,
+   0.002384582,
+   0.002116782,
+   0.002057183,
+   0.002054331,
+   0.002017671,
+   0.001867892,
+   0.001835245,
+   0.001719861,
+   0.001698866,
+   0.001694636,
+   0.001684854,
+   0.001649022,
+   0.001603397,
+   0.001577165,
+   0.001540754,
+   0.001441782,
+   0.001406082,
+   0.001367532,
+   0.001352155,
+   0.001312453,
+   0.001301948,
+   0.001298127,
+   0.001246548,
+   0.001158079,
+   0.001130838,
+   0.001107613,
+   0.000960607,
+   0.000945522,
+   0.000928136,
+   0.0009187,
+   0.000870325,
+   0.000819662,
+   0.000816241,
+   0.000731183,
+   0.000708555,
+   0.000703365,
+   0.000677676,
+   0.000671839,
+   0.000652599,
+   0.000648447,
+   0.000646513,
+   0.000568235,
+   0.00055517,
+   0.00051071,
+   0.000504656,
+   0.000502954,
+   0.000500168,
+   0.000492902,
+   0.000488814,
+   0.000462405,
+   0.000451203,
+   0.000447509,
+   0.000434973,
+   0.000431223,
+   0.000424762,
+   0.000419727,
+   0.000414485,
+   0.000395718,
+   0.000388249,
+   0.000385827,
+   0.000383336,
+   0.000377621,
+   0.000365923,
+   0.000351761,
+   0.000335851,
+   0.00033285,
+   0.000324134,
+   0.000323627,
+   0.000322278,
+   0.000303463,
+   0.000301267,
+   0.000293996,
+   0.000292401,
+   0.000291781,
+   0.000287899,
+   0.000284407,
+   0.000282757,
+   0.000271451,
+   0.000268288,
+   0.000252743,
+   0.000246787,
+   0.000246218,
+   0.000242908,
+   0.000239545,
+   0.00023551,
+   0.000230621,
+   0.000217738,
+   0.000217088,
+   0.000214358,
+   0.000199154,
+   0.000195979,
+   0.0001928,
+   0.000190676,
+   0.000189497,
+   0.000182005,
+   0.000179927,
+   0.000179629,
+   0.000178948,
+   0.00017506,
+   0.000165484,
+   0.000157721,
+   0.000157259,
+   0.00014921,
+   0.000147319,
+   0.000145156,
+   0.000143924,
+   0.000140697,
+   0.000137203,
+   0.000133933,
+   0.000128325,
+   0.000125022,
+   0.000124167,
+   0.000118041,
+   0.000116489,
+   0.000114758,
+   0.000113473,
+   0.000111567,
+   0.000110007,
+   0.000108806,
+   0.000108781,
+   0.000103227,
+   9.6322e-05,
+   9.4668e-05,
+   9.2746e-05,
+   9.0433e-05,
+   8.9871e-05,
+   8.9351e-05,
+   8.8736e-05,
+   8.7421e-05,
+   8.7412e-05,
+   8.6878e-05,
+   8.6677e-05,
+   8.4177e-05,
+   8.3529e-05,
+   8.3342e-05,
+   8.0572e-05,
+   7.8925e-05,
+   7.8558e-05,
+   7.7891e-05,
+   7.4552e-05,
+   7.3567e-05,
+   7.2087e-05,
+   6.9858e-05,
+   6.9407e-05,
+   6.4971e-05,
+   6.3979e-05,
+   6.3251e-05,
+   6.2624e-05,
+   6.249e-05,
+   6.1248e-05,
+   6.0993e-05,
+   5.9392e-05,
+   5.9124e-05,
+   5.859e-05,
+   5.4045e-05,
+   5.122e-05,
+   5.0242e-05,
+   4.8781e-05,
+   4.6337e-05,
+   4.5378e-05,
+   4.4831e-05,
+   4.3839e-05,
+   4.3804e-05,
+   4.2371e-05,
+   4.1129e-05,
+   3.9965e-05,
+   3.8499e-05,
+   3.6581e-05,
+   3.4957e-05,
+   3.3417e-05,
+   3.1669e-05,
+   3.1278e-05,
+   2.9441e-05,
+   2.9089e-05,
+   2.8773e-05,
+   2.6829e-05,
+   2.6177e-05,
+   2.4757e-05,
+   2.4246e-05,
+   2.3937e-05,
+   2.2697e-05,
+   2.1602e-05,
+   2.083e-05,
+   1.9806e-05,
+   1.927e-05,
+   1.8694e-05,
+   1.8536e-05,
+   1.8022e-05,
+   1.6598e-05,
+   1.5045e-05,
+   1.4667e-05,
+   1.4528e-05,
+   1.3997e-05,
+   1.3886e-05,
+   1.3668e-05,
+   1.3327e-05,
+   1.3291e-05,
+   1.3283e-05,
+   1.2412e-05,
+   1.1446e-05,
+   1.1405e-05,
+   1.0069e-05,
+   1.0035e-05,
+   9.337e-06,
+   8.658e-06,
+   8.426e-06,
+   8.126e-06,
+   7.711e-06,
+   6.055e-06,
+   6.04e-06,
+   5.836e-06,
+   5.233e-06,
+   4.993e-06,
+   4.845e-06,
+   4.754e-06,
+   4.638e-06,
+   4.544e-06,
+   4.462e-06,
+   4.461e-06,
+   4.326e-06,
+   4.169e-06,
+   4.054e-06,
+   4.036e-06,
+   3.877e-06,
+   3.691e-06,
+   3.69e-06,
+   3.255e-06,
+   3.232e-06,
+   3.04e-06,
+   2.723e-06,
+   2.717e-06,
+   2.611e-06,
+   2.476e-06,
+   2.165e-06,
+   2.062e-06,
+   1.995e-06,
+   1.826e-06,
+   1.791e-06,
+   1.73e-06,
+   1.551e-06,
+   1.534e-06,
+   1.516e-06,
+   1.471e-06,
+   1.407e-06,
+   1.371e-06,
+   1.283e-06,
+   1.168e-06,
+   1.15e-06,
+   1.14e-06,
+   1.124e-06,
+   1.08e-06,
+   9.96e-07,
+   8.99e-07,
+   8.78e-07,
+   8.36e-07,
+   7.34e-07,
+   6.87e-07,
+   6.69e-07,
+   6.58e-07,
+   6.22e-07,
+   5.78e-07,
+   5.72e-07,
+   5.5e-07,
+   5.41e-07,
+   5.11e-07,
+   4.6e-07,
+   4.3e-07,
+   3.7e-07,
+   2.86e-07,
+   2.85e-07,
+   2.82e-07,
+   2.74e-07,
+   2.17e-07,
+   1.74e-07,
+   1.65e-07,
+   1.57e-07,
+   1.27e-07,
+   1.02e-07,
+   9.5e-08,
+   7.1e-08,
+   4.2e-08,
+   2.2e-08,
+   0.0
+  ],
+  "leaders": [
+   {
+    "key": "1",
+    "label": "GOLD",
+    "value": 4973964157.257885,
+    "share": 0.6103
+   },
+   {
+    "key": "115",
+    "label": "CRCL",
+    "value": 372721202.68956155,
+    "share": 0.0457
+   },
+   {
+    "key": "9",
+    "label": "SPCX",
+    "value": 300121727.72416645,
+    "share": 0.0368
+   },
+   {
+    "key": "114",
+    "label": "MSTR",
+    "value": 250019784.86259356,
+    "share": 0.0307
+   },
+   {
+    "key": "118",
+    "label": "QQQ",
+    "value": 178756278.38810235,
+    "share": 0.0219
+   },
+   {
+    "key": "86",
+    "label": "SPY",
+    "value": 152998585.52600992,
+    "share": 0.0188
+   },
+   {
+    "key": "2",
+    "label": "NVDA",
+    "value": 150973149.35132608,
+    "share": 0.0185
+   },
+   {
+    "key": "14",
+    "label": "TSLA",
+    "value": 128263025.37430696,
+    "share": 0.0157
+   },
+   {
+    "key": "12",
+    "label": "MU",
+    "value": 122900125.17466183,
+    "share": 0.0151
+   },
+   {
+    "key": "4",
+    "label": "GOOGL",
+    "value": 111572214.97462451,
+    "share": 0.0137
+   },
+   {
+    "key": "48",
+    "label": "SNDK",
+    "value": 102879856.00818595,
+    "share": 0.0126
+   },
+   {
+    "key": "20",
+    "label": "INTC",
+    "value": 86066335.40127306,
+    "share": 0.0106
+   }
+  ]
+ },
+ "ex_commodity": {
+  "total": 3282185056.1100006,
+  "hhi": 2694.4,
+  "effective_n": 3.71,
+  "top1": 0.3589,
+  "top3": 0.8828,
+  "top5": 0.9565,
+  "n": 11,
+  "shares": [
+   0.358870995,
+   0.266529076,
+   0.257431115,
+   0.039057945,
+   0.034602176,
+   0.020894782,
+   0.010990392,
+   0.006271204,
+   0.005146412,
+   0.000204057,
+   1.847e-06
+  ],
+  "leaders": [
+   {
+    "key": "6a2aed5097c45356b1a5f710",
+    "label": "bStocks",
+    "value": 1177881015.6200006,
+    "share": 0.3589
+   },
+   {
+    "key": "6878977dcbbf471de3366e85",
+    "label": "Backed Assets",
+    "value": 874797749.7299999,
+    "share": 0.2665
+   },
+   {
+    "key": "688ca4ccabae9b5b9fb3167a",
+    "label": "Ondo Assets",
+    "value": 844936557.2100003,
+    "share": 0.2574
+   },
+   {
+    "key": "6a465832fbe3004b1a0ea2dd",
+    "label": "Robinhood",
+    "value": 128195402.41,
+    "share": 0.0391
+   },
+   {
+    "key": "6a43600c282e7240b76c8bbb",
+    "label": "Reality",
+    "value": 113570745.45000002,
+    "share": 0.0346
+   },
+   {
+    "key": "6a436076282e7240b76c8bf9",
+    "label": "Republic",
+    "value": 68580542.28,
+    "share": 0.0209
+   },
+   {
+    "key": "6a72fe7072996604d45c6733",
+    "label": "Coinbase",
+    "value": 36072501.250000015,
+    "share": 0.011
+   },
+   {
+    "key": "6a2d54b697c45356b1a634f4",
+    "label": "Backpack",
+    "value": 20583251.4,
+    "share": 0.0063
+   },
+   {
+    "key": "689612983f270c6ff4781b96",
+    "label": "PreStocks Assets",
+    "value": 16891475.61,
+    "share": 0.0051
+   },
+   {
+    "key": "6a0be4e680ee5978ec4455ce",
+    "label": "Tessera Assets",
+    "value": 669751.9,
+    "share": 0.0002
+   },
+   {
+    "key": "699ed38db54c9320b15928e3",
+    "label": "Hyperliquid Assets",
+    "value": 6063.25,
+    "share": 0.0
+   }
+  ]
+ },
+ "by_asset_class": {
+  "commodity": {
+   "total": 4973958945.320001,
+   "hhi": 5112.1,
+   "effective_n": 1.96,
+   "top1": 0.6126,
+   "top3": 0.9951,
+   "top5": 1.0,
+   "n": 5,
+   "shares": [
+    0.612615555,
+    0.36837575,
+    0.014121462,
+    0.003751831,
+    0.001135402
+   ],
+   "leaders": [
+    {
+     "key": "68904e9cabae9b5b9fb358ac",
+     "label": "Tether Holdings",
+     "value": 3047124618.1000004,
+     "share": 0.6126
+    },
+    {
+     "key": "68904c24abae9b5b9fb35815",
+     "label": "Paxos",
+     "value": 1832285859.31,
+     "share": 0.3684
+    },
+    {
+     "key": "68905a7babae9b5b9fb35a8d",
+     "label": "Matrixdock",
+     "value": 70239574.45,
+     "share": 0.0141
+    },
+    {
+     "key": "68904cceabae9b5b9fb35839",
+     "label": "Comtech Gold",
+     "value": 18661450.92,
+     "share": 0.0038
+    },
+    {
+     "key": "68905b43abae9b5b9fb35a95",
+     "label": "VNX",
+     "value": 5647442.54,
+     "share": 0.0011
+    }
+   ]
+  },
+  "stock": {
+   "total": 2396313235.6900005,
+   "hhi": 2660.9,
+   "effective_n": 3.76,
+   "top1": 0.3882,
+   "top3": 0.8581,
+   "top5": 0.9404,
+   "n": 11,
+   "shares": [
+    0.388213415,
+    0.249387545,
+    0.220521901,
+    0.041783051,
+    0.040532515,
+    0.028619189,
+    0.015053333,
+    0.008558085,
+    0.007048943,
+    0.000279493,
+    2.53e-06
+   ],
+   "leaders": [
+    {
+     "key": "6a2aed5097c45356b1a5f710",
+     "label": "bStocks",
+     "value": 930280943.8900005,
+     "share": 0.3882
+    },
+    {
+     "key": "6878977dcbbf471de3366e85",
+     "label": "Backed Assets",
+     "value": 597610674.6600001,
+     "share": 0.2494
+    },
+    {
+     "key": "688ca4ccabae9b5b9fb3167a",
+     "label": "Ondo Assets",
+     "value": 528439549.79000014,
+     "share": 0.2205
+    },
+    {
+     "key": "6a43600c282e7240b76c8bbb",
+     "label": "Reality",
+     "value": 100125277.94000001,
+     "share": 0.0418
+    },
+    {
+     "key": "6a465832fbe3004b1a0ea2dd",
+     "label": "Robinhood",
+     "value": 97128602.44000001,
+     "share": 0.0405
+    },
+    {
+     "key": "6a436076282e7240b76c8bf9",
+     "label": "Republic",
+     "value": 68580542.28,
+     "share": 0.0286
+    },
+    {
+     "key": "6a72fe7072996604d45c6733",
+     "label": "Coinbase",
+     "value": 36072501.250000015,
+     "share": 0.0151
+    },
+    {
+     "key": "6a2d54b697c45356b1a634f4",
+     "label": "Backpack",
+     "value": 20507852.68,
+     "share": 0.0086
+    },
+    {
+     "key": "689612983f270c6ff4781b96",
+     "label": "PreStocks Assets",
+     "value": 16891475.61,
+     "share": 0.007
+    },
+    {
+     "key": "6a0be4e680ee5978ec4455ce",
+     "label": "Tessera Assets",
+     "value": 669751.9,
+     "share": 0.0003
+    },
+    {
+     "key": "699ed38db54c9320b15928e3",
+     "label": "Hyperliquid Assets",
+     "value": 6063.25,
+     "share": 0.0
+    }
+   ]
+  },
+  "etf": {
+   "total": 885871820.42,
+   "hhi": 3051.3,
+   "effective_n": 3.28,
+   "top1": 0.3573,
+   "top3": 0.9497,
+   "top5": 0.9999,
+   "n": 6,
+   "shares": [
+    0.357271786,
+    0.312897497,
+    0.279498756,
+    0.035069182,
+    0.015177667,
+    8.5112e-05
+   ],
+   "leaders": [
+    {
+     "key": "688ca4ccabae9b5b9fb3167a",
+     "label": "Ondo Assets",
+     "value": 316497007.42,
+     "share": 0.3573
+    },
+    {
+     "key": "6878977dcbbf471de3366e85",
+     "label": "Backed Assets",
+     "value": 277187075.07,
+     "share": 0.3129
+    },
+    {
+     "key": "6a2aed5097c45356b1a5f710",
+     "label": "bStocks",
+     "value": 247600071.73,
+     "share": 0.2795
+    },
+    {
+     "key": "6a465832fbe3004b1a0ea2dd",
+     "label": "Robinhood",
+     "value": 31066799.970000003,
+     "share": 0.0351
+    },
+    {
+     "key": "6a43600c282e7240b76c8bbb",
+     "label": "Reality",
+     "value": 13445467.51,
+     "share": 0.0152
+    },
+    {
+     "key": "6a2d54b697c45356b1a634f4",
+     "label": "Backpack",
+     "value": 75398.72,
+     "share": 0.0001
+    }
+   ]
+  }
+ },
+ "issuers": [
+  {
+   "issuer_id": "68904e9cabae9b5b9fb358ac",
+   "name": "Tether Holdings",
+   "site": "https://tether.to/",
+   "in_directory": true,
+   "tokens": 2,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 3047124618.1000004,
+   "volume_24h": 153430487.16922042,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [
+    "Ethereum",
+    "Hyperliquid"
+   ],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 2,
+   "attributed_tokens": 2,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "68904c24abae9b5b9fb35815",
+   "name": "Paxos",
+   "site": "https://www.paxos.com/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 1832285859.31,
+   "volume_24h": 107440006.71776189,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [
+    "Ethereum"
+   ],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6a2aed5097c45356b1a5f710",
+   "name": "bStocks",
+   "site": "",
+   "in_directory": true,
+   "tokens": 92,
+   "tokens_without_cap": 0,
+   "assets": 92,
+   "market_cap": 1177881015.6200006,
+   "volume_24h": 649103314.7498245,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [
+    "BNB"
+   ],
+   "assets_with_tradfi_market": 89,
+   "declared_tokens": 96,
+   "attributed_tokens": 92,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6878977dcbbf471de3366e85",
+   "name": "Backed Assets",
+   "site": "https://assets.backed.fi/",
+   "in_directory": true,
+   "tokens": 777,
+   "tokens_without_cap": 619,
+   "assets": 664,
+   "market_cap": 874797749.7299999,
+   "volume_24h": 203261247.11300322,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [
+    "BNB",
+    "Ethereum",
+    "OKB",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 661,
+   "declared_tokens": 1181,
+   "attributed_tokens": 777,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "688ca4ccabae9b5b9fb3167a",
+   "name": "Ondo Assets",
+   "site": "https://ondo.finance/",
+   "in_directory": true,
+   "tokens": 217,
+   "tokens_without_cap": 6,
+   "assets": 216,
+   "market_cap": 844936557.2100003,
+   "volume_24h": 274829244.8938292,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [
+    "Ethereum",
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 212,
+   "declared_tokens": 560,
+   "attributed_tokens": 217,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6a465832fbe3004b1a0ea2dd",
+   "name": "Robinhood",
+   "site": "https://robinhood.com/us/en/",
+   "in_directory": true,
+   "tokens": 109,
+   "tokens_without_cap": 7,
+   "assets": 109,
+   "market_cap": 128195402.41,
+   "volume_24h": 98798746.70320913,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [
+    "Robinhood"
+   ],
+   "assets_with_tradfi_market": 108,
+   "declared_tokens": 110,
+   "attributed_tokens": 109,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6a43600c282e7240b76c8bbb",
+   "name": "Reality",
+   "site": "",
+   "in_directory": true,
+   "tokens": 71,
+   "tokens_without_cap": 0,
+   "assets": 71,
+   "market_cap": 113570745.45000002,
+   "volume_24h": 10846583.957881495,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [
+    "Arbitrum"
+   ],
+   "assets_with_tradfi_market": 70,
+   "declared_tokens": 71,
+   "attributed_tokens": 71,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "68905a7babae9b5b9fb35a8d",
+   "name": "Matrixdock",
+   "site": "https://www.matrixdock.com/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 70239574.45,
+   "volume_24h": 348950.52589466,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [
+    "Ethereum"
+   ],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6a436076282e7240b76c8bf9",
+   "name": "Republic",
+   "site": "https://republic.com/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 68580542.28,
+   "volume_24h": 26647.43962603,
+   "classes": [
+    "stock"
+   ],
+   "chains": [
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 1,
+   "declared_tokens": 2,
+   "attributed_tokens": 1,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6a72fe7072996604d45c6733",
+   "name": "Coinbase",
+   "site": "https://www.coinbase.com/en-sg/tokenize",
+   "in_directory": true,
+   "tokens": 125,
+   "tokens_without_cap": 72,
+   "assets": 125,
+   "market_cap": 36072501.250000015,
+   "volume_24h": 91263786.38223164,
+   "classes": [
+    "stock"
+   ],
+   "chains": [
+    "Base"
+   ],
+   "assets_with_tradfi_market": 124,
+   "declared_tokens": 127,
+   "attributed_tokens": 125,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6a2d54b697c45356b1a634f4",
+   "name": "Backpack",
+   "site": "https://backpack.exchange",
+   "in_directory": true,
+   "tokens": 11,
+   "tokens_without_cap": 0,
+   "assets": 11,
+   "market_cap": 20583251.4,
+   "volume_24h": 14054635.80513839,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 10,
+   "declared_tokens": 13,
+   "attributed_tokens": 11,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "68904cceabae9b5b9fb35839",
+   "name": "Comtech Gold",
+   "site": "https://www.comtechgold.com/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 18661450.92,
+   "volume_24h": 881007.8246451,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [
+    "XDC Network"
+   ],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "689612983f270c6ff4781b96",
+   "name": "PreStocks Assets",
+   "site": "https://prestocks.com/",
+   "in_directory": true,
+   "tokens": 3,
+   "tokens_without_cap": 0,
+   "assets": 3,
+   "market_cap": 16891475.61,
+   "volume_24h": 361388.42360852,
+   "classes": [
+    "stock"
+   ],
+   "chains": [
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 1,
+   "declared_tokens": 22,
+   "attributed_tokens": 3,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "68905b43abae9b5b9fb35a95",
+   "name": "VNX",
+   "site": "https://vnx.li/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 5647442.54,
+   "volume_24h": 975.08780032,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [
+    "Ethereum"
+   ],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "6a0be4e680ee5978ec4455ce",
+   "name": "Tessera Assets",
+   "site": "https://www.tessera.pe/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 669751.9,
+   "volume_24h": 584907.7454209,
+   "classes": [
+    "stock"
+   ],
+   "chains": [
+    "Solana"
+   ],
+   "assets_with_tradfi_market": 1,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "699ed38db54c9320b15928e3",
+   "name": "Hyperliquid Assets",
+   "site": "https://app.hyperliquid.xyz/trade",
+   "in_directory": true,
+   "tokens": 12,
+   "tokens_without_cap": 0,
+   "assets": 11,
+   "market_cap": 6063.25,
+   "volume_24h": 0.0,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [
+    "Hyperliquid"
+   ],
+   "assets_with_tradfi_market": 11,
+   "declared_tokens": 12,
+   "attributed_tokens": 12,
+   "placeholder": false
+  },
+  {
+   "issuer_id": "695e11f774b54210f3b95dc3",
+   "name": "NA (Derivatives)",
+   "site": "",
+   "in_directory": true,
+   "tokens": 150,
+   "tokens_without_cap": 4,
+   "assets": 147,
+   "market_cap": 0.0,
+   "volume_24h": 310362.76036458,
+   "classes": [
+    "commodity",
+    "etf",
+    "stock"
+   ],
+   "chains": [],
+   "assets_with_tradfi_market": 138,
+   "declared_tokens": 278,
+   "attributed_tokens": 150,
+   "placeholder": true
+  },
+  {
+   "issuer_id": "688c6172abae9b5b9fb30359",
+   "name": "Dinari Assets",
+   "site": "https://dinari.com/",
+   "in_directory": true,
+   "tokens": 27,
+   "tokens_without_cap": 27,
+   "assets": 27,
+   "market_cap": 0.0,
+   "volume_24h": 0.0,
+   "classes": [
+    "etf",
+    "stock"
+   ],
+   "chains": [],
+   "assets_with_tradfi_market": 25,
+   "declared_tokens": 91,
+   "attributed_tokens": 27,
+   "placeholder": true
+  },
+  {
+   "issuer_id": "68e25e8dd4cd001228754c7c",
+   "name": "Kinesis Assets",
+   "site": "https://kinesis.money/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 0.0,
+   "volume_24h": 145442.58283117,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": true
+  },
+  {
+   "issuer_id": "68e27862d4cd001228754d31",
+   "name": "XAGx",
+   "site": "https://xagx.org/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 0.0,
+   "volume_24h": 0.0,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": true
+  },
+  {
+   "issuer_id": "68e27c8ad4cd001228754d67",
+   "name": "Token",
+   "site": "https://www.token.com.tr/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 0,
+   "assets": 1,
+   "market_cap": 0.0,
+   "volume_24h": 0.0,
+   "classes": [
+    "commodity"
+   ],
+   "chains": [],
+   "assets_with_tradfi_market": 0,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": true
+  },
+  {
+   "issuer_id": "68b902a8f972b459c80de6a5",
+   "name": "Superstate Assets",
+   "site": "https://superstate.com/",
+   "in_directory": true,
+   "tokens": 1,
+   "tokens_without_cap": 1,
+   "assets": 1,
+   "market_cap": 0.0,
+   "volume_24h": 0.0,
+   "classes": [
+    "stock"
+   ],
+   "chains": [],
+   "assets_with_tradfi_market": 1,
+   "declared_tokens": 1,
+   "attributed_tokens": 1,
+   "placeholder": true
+  }
+ ],
+ "top_assets": [
+  {
+   "rwa_id": "1",
+   "name": "Gold",
+   "symbol": "GOLD",
+   "asset_class": "commodity",
+   "tokenized_market_cap": 4973964157.257885,
+   "tokens": 7,
+   "issuers": 6,
+   "tradfi_markets": 0,
+   "industry": "",
+   "primary_exchange": "",
+   "cik": "",
+   "top_issuer": "Tether Holdings",
+   "top_issuer_share": 0.6126,
+   "split": [
+    {
+     "issuer": "Tether Holdings",
+     "market_cap": 3047124618.1000004,
+     "share": 0.6126
+    },
+    {
+     "issuer": "Paxos",
+     "market_cap": 1832285859.31,
+     "share": 0.3684
+    },
+    {
+     "issuer": "Matrixdock",
+     "market_cap": 70239574.45,
+     "share": 0.0141
+    },
+    {
+     "issuer": "Comtech Gold",
+     "market_cap": 18661450.92,
+     "share": 0.0038
+    },
+    {
+     "issuer": "VNX",
+     "market_cap": 5647442.54,
+     "share": 0.0011
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "115",
+   "name": "Circle Internet Group Inc",
+   "symbol": "CRCL",
+   "asset_class": "stock",
+   "tokenized_market_cap": 372721202.68956155,
+   "tokens": 8,
+   "issuers": 7,
+   "tradfi_markets": 1,
+   "industry": "Finance Services",
+   "primary_exchange": "New York Stock Exchange",
+   "cik": "0001876042",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.3976,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 148211578.34,
+     "share": 0.3976
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 102604274.64,
+     "share": 0.2753
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 98362484.33,
+     "share": 0.2639
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 14146439.23,
+     "share": 0.038
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 9245029.38,
+     "share": 0.0248
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "9",
+   "name": "SpaceX",
+   "symbol": "SPCX",
+   "asset_class": "stock",
+   "tokenized_market_cap": 300121727.72416645,
+   "tokens": 12,
+   "issuers": 11,
+   "tradfi_markets": 1,
+   "industry": "Guided Missiles & Space Vehicles & Parts",
+   "primary_exchange": "",
+   "cik": "",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.4597,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 137979225.88,
+     "share": 0.4597
+    },
+    {
+     "issuer": "Republic",
+     "market_cap": 68580542.28,
+     "share": 0.2285
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 51404467.63,
+     "share": 0.1713
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 13510718.68,
+     "share": 0.045
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 11591721.99,
+     "share": 0.0386
+    },
+    {
+     "issuer": "Backpack",
+     "market_cap": 9035957.43,
+     "share": 0.0301
+    },
+    {
+     "issuer": "PreStocks Assets",
+     "market_cap": 5148642.92,
+     "share": 0.0172
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 2208023.31,
+     "share": 0.0074
+    }
+   ]
+  },
+  {
+   "rwa_id": "114",
+   "name": "MicroStrategy Inc",
+   "symbol": "MSTR",
+   "asset_class": "stock",
+   "tokenized_market_cap": 250019784.86259356,
+   "tokens": 8,
+   "issuers": 7,
+   "tradfi_markets": 1,
+   "industry": "Finance Services",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001050446",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.4439,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 110994558.15,
+     "share": 0.4439
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 94761839.84,
+     "share": 0.379
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 26193062.2,
+     "share": 0.1048
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 8904363.35,
+     "share": 0.0356
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 6793857.19,
+     "share": 0.0272
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 2277282.36,
+     "share": 0.0091
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "118",
+   "name": "Invesco QQQ Trust",
+   "symbol": "QQQ",
+   "asset_class": "etf",
+   "tokenized_market_cap": 178756278.38810235,
+   "tokens": 9,
+   "issuers": 7,
+   "tradfi_markets": 1,
+   "industry": "",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001067839",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.5238,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 93634517.36,
+     "share": 0.5238
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 44463970.36,
+     "share": 0.2487
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 33175521.17,
+     "share": 0.1856
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 5187513.22,
+     "share": 0.029
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 2282076.04,
+     "share": 0.0128
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Hyperliquid Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "86",
+   "name": "SPDR S&P 500 ETF Trust",
+   "symbol": "SPY",
+   "asset_class": "etf",
+   "tokenized_market_cap": 152998585.52600992,
+   "tokens": 9,
+   "issuers": 8,
+   "tradfi_markets": 1,
+   "industry": "",
+   "primary_exchange": "NYSE Arca, Inc.",
+   "cik": "0000884394",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.4376,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 66949667.17,
+     "share": 0.4376
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 46357342.48,
+     "share": 0.303
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 20749304.57,
+     "share": 0.1356
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 17289302.34,
+     "share": 0.113
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 1647433.95,
+     "share": 0.0108
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Hyperliquid Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "2",
+   "name": "Nvidia Corp",
+   "symbol": "NVDA",
+   "asset_class": "stock",
+   "tokenized_market_cap": 150973149.35132608,
+   "tokens": 9,
+   "issuers": 8,
+   "tradfi_markets": 1,
+   "industry": "Semiconductors & Related Devices",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001045810",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.301,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 45446849.99,
+     "share": 0.301
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 42996697.03,
+     "share": 0.2848
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 33458337.72,
+     "share": 0.2216
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 19338607.51,
+     "share": 0.1281
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 7038520.4,
+     "share": 0.0466
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 2670041.29,
+     "share": 0.0177
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "14",
+   "name": "Tesla, Inc.",
+   "symbol": "TSLA",
+   "asset_class": "stock",
+   "tokenized_market_cap": 128263025.37430696,
+   "tokens": 10,
+   "issuers": 9,
+   "tradfi_markets": 1,
+   "industry": "Motor Vehicles & Passenger Car Bodies",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001318605",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.5366,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 68820960.51,
+     "share": 0.5366
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 31960304.78,
+     "share": 0.2492
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 16928910.93,
+     "share": 0.132
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 4784923.1,
+     "share": 0.0373
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 3209625.25,
+     "share": 0.025
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 2581166.81,
+     "share": 0.0201
+    },
+    {
+     "issuer": "Hyperliquid Assets",
+     "market_cap": 6063.25,
+     "share": 0.0
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "12",
+   "name": "Micron Technology Inc",
+   "symbol": "MU",
+   "asset_class": "stock",
+   "tokenized_market_cap": 122900125.17466183,
+   "tokens": 9,
+   "issuers": 8,
+   "tradfi_markets": 1,
+   "industry": "Semiconductors & Related Devices",
+   "primary_exchange": "Nasdaq",
+   "cik": "0000723125",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.4385,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 53887187.19,
+     "share": 0.4385
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 34178311.1,
+     "share": 0.2781
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 16860612.7,
+     "share": 0.1372
+    },
+    {
+     "issuer": "Backpack",
+     "market_cap": 6295469.79,
+     "share": 0.0512
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 5870019.56,
+     "share": 0.0478
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 4570623.08,
+     "share": 0.0372
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 1155348.01,
+     "share": 0.0094
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "4",
+   "name": "Alphabet Inc Class A",
+   "symbol": "GOOGL",
+   "asset_class": "stock",
+   "tokenized_market_cap": 111572214.97462451,
+   "tokens": 11,
+   "issuers": 9,
+   "tradfi_markets": 1,
+   "industry": "Services-Computer Programming, Data Processing, Etc.",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001652044",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.3449,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 38477174.47,
+     "share": 0.3449
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 34791048.95,
+     "share": 0.3118
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 20810446.89,
+     "share": 0.1865
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 6011734.19,
+     "share": 0.0539
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 5958217.74,
+     "share": 0.0534
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 5542561.36,
+     "share": 0.0497
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "48",
+   "name": "SanDisk Corp",
+   "symbol": "SNDK",
+   "asset_class": "stock",
+   "tokenized_market_cap": 102879856.00818595,
+   "tokens": 9,
+   "issuers": 8,
+   "tradfi_markets": 1,
+   "industry": "",
+   "primary_exchange": "",
+   "cik": "",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.6397,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 65809464.85,
+     "share": 0.6397
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 16248599.63,
+     "share": 0.1579
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 10777252.63,
+     "share": 0.1048
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 5362089.19,
+     "share": 0.0521
+    },
+    {
+     "issuer": "Backpack",
+     "market_cap": 1694812.78,
+     "share": 0.0165
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 1525188.94,
+     "share": 0.0148
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 1389044.77,
+     "share": 0.0135
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "20",
+   "name": "Intel Corp",
+   "symbol": "INTC",
+   "asset_class": "stock",
+   "tokenized_market_cap": 86066335.40127306,
+   "tokens": 8,
+   "issuers": 7,
+   "tradfi_markets": 1,
+   "industry": "Semiconductors & Related Devices",
+   "primary_exchange": "Nasdaq",
+   "cik": "0000050863",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.5772,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 49674951.09,
+     "share": 0.5772
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 14534968.49,
+     "share": 0.1689
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 13160822.540000001,
+     "share": 0.1529
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 6300177.55,
+     "share": 0.0732
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 2365187.39,
+     "share": 0.0275
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "141",
+   "name": "iShares Core S&P 500 ETF",
+   "symbol": "IVV",
+   "asset_class": "etf",
+   "tokenized_market_cap": 60216651.75507685,
+   "tokens": 1,
+   "issuers": 1,
+   "tradfi_markets": 1,
+   "industry": "",
+   "primary_exchange": "NYSE Arca, Inc.",
+   "cik": "0001100663",
+   "top_issuer": "Ondo Assets",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 60217098.41,
+     "share": 1.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "7750",
+   "name": "Direxion Daily Semiconductor Bull 3X ETF",
+   "symbol": "SOXL",
+   "asset_class": "etf",
+   "tokenized_market_cap": 51684417.77502475,
+   "tokens": 4,
+   "issuers": 3,
+   "tradfi_markets": 1,
+   "industry": "",
+   "primary_exchange": "",
+   "cik": "",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.7796,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 40291466.88,
+     "share": 0.7796
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 6765384.73,
+     "share": 0.1309
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 4596517.67,
+     "share": 0.0889
+    }
+   ]
+  },
+  {
+   "rwa_id": "82",
+   "name": "Coinbase Global, Inc.",
+   "symbol": "COIN",
+   "asset_class": "stock",
+   "tokenized_market_cap": 46426463.18465838,
+   "tokens": 8,
+   "issuers": 7,
+   "tradfi_markets": 1,
+   "industry": "Finance Services",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001679788",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.4298,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 19953196.73,
+     "share": 0.4298
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 13742858.450000001,
+     "share": 0.296
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 8489386.19,
+     "share": 0.1829
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 2698258.39,
+     "share": 0.0581
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 1553914.3,
+     "share": 0.0335
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "10",
+   "name": "Meta Platforms, Inc.",
+   "symbol": "META",
+   "asset_class": "stock",
+   "tokenized_market_cap": 37709756.39403189,
+   "tokens": 9,
+   "issuers": 8,
+   "tradfi_markets": 1,
+   "industry": "Services-Computer Programming, Data Processing, Etc.",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001326801",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.2837,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 10698798.450000001,
+     "share": 0.2837
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 10074138.28,
+     "share": 0.2671
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 7338150.43,
+     "share": 0.1946
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 4829667.29,
+     "share": 0.1281
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 4148494.68,
+     "share": 0.11
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 597260.19,
+     "share": 0.0158
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Hyperliquid Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "3",
+   "name": "Apple Inc.",
+   "symbol": "AAPL",
+   "asset_class": "stock",
+   "tokenized_market_cap": 34950829.81649095,
+   "tokens": 10,
+   "issuers": 9,
+   "tradfi_markets": 1,
+   "industry": "Electronic Computers",
+   "primary_exchange": "Nasdaq",
+   "cik": "0000320193",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.3653,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 12767397.13,
+     "share": 0.3653
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 9490898.59,
+     "share": 0.2716
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 5494409.48,
+     "share": 0.1572
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 4011026.42,
+     "share": 0.1148
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 2555604.99,
+     "share": 0.0731
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 631188.94,
+     "share": 0.0181
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "13",
+   "name": "Broadcom Inc",
+   "symbol": "AVGO",
+   "asset_class": "stock",
+   "tokenized_market_cap": 32996421.545581672,
+   "tokens": 8,
+   "issuers": 7,
+   "tradfi_markets": 1,
+   "industry": "Semiconductors & Related Devices",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001730168",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.561,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 18511150.7,
+     "share": 0.561
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 7262658.789999999,
+     "share": 0.2201
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 4246967.31,
+     "share": 0.1287
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 2616094.86,
+     "share": 0.0793
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 264087.34,
+     "share": 0.008
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 99748.19,
+     "share": 0.003
+    },
+    {
+     "issuer": "Dinari Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "8065",
+   "name": "SK Hynix",
+   "symbol": "SKHY",
+   "asset_class": "stock",
+   "tokenized_market_cap": 32060465.583054326,
+   "tokens": 7,
+   "issuers": 6,
+   "tradfi_markets": 0,
+   "industry": "",
+   "primary_exchange": "",
+   "cik": "",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.6444,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 20661341.65,
+     "share": 0.6444
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 7132015.57,
+     "share": 0.2225
+    },
+    {
+     "issuer": "Backpack",
+     "market_cap": 3092985.21,
+     "share": 0.0965
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 1116674.23,
+     "share": 0.0348
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 47732.05,
+     "share": 0.0015
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "125",
+   "name": "Hims & Hers Health Inc",
+   "symbol": "HIMS",
+   "asset_class": "stock",
+   "tokenized_market_cap": 31055802.01941497,
+   "tokens": 6,
+   "issuers": 5,
+   "tradfi_markets": 1,
+   "industry": "Services-Offices & Clinics of Doctors of Medicine",
+   "primary_exchange": "New York Stock Exchange",
+   "cik": "0001773751",
+   "top_issuer": "Ondo Assets",
+   "top_issuer_share": 0.9629,
+   "split": [
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 29905115.37,
+     "share": 0.9629
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 705117.81,
+     "share": 0.0227
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 441533.32,
+     "share": 0.0142
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 36673.72,
+     "share": 0.0012
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "70",
+   "name": "Marvell Technology Inc",
+   "symbol": "MRVL",
+   "asset_class": "stock",
+   "tokenized_market_cap": 30532152.49430201,
+   "tokens": 7,
+   "issuers": 6,
+   "tradfi_markets": 1,
+   "industry": "Semiconductors & Related Devices",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001835632",
+   "top_issuer": "Ondo Assets",
+   "top_issuer_share": 0.434,
+   "split": [
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 13252423.29,
+     "share": 0.434
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 7609969.17,
+     "share": 0.2492
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 5757831.300000001,
+     "share": 0.1886
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 3610660.69,
+     "share": 0.1183
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 296610.47,
+     "share": 0.0097
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 2331.71,
+     "share": 0.0001
+    }
+   ]
+  },
+  {
+   "rwa_id": "211",
+   "name": "ProShares UltraPro QQQ",
+   "symbol": "TQQQ",
+   "asset_class": "etf",
+   "tokenized_market_cap": 30012649.60042131,
+   "tokens": 5,
+   "issuers": 4,
+   "tradfi_markets": 1,
+   "industry": "",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001174610",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 0.7171,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 21523520.06,
+     "share": 0.7171
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 4845646.36,
+     "share": 0.1615
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 2430991.13,
+     "share": 0.081
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 1201590.86,
+     "share": 0.04
+    }
+   ]
+  },
+  {
+   "rwa_id": "3066",
+   "name": "CEA Industries Inc.",
+   "symbol": "BNC",
+   "asset_class": "stock",
+   "tokenized_market_cap": 28029033.130995743,
+   "tokens": 2,
+   "issuers": 2,
+   "tradfi_markets": 1,
+   "industry": "",
+   "primary_exchange": "",
+   "cik": "",
+   "top_issuer": "bStocks",
+   "top_issuer_share": 1.0,
+   "split": [
+    {
+     "issuer": "bStocks",
+     "market_cap": 28029033.13,
+     "share": 1.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "6",
+   "name": "Amazon.com Inc",
+   "symbol": "AMZN",
+   "asset_class": "stock",
+   "tokenized_market_cap": 27497845.797135852,
+   "tokens": 9,
+   "issuers": 8,
+   "tradfi_markets": 1,
+   "industry": "Retail-Catalog & Mail-Order Houses",
+   "primary_exchange": "Nasdaq",
+   "cik": "0001018724",
+   "top_issuer": "Backed Assets",
+   "top_issuer_share": 0.3293,
+   "split": [
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 9054743.73,
+     "share": 0.3293
+    },
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 6819897.46,
+     "share": 0.248
+    },
+    {
+     "issuer": "bStocks",
+     "market_cap": 4088623.61,
+     "share": 0.1487
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 3200065.61,
+     "share": 0.1164
+    },
+    {
+     "issuer": "Coinbase",
+     "market_cap": 3135140.33,
+     "share": 0.114
+    },
+    {
+     "issuer": "Reality",
+     "market_cap": 1203871.3,
+     "share": 0.0438
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Hyperliquid Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  },
+  {
+   "rwa_id": "205",
+   "name": "iShares Silver Trust",
+   "symbol": "SLV",
+   "asset_class": "etf",
+   "tokenized_market_cap": 25256916.35942984,
+   "tokens": 5,
+   "issuers": 5,
+   "tradfi_markets": 1,
+   "industry": "Commodity Contracts Brokers & Dealers",
+   "primary_exchange": "NYSE Arca, Inc.",
+   "cik": "0001330568",
+   "top_issuer": "Ondo Assets",
+   "top_issuer_share": 0.9543,
+   "split": [
+    {
+     "issuer": "Ondo Assets",
+     "market_cap": 24102068.51,
+     "share": 0.9543
+    },
+    {
+     "issuer": "Robinhood",
+     "market_cap": 1130693.46,
+     "share": 0.0448
+    },
+    {
+     "issuer": "Hyperliquid Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "NA (Derivatives)",
+     "market_cap": 0.0,
+     "share": 0.0
+    },
+    {
+     "issuer": "Backed Assets",
+     "market_cap": 0.0,
+     "share": 0.0
+    }
+   ]
+  }
+ ],
+ "asset_index": {
+  "note": "every asset in the catalogue that is tokenised or priced, largest first. top_assets above carries the same assets in full for the largest 25; this is the whole list, in columns.",
+  "fields": [
+   "symbol",
+   "name",
+   "asset_class",
+   "tokenised_market_cap",
+   "tokens",
+   "issuers",
+   "top_issuer",
+   "tradfi_markets"
+  ],
+  "top_issuer": "an index into issuers[] above: the issuer holding the largest attributed value. -1 where no issuer attributes any value - an asset whose tokens all report no market cap has issuers but no leader",
+  "tokenised_market_cap": "the asset-level figure from quotes/latest, NOT the sum of its tokens - the two disagree, and coverage.reconciliation is where that gap is reported",
+  "rows": [
+   [
+    "GOLD",
+    "Gold",
+    "commodity",
+    4973964157.26,
+    7,
+    6,
+    0,
+    0
+   ],
+   [
+    "CRCL",
+    "Circle Internet Group Inc",
+    "stock",
+    372721202.69,
+    8,
+    7,
+    2,
+    1
+   ],
+   [
+    "SPCX",
+    "SpaceX",
+    "stock",
+    300121727.72,
+    12,
+    11,
+    2,
+    1
+   ],
+   [
+    "MSTR",
+    "MicroStrategy Inc",
+    "stock",
+    250019784.86,
+    8,
+    7,
+    3,
+    1
+   ],
+   [
+    "QQQ",
+    "Invesco QQQ Trust",
+    "etf",
+    178756278.39,
+    9,
+    7,
+    2,
+    1
+   ],
+   [
+    "SPY",
+    "SPDR S&P 500 ETF Trust",
+    "etf",
+    152998585.53,
+    9,
+    8,
+    3,
+    1
+   ],
+   [
+    "NVDA",
+    "Nvidia Corp",
+    "stock",
+    150973149.35,
+    9,
+    8,
+    3,
+    1
+   ],
+   [
+    "TSLA",
+    "Tesla, Inc.",
+    "stock",
+    128263025.37,
+    10,
+    9,
+    3,
+    1
+   ],
+   [
+    "MU",
+    "Micron Technology Inc",
+    "stock",
+    122900125.17,
+    9,
+    8,
+    2,
+    1
+   ],
+   [
+    "GOOGL",
+    "Alphabet Inc Class A",
+    "stock",
+    111572214.97,
+    11,
+    9,
+    3,
+    1
+   ],
+   [
+    "SNDK",
+    "SanDisk Corp",
+    "stock",
+    102879856.01,
+    9,
+    8,
+    2,
+    1
+   ],
+   [
+    "INTC",
+    "Intel Corp",
+    "stock",
+    86066335.4,
+    8,
+    7,
+    2,
+    1
+   ],
+   [
+    "IVV",
+    "iShares Core S&P 500 ETF",
+    "etf",
+    60216651.76,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "SOXL",
+    "Direxion Daily Semiconductor Bull 3X ETF",
+    "etf",
+    51684417.78,
+    4,
+    3,
+    2,
+    1
+   ],
+   [
+    "COIN",
+    "Coinbase Global, Inc.",
+    "stock",
+    46426463.18,
+    8,
+    7,
+    2,
+    1
+   ],
+   [
+    "META",
+    "Meta Platforms, Inc.",
+    "stock",
+    37709756.39,
+    9,
+    8,
+    3,
+    1
+   ],
+   [
+    "AAPL",
+    "Apple Inc.",
+    "stock",
+    34950829.82,
+    10,
+    9,
+    3,
+    1
+   ],
+   [
+    "AVGO",
+    "Broadcom Inc",
+    "stock",
+    32996421.55,
+    8,
+    7,
+    2,
+    1
+   ],
+   [
+    "SKHY",
+    "SK Hynix",
+    "stock",
+    32060465.58,
+    7,
+    6,
+    2,
+    0
+   ],
+   [
+    "HIMS",
+    "Hims & Hers Health Inc",
+    "stock",
+    31055802.02,
+    6,
+    5,
+    4,
+    1
+   ],
+   [
+    "MRVL",
+    "Marvell Technology Inc",
+    "stock",
+    30532152.49,
+    7,
+    6,
+    4,
+    1
+   ],
+   [
+    "TQQQ",
+    "ProShares UltraPro QQQ",
+    "etf",
+    30012649.6,
+    5,
+    4,
+    2,
+    1
+   ],
+   [
+    "BNC",
+    "CEA Industries Inc.",
+    "stock",
+    28029033.13,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "AMZN",
+    "Amazon.com Inc",
+    "stock",
+    27497845.8,
+    9,
+    8,
+    3,
+    1
+   ],
+   [
+    "SLV",
+    "iShares Silver Trust",
+    "etf",
+    25256916.36,
+    5,
+    5,
+    4,
+    1
+   ],
+   [
+    "MSFT",
+    "Microsoft Corp",
+    "stock",
+    25031294.28,
+    10,
+    9,
+    4,
+    1
+   ],
+   [
+    "AMD",
+    "Advanced Micro Devices Inc",
+    "stock",
+    20715791.89,
+    8,
+    8,
+    4,
+    1
+   ],
+   [
+    "HOOD",
+    "Robinhood Markets Inc",
+    "stock",
+    20323725.56,
+    8,
+    6,
+    3,
+    1
+   ],
+   [
+    "SHLD",
+    "Global X Defense Tech ETF",
+    "etf",
+    19663985.33,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "KORU",
+    "Direxion Daily MSCI South Korea Bull 3X ETF",
+    "etf",
+    19545375.67,
+    1,
+    1,
+    2,
+    1
+   ],
+   [
+    "DRAM",
+    "Roundhill Memory ETF",
+    "etf",
+    19435792.22,
+    3,
+    3,
+    2,
+    1
+   ],
+   [
+    "TLT",
+    "iShares 20+ Year Treasury Bond ETF",
+    "etf",
+    17253056.29,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "IEFA",
+    "iShares Core MSCI EAFE ETF",
+    "etf",
+    16767291.92,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "TSM",
+    "Taiwan Semiconductor Manufacturing Co Ltd",
+    "stock",
+    16744042.82,
+    6,
+    6,
+    2,
+    1
+   ],
+   [
+    "BMNR",
+    "BitMine Immersion Technologies",
+    "stock",
+    16445241.15,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "GLD",
+    "SPDR Gold Trust",
+    "etf",
+    15224456.53,
+    7,
+    5,
+    3,
+    1
+   ],
+   [
+    "EWY",
+    "iShares MSCI South Korea ETF",
+    "etf",
+    14958359.82,
+    8,
+    7,
+    2,
+    1
+   ],
+   [
+    "AGG",
+    "iShares Core US Aggregate Bond ETF",
+    "etf",
+    14017915.34,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "MUU",
+    "Direxion Shares ETF Trust Direxion Daily MU Bull 2X ETF",
+    "etf",
+    13846786.12,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "ORCL",
+    "Oracle Corp",
+    "stock",
+    13812315.16,
+    8,
+    7,
+    3,
+    1
+   ],
+   [
+    "PDD",
+    "PDD Holdings Inc",
+    "stock",
+    13732582.74,
+    4,
+    4,
+    4,
+    1
+   ],
+   [
+    "SQQQ",
+    "ProShares UltraPro Short QQQ",
+    "etf",
+    13440533.6,
+    4,
+    4,
+    3,
+    1
+   ],
+   [
+    "GME",
+    "GameStop Corp",
+    "stock",
+    13068662.31,
+    8,
+    7,
+    2,
+    1
+   ],
+   [
+    "BABA",
+    "Alibaba Group Holding Ltd",
+    "stock",
+    12854853.18,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "ITOT",
+    "iShares Core S&P Total US Stock Market ETF",
+    "etf",
+    12558080.72,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "PLTR",
+    "Palantir Technologies Inc",
+    "stock",
+    11751399.52,
+    8,
+    7,
+    3,
+    1
+   ],
+   [
+    "SGOV",
+    "iShares 0-3 Month Treasury Bond ETF",
+    "etf",
+    11460424.15,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "EFA",
+    "iShares MSCI EAFE ETF",
+    "etf",
+    11146214.88,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "TIP",
+    "iShares TIPS Bond ETF",
+    "etf",
+    11020882.16,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "COHR",
+    "Coherent",
+    "stock",
+    10697289.73,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "AMAT",
+    "Applied Materials",
+    "stock",
+    10611662.61,
+    7,
+    6,
+    2,
+    1
+   ],
+   [
+    "SOFI",
+    "SoFi Technologies Inc",
+    "stock",
+    10580521.84,
+    6,
+    6,
+    4,
+    1
+   ],
+   [
+    "IAU",
+    "iShares Gold Trust",
+    "etf",
+    10160126.9,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "RKLB",
+    "Rocket Lab Corporation",
+    "stock",
+    9439044.31,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "IWF",
+    "iShares Russell 1000 Growth",
+    "etf",
+    9217013.33,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "LLY",
+    "Eli Lilly And Co",
+    "stock",
+    9027714.69,
+    8,
+    7,
+    4,
+    1
+   ],
+   [
+    "AAOI",
+    "Applied Optoelectronics, Inc.",
+    "stock",
+    7829526.74,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "ANTHROPIC",
+    "Anthropic",
+    "stock",
+    7706579.86,
+    2,
+    2,
+    12,
+    0
+   ],
+   [
+    "IREN",
+    "IREN Ltd",
+    "stock",
+    7564873.92,
+    7,
+    6,
+    2,
+    1
+   ],
+   [
+    "NBIS",
+    "Nebius Group N.V.",
+    "stock",
+    7487959.32,
+    4,
+    4,
+    2,
+    1
+   ],
+   [
+    "EEM",
+    "iShares MSCI Emerging Markets ETF",
+    "etf",
+    7093681.01,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "LITE",
+    "Lumentum Holdings Inc.",
+    "stock",
+    6680742.79,
+    6,
+    5,
+    2,
+    1
+   ],
+   [
+    "QCOM",
+    "Qualcomm Inc",
+    "stock",
+    6652859.66,
+    7,
+    6,
+    2,
+    1
+   ],
+   [
+    "CBRS",
+    "Cerebras Systems",
+    "stock",
+    5959585.71,
+    5,
+    5,
+    2,
+    0
+   ],
+   [
+    "ASML",
+    "ASML Holding NV",
+    "stock",
+    5775150.16,
+    7,
+    6,
+    4,
+    1
+   ],
+   [
+    "USO",
+    "United States Oil Fund LP",
+    "etf",
+    5732851.6,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "NFLX",
+    "Netflix",
+    "stock",
+    5523466.92,
+    8,
+    7,
+    3,
+    1
+   ],
+   [
+    "SNXX",
+    "Tradr 2X Long SNDK Daily ETF",
+    "etf",
+    5475895.96,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "KO",
+    "Coca-Cola Co",
+    "stock",
+    5319081.36,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "IWN",
+    "iShares Russell 2000 Value ETF",
+    "etf",
+    5285237.74,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "ARM",
+    "Arm Holdings PLC - ADR",
+    "stock",
+    5269472.9,
+    7,
+    7,
+    4,
+    1
+   ],
+   [
+    "MCD",
+    "McDonald's Corp",
+    "stock",
+    4631459.11,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "IBM",
+    "IBM",
+    "stock",
+    4524972.72,
+    7,
+    6,
+    4,
+    1
+   ],
+   [
+    "LMT",
+    "Lockheed Martin Corp",
+    "stock",
+    4162598.58,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "PFE",
+    "Pfizer Inc",
+    "stock",
+    4113248.77,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "OPENAI",
+    "OpenAI",
+    "stock",
+    4099377.01,
+    3,
+    3,
+    12,
+    0
+   ],
+   [
+    "WDC",
+    "Western Digital Corporation",
+    "stock",
+    4076669.15,
+    5,
+    4,
+    2,
+    1
+   ],
+   [
+    "CVX",
+    "Chevron Corp",
+    "stock",
+    4017452.11,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "JPM",
+    "JPmorgan Chase & Co",
+    "stock",
+    3984134.82,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "SMCI",
+    "Super Micro Computer Inc",
+    "stock",
+    3768883.77,
+    7,
+    6,
+    4,
+    1
+   ],
+   [
+    "DELL",
+    "Dell Technologies Inc.",
+    "stock",
+    3677576.87,
+    5,
+    4,
+    3,
+    1
+   ],
+   [
+    "SOXS",
+    "Direxion Daily Semiconductor Bear 3X ETF",
+    "etf",
+    3647467.08,
+    3,
+    3,
+    6,
+    1
+   ],
+   [
+    "ASTS",
+    "Ast Spacemobile, Inc.",
+    "stock",
+    3545291.9,
+    6,
+    5,
+    2,
+    1
+   ],
+   [
+    "LUNR",
+    "Intuitive Machines, Inc.",
+    "stock",
+    3514729.88,
+    2,
+    2,
+    3,
+    1
+   ],
+   [
+    "AGPU",
+    "Axe Compute Inc.",
+    "stock",
+    3462071.79,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "BE",
+    "Bloom Energy Corporation",
+    "stock",
+    3421033.65,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "CSCO",
+    "Cisco Systems Inc",
+    "stock",
+    3378303.12,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "AXTI",
+    "AXT Inc",
+    "stock",
+    3225341.49,
+    3,
+    3,
+    2,
+    1
+   ],
+   [
+    "IWM",
+    "iShares Russell 2000 ETF",
+    "etf",
+    3164466.09,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "PBR",
+    "Petroleo Brasileiro SA Petrobras Preference Shares",
+    "stock",
+    3144728.15,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "PG",
+    "Procter & Gamble Co",
+    "stock",
+    3124421.87,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "NOK",
+    "Nokia Corporation",
+    "stock",
+    3077838.27,
+    6,
+    6,
+    2,
+    1
+   ],
+   [
+    "IJH",
+    "iShares Core S&P Mid-Cap ETF",
+    "etf",
+    2982493.05,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "RDDT",
+    "Reddit Inc",
+    "stock",
+    2867064.67,
+    6,
+    6,
+    5,
+    1
+   ],
+   [
+    "INTW",
+    "GraniteShares ETF Trust GraniteShares 2x Long INTC Daily ETF",
+    "etf",
+    2737387.25,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "PANW",
+    "Palo Alto Networks Inc",
+    "stock",
+    2712931.91,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "NVO",
+    "Novo Nordisk A/S",
+    "stock",
+    2641888.65,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "V",
+    "Visa Inc",
+    "stock",
+    2637758.35,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "WMT",
+    "Walmart Inc",
+    "stock",
+    2626764.43,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "PEP",
+    "PepsiCo Inc",
+    "stock",
+    2473411.08,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "VTI",
+    "Vanguard Total Stock Market Index Fund ETF",
+    "etf",
+    2455510.48,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "PYPL",
+    "PayPal Holdings Inc",
+    "stock",
+    2396249.36,
+    7,
+    6,
+    4,
+    1
+   ],
+   [
+    "MRNA",
+    "Moderna Inc",
+    "stock",
+    2383246.68,
+    6,
+    6,
+    2,
+    1
+   ],
+   [
+    "SMH",
+    "VanEck Semiconductor ETF",
+    "etf",
+    2378192.35,
+    4,
+    3,
+    2,
+    1
+   ],
+   [
+    "GS",
+    "Goldman Sachs Group Inc",
+    "stock",
+    2346549.59,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "GLW",
+    "Corning Incorporated",
+    "stock",
+    2318090.27,
+    4,
+    3,
+    2,
+    1
+   ],
+   [
+    "FXI",
+    "iShares China Large-Cap ETF",
+    "etf",
+    2304638.19,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "CRWV",
+    "Coreweave, Inc.",
+    "stock",
+    2212488.48,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "CRM",
+    "Salesforce Inc",
+    "stock",
+    2186706.5,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "COST",
+    "Costco Wholesale Corp",
+    "stock",
+    2060007.57,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "TM",
+    "Toyota Motor Corp",
+    "stock",
+    2011460.5,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "ADBE",
+    "Adobe Inc",
+    "stock",
+    2006828.3,
+    4,
+    4,
+    2,
+    1
+   ],
+   [
+    "BLK",
+    "BlackRock Inc",
+    "stock",
+    1979846.44,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "SBUX",
+    "Starbucks Corp",
+    "stock",
+    1952440.7,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "BRK.B",
+    "Berkshire Hathaway Inc Class B",
+    "stock",
+    1919549.38,
+    5,
+    4,
+    3,
+    1
+   ],
+   [
+    "UNH",
+    "UnitedHealth Group Inc",
+    "stock",
+    1879697.34,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "NOW",
+    "ServiceNow Inc",
+    "stock",
+    1774698.03,
+    6,
+    6,
+    4,
+    1
+   ],
+   [
+    "SNOW",
+    "Snowflake Inc",
+    "stock",
+    1769401.42,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "LIN",
+    "Linde PLC",
+    "stock",
+    1747145.58,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "USAR",
+    "USA Rare Earth, Inc.",
+    "stock",
+    1623225.49,
+    4,
+    4,
+    2,
+    1
+   ],
+   [
+    "EQIX",
+    "Equinix Inc",
+    "stock",
+    1597349.28,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "MA",
+    "Mastercard Inc",
+    "stock",
+    1571435.03,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "ABT",
+    "Abbott Laboratories",
+    "stock",
+    1554128.43,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "ABNB",
+    "Airbnb Inc",
+    "stock",
+    1544512.15,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "GE",
+    "General Electric Co",
+    "stock",
+    1483449.91,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "VRT",
+    "Vertiv Holdings Co",
+    "stock",
+    1466510.9,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "COPX",
+    "Global X Copper Miners ETF",
+    "etf",
+    1464087.12,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "DJT",
+    "Trump Media & Technology Group Corp.",
+    "stock",
+    1458531.6,
+    4,
+    4,
+    2,
+    1
+   ],
+   [
+    "ACN",
+    "Accenture Plc",
+    "stock",
+    1426845.32,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "BA",
+    "Boeing Co",
+    "stock",
+    1348791.34,
+    4,
+    4,
+    4,
+    1
+   ],
+   [
+    "WFC",
+    "Wells Fargo & Co",
+    "stock",
+    1285518.21,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "JD",
+    "JD.Com Inc",
+    "stock",
+    1281759.67,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "CRWD",
+    "Crowdstrike Holdings Inc",
+    "stock",
+    1216148.99,
+    6,
+    5,
+    2,
+    1
+   ],
+   [
+    "HYG",
+    "iShares iBoxx $ High Yield Corporate Bond ETF",
+    "etf",
+    1200742.46,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "APP",
+    "Applovin Corp",
+    "stock",
+    1183109.07,
+    4,
+    3,
+    3,
+    1
+   ],
+   [
+    "NKE",
+    "Nike Inc",
+    "stock",
+    1173064.1,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "TTWO",
+    "Take-Two Interactive Software, Inc.",
+    "stock",
+    1146763.2,
+    4,
+    4,
+    5,
+    1
+   ],
+   [
+    "DIS",
+    "Walt Disney Co",
+    "stock",
+    1118290.69,
+    4,
+    4,
+    4,
+    1
+   ],
+   [
+    "BIDU",
+    "Baidu Inc",
+    "stock",
+    1091637.07,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "STX",
+    "Seagate Technology Holdings Plc",
+    "stock",
+    1045929.44,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "OKLO",
+    "Oklo Inc",
+    "stock",
+    1019004.37,
+    6,
+    5,
+    4,
+    1
+   ],
+   [
+    "UBER",
+    "Uber Technologies Inc",
+    "stock",
+    1012039.6,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "SPGI",
+    "S&P Global Inc",
+    "stock",
+    962105.97,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "SHOP",
+    "Shopify Inc",
+    "stock",
+    949458.11,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "FUTU",
+    "Futu Holdings Ltd",
+    "stock",
+    935347.23,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "CMG",
+    "Chipotle Mexican Grill Inc",
+    "stock",
+    924869.77,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "DASH",
+    "DoorDash Inc",
+    "stock",
+    909340.45,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "AXP",
+    "American Express Co",
+    "stock",
+    896625.13,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "FLNC",
+    "Fluence Energy, Inc.",
+    "stock",
+    886836.36,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "ONDS",
+    "Ondas Holdings Inc",
+    "stock",
+    886634.92,
+    5,
+    4,
+    3,
+    1
+   ],
+   [
+    "XOM",
+    "Exxon Mobil Corp",
+    "stock",
+    841362.02,
+    5,
+    4,
+    3,
+    1
+   ],
+   [
+    "DFDV",
+    "Defi Development Corp",
+    "stock",
+    785079.15,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "BB",
+    "BlackBerry Limited",
+    "stock",
+    771601.22,
+    1,
+    1,
+    2,
+    1
+   ],
+   [
+    "MELI",
+    "MercadoLibre Inc",
+    "stock",
+    755933.49,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "INTU",
+    "Intuit Inc",
+    "stock",
+    737086.57,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "TXN",
+    "Texas Instruments Inc",
+    "stock",
+    732500.14,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "AMC",
+    "AMC Entertainment",
+    "stock",
+    728268.05,
+    6,
+    6,
+    2,
+    1
+   ],
+   [
+    "CRDO",
+    "Credo Technology Group Holding Ltd",
+    "stock",
+    723255.95,
+    3,
+    3,
+    2,
+    1
+   ],
+   [
+    "LRCX",
+    "Lam Research Corp",
+    "stock",
+    712532.34,
+    5,
+    4,
+    3,
+    1
+   ],
+   [
+    "HYDB",
+    "iShares High Yield Systematic Bond ETF",
+    "etf",
+    712461.83,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "MVLL",
+    "GraniteShares ETF Trust GraniteShares 2x Long MRVL Daily ETF",
+    "etf",
+    708106.42,
+    1,
+    1,
+    2,
+    1
+   ],
+   [
+    "APO",
+    "Apollo Global Management Ord Shs",
+    "stock",
+    706468.25,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "MDB",
+    "Mongodb, Inc.",
+    "stock",
+    686095.42,
+    4,
+    4,
+    2,
+    1
+   ],
+   [
+    "QNT",
+    "Quantinuum Inc",
+    "stock",
+    680809.56,
+    2,
+    2,
+    2,
+    0
+   ],
+   [
+    "GEV",
+    "GE Vernova Inc.",
+    "stock",
+    679286.24,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "RBLX",
+    "Roblox Corporation",
+    "stock",
+    656708.97,
+    3,
+    3,
+    5,
+    1
+   ],
+   [
+    "ALAB",
+    "Astera Labs, Inc.",
+    "stock",
+    643287.29,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "JNJ",
+    "Johnson & Johnson",
+    "stock",
+    640295.58,
+    4,
+    3,
+    3,
+    1
+   ],
+   [
+    "ZM",
+    "Zoom Communications, Inc.",
+    "stock",
+    634858.23,
+    5,
+    4,
+    2,
+    1
+   ],
+   [
+    "ISRG",
+    "Intuitive Surgical Inc",
+    "stock",
+    607647.67,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "BINC",
+    "iShares Flexible Income Active ETF",
+    "etf",
+    599612.98,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "SHAZ",
+    "SharonAI Holdings, Inc.",
+    "stock",
+    587552.15,
+    3,
+    3,
+    2,
+    1
+   ],
+   [
+    "CEG",
+    "Constellation Energy",
+    "stock",
+    569386.84,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "SPOT",
+    "Spotify Technology SA",
+    "stock",
+    565706.14,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "FWDI",
+    "Forward Industries, Inc.",
+    "stock",
+    529550.36,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "WEN",
+    "Wendy's Company",
+    "stock",
+    521465.86,
+    5,
+    5,
+    2,
+    1
+   ],
+   [
+    "PENG",
+    "Penguin Solutions, Inc.",
+    "stock",
+    515532.61,
+    3,
+    3,
+    2,
+    1
+   ],
+   [
+    "FIG",
+    "Figma Inc",
+    "stock",
+    510425.02,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "TBLL",
+    "Invesco Short Term Treasury ETF",
+    "etf",
+    509332.16,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "UVXY",
+    "ProShares Ultra VIX Short-Term Futures ETF",
+    "etf",
+    499210.2,
+    1,
+    1,
+    2,
+    1
+   ],
+   [
+    "QBTS",
+    "D-Wave Quantum",
+    "stock",
+    497127.7,
+    4,
+    4,
+    4,
+    1
+   ],
+   [
+    "GPRO",
+    "GoPro, Inc.",
+    "stock",
+    484084.71,
+    3,
+    3,
+    2,
+    1
+   ],
+   [
+    "MP",
+    "Mp Materials Corp",
+    "stock",
+    481898.88,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "USHY",
+    "iShares Broad USD High Yield Corporate Bond ETF",
+    "etf",
+    477548.11,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "KLAC",
+    "KLA Corp",
+    "stock",
+    440502.05,
+    4,
+    3,
+    3,
+    1
+   ],
+   [
+    "RIVN",
+    "Rivian Automotive Inc",
+    "stock",
+    417473.3,
+    6,
+    5,
+    5,
+    1
+   ],
+   [
+    "HPE",
+    "Hewlett Packard Enterprise Company",
+    "stock",
+    409504.7,
+    2,
+    2,
+    2,
+    1
+   ],
+   [
+    "PALL",
+    "abrdn Physical Palladium Shares ETF",
+    "etf",
+    397596.07,
+    3,
+    3,
+    4,
+    0
+   ],
+   [
+    "AMBR",
+    "Amber International Holding Ltd",
+    "stock",
+    377671.03,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "LULU",
+    "Lululemon Athletica Inc.",
+    "stock",
+    369856.95,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "SBET",
+    "Sharplink Gaming Inc",
+    "stock",
+    365398.35,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "JAAA",
+    "Janus Henderson AAA CLO ETF",
+    "etf",
+    357317.66,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "BILI",
+    "Bilibili",
+    "stock",
+    357026.37,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "VST",
+    "Vistra Corp",
+    "stock",
+    345349.78,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "OSCR",
+    "Oscar Health Inc",
+    "stock",
+    335228.43,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "REMX",
+    "VanEck Rare Earth and Strategic Metals ETF",
+    "etf",
+    325737.31,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "RIOT",
+    "Riot Platforms Inc",
+    "stock",
+    313788.9,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "ANET",
+    "Arista Networks",
+    "stock",
+    298156.98,
+    5,
+    4,
+    4,
+    1
+   ],
+   [
+    "WULF",
+    "Terawulf Inc",
+    "stock",
+    284917.39,
+    4,
+    3,
+    4,
+    1
+   ],
+   [
+    "ABBV",
+    "AbbVie Inc",
+    "stock",
+    272370.71,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "NIO",
+    "Nio Inc",
+    "stock",
+    258125.06,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "TER",
+    "Teradyne, Inc.",
+    "stock",
+    254936.04,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "DBC",
+    "Invesco DB Commodity Index Tracking Fund",
+    "etf",
+    239960.28,
+    1,
+    1,
+    4,
+    0
+   ],
+   [
+    "TCOM",
+    "Trip.com Group Ltd",
+    "stock",
+    237095.73,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "BAC",
+    "Bank of America Corp",
+    "stock",
+    234520.02,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "SOXX",
+    "iShares Semiconductor ETF",
+    "etf",
+    218672.71,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "NEAR",
+    "iShares Short Duration Bond Active ETF",
+    "etf",
+    213359.81,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "NNE",
+    "Nano Nuclear Energy Inc.",
+    "stock",
+    201786.14,
+    1,
+    1,
+    5,
+    1
+   ],
+   [
+    "MARA",
+    "MARA Holdings Inc",
+    "stock",
+    197620.34,
+    5,
+    5,
+    4,
+    1
+   ],
+   [
+    "CMCSA",
+    "Comcast Corp",
+    "stock",
+    195102.7,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "QUBT",
+    "Quantum Computing Inc.",
+    "stock",
+    184996.54,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "MRK",
+    "Merck & Co Inc",
+    "stock",
+    176070.27,
+    4,
+    3,
+    3,
+    1
+   ],
+   [
+    "DHR",
+    "Danaher Corp",
+    "stock",
+    169776.13,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "RGTI",
+    "Rigetti Computing Inc",
+    "stock",
+    161434.94,
+    5,
+    5,
+    4,
+    1
+   ],
+   [
+    "UPS",
+    "United Parcel Service, Inc.",
+    "stock",
+    157061.69,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "LI",
+    "Li Auto Inc",
+    "stock",
+    152366.74,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "F",
+    "Ford Motor Co",
+    "stock",
+    151080.44,
+    3,
+    3,
+    5,
+    1
+   ],
+   [
+    "CIFR",
+    "Cipher Mining",
+    "stock",
+    146889.91,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "PM",
+    "Philip Morris International Inc",
+    "stock",
+    135282.9,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "TMO",
+    "Thermo Fisher Scientific Inc",
+    "stock",
+    122627.18,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "OXY",
+    "Occidental Petroleum Corp",
+    "stock",
+    119541.3,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "DDOG",
+    "Datadog, Inc.",
+    "stock",
+    118411.83,
+    3,
+    3,
+    5,
+    1
+   ],
+   [
+    "OKTA",
+    "Okta, Inc.",
+    "stock",
+    114081.34,
+    3,
+    2,
+    3,
+    1
+   ],
+   [
+    "OPEN",
+    "Opendoor Technologies Inc",
+    "stock",
+    113180.82,
+    4,
+    3,
+    3,
+    1
+   ],
+   [
+    "NU",
+    "Nu Holdings Ltd.",
+    "stock",
+    111403.38,
+    1,
+    1,
+    5,
+    1
+   ],
+   [
+    "AZN",
+    "AstraZeneca PLC",
+    "stock",
+    108620.91,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "IONQ",
+    "Ionq, Inc.",
+    "stock",
+    108330.2,
+    4,
+    4,
+    6,
+    1
+   ],
+   [
+    "HD",
+    "Home Depot Inc",
+    "stock",
+    108263.8,
+    4,
+    3,
+    3,
+    1
+   ],
+   [
+    "BX",
+    "Blackstone Inc.",
+    "stock",
+    101169.03,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "MDT",
+    "Medtronic PLC",
+    "stock",
+    93292.77,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "ROK",
+    "Rockwell Automation, Inc.",
+    "stock",
+    92955.28,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "TSLL",
+    "Direxion Shares ETF Trust Direxion Daily TSLA Bull 2X ETF",
+    "etf",
+    82067.31,
+    2,
+    2,
+    3,
+    1
+   ],
+   [
+    "GRAB",
+    "Grab Holdings Ltd",
+    "stock",
+    81791.2,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "TMF",
+    "Direxion Daily 20+ Year Treasury Bull 3X ETF",
+    "etf",
+    76103.75,
+    1,
+    1,
+    3,
+    1
+   ],
+   [
+    "JOBY",
+    "Joby Aviation, Inc.",
+    "stock",
+    70565.69,
+    1,
+    1,
+    6,
+    1
+   ],
+   [
+    "FIGR",
+    "Figure Technology Solutions Inc",
+    "stock",
+    68674.86,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "ON",
+    "ON Semiconductor Corp",
+    "stock",
+    66228.64,
+    3,
+    2,
+    4,
+    1
+   ],
+   [
+    "PDBC",
+    "Invesco Optimum Yld Dvsfd Cmd Str No K-1 ETF",
+    "etf",
+    62848.09,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "UL",
+    "Unilever plc",
+    "stock",
+    49348.62,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "RTX",
+    "Rtx Corp",
+    "stock",
+    49232.46,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "SAP",
+    "SAP SE",
+    "stock",
+    47568.53,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "INFY",
+    "Infosys Limited",
+    "stock",
+    42654.63,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "SAN",
+    "Banco Santander S.A.",
+    "stock",
+    40697.33,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "SE",
+    "Sea Limited",
+    "stock",
+    39489.59,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "TLN",
+    "Talen Energy Corp",
+    "stock",
+    38745.88,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "BUD",
+    "Anheuser-Busch INBEV SA/NV",
+    "stock",
+    37800.03,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "SONY",
+    "Sony Group Corporation",
+    "stock",
+    37034.13,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "NEE",
+    "NextEra Energy Inc",
+    "stock",
+    36367.42,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "WRD",
+    "WeRide Inc.",
+    "stock",
+    36362.96,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "RDW",
+    "Redwire Corporation",
+    "stock",
+    35262.83,
+    3,
+    3,
+    6,
+    1
+   ],
+   [
+    "VALE",
+    "VALE S.A.",
+    "stock",
+    33983.93,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "CIEN",
+    "Ciena Corporation",
+    "stock",
+    33041.39,
+    2,
+    2,
+    6,
+    1
+   ],
+   [
+    "COP",
+    "ConocoPhillips",
+    "stock",
+    32893.08,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "HSAI",
+    "Hesai Group",
+    "stock",
+    31603.81,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "USFR",
+    "WisdomTree Floating Rate Treasury Fund",
+    "etf",
+    30086.44,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "WDAY",
+    "Workday, Inc.",
+    "stock",
+    30078.98,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "TMUS",
+    "T-Mobile Us Inc",
+    "stock",
+    26529.62,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "DGRW",
+    "WisdomTree US Quality Dividend Growth Fund",
+    "etf",
+    26339.03,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "CCL",
+    "Carnival Corporation Ltd.",
+    "stock",
+    24774.55,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "BZ",
+    "Kanzhun",
+    "stock",
+    22197.98,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "ACHR",
+    "Archer Aviation",
+    "stock",
+    22147.72,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "PLUG",
+    "Plug Power Inc",
+    "stock",
+    21278.42,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "P",
+    "Everpure, Inc.",
+    "stock",
+    20179.11,
+    3,
+    3,
+    5,
+    1
+   ],
+   [
+    "SNAP",
+    "Snap Inc",
+    "stock",
+    17648.33,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "NIKL",
+    "Sprott Nickel Miners ETF",
+    "etf",
+    16807.46,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "CAT",
+    "Caterpillar",
+    "stock",
+    16260.4,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "PINS",
+    "Pinterest Inc",
+    "stock",
+    14883.88,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "T",
+    "AT&T Inc",
+    "stock",
+    14596.03,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "BLSH",
+    "Bullish",
+    "stock",
+    14098.39,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "FTGC",
+    "First Trust Global Tactical Commodity Strategy Fund",
+    "etf",
+    12641.98,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "SOUN",
+    "SoundHound AI Inc",
+    "stock",
+    12500.77,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "XYZ",
+    "Block Inc",
+    "stock",
+    12355.14,
+    3,
+    3,
+    4,
+    1
+   ],
+   [
+    "ELF",
+    "e.l.f. Beauty, Inc.",
+    "stock",
+    11987.84,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "AAL",
+    "American Airlines Group",
+    "stock",
+    11465.84,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "SIMO",
+    "Silicon Motion Technology Corporation",
+    "stock",
+    11170.53,
+    2,
+    2,
+    6,
+    1
+   ],
+   [
+    "POET",
+    "POET Technologies Inc.",
+    "stock",
+    10455.56,
+    1,
+    1,
+    5,
+    1
+   ],
+   [
+    "CELH",
+    "Celsius Holdings, Inc.",
+    "stock",
+    9518.55,
+    3,
+    3,
+    5,
+    1
+   ],
+   [
+    "VZ",
+    "Verizon Communications Inc",
+    "stock",
+    9371.51,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "MXL",
+    "Maxlinear, Inc.",
+    "stock",
+    9292.73,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "XLK",
+    "State Street Technology Select Sector SPDR ETF",
+    "etf",
+    9159.08,
+    1,
+    1,
+    5,
+    1
+   ],
+   [
+    "CPNG",
+    "Coupang Inc",
+    "stock",
+    8804.14,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "BBAI",
+    "BigBear.ai Holdings",
+    "stock",
+    8120.93,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "TSEM",
+    "Tower Semiconductor Ltd.",
+    "stock",
+    7326.99,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "APLD",
+    "Applied Digital Corporation",
+    "stock",
+    7159.39,
+    4,
+    3,
+    5,
+    1
+   ],
+   [
+    "AMGN",
+    "Amgen",
+    "stock",
+    6812.67,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "NTES",
+    "NetEase Inc",
+    "stock",
+    5984.2,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "PSQ",
+    "ProShares Short QQQ",
+    "etf",
+    5596.67,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "DNN",
+    "Denison Mines Corp",
+    "stock",
+    5453.64,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "SPMO",
+    "Invesco S&P 500 Momentum ETF",
+    "etf",
+    5362.12,
+    1,
+    1,
+    5,
+    1
+   ],
+   [
+    "RXRX",
+    "Recursion Pharmaceuticals, Inc.",
+    "stock",
+    5069.17,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "MTZ",
+    "MasTec Inc",
+    "stock",
+    4708.59,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "INOD",
+    "Innodata Inc.",
+    "stock",
+    4660.93,
+    1,
+    1,
+    5,
+    1
+   ],
+   [
+    "ADI",
+    "Analog Devices",
+    "stock",
+    4482.2,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "DE",
+    "Deere & Co",
+    "stock",
+    4406.63,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "ZS",
+    "Zscaler, Inc.",
+    "stock",
+    4166.85,
+    3,
+    3,
+    5,
+    1
+   ],
+   [
+    "UMC",
+    "United Microelectronic Corp.",
+    "stock",
+    3745.74,
+    2,
+    2,
+    5,
+    1
+   ],
+   [
+    "COF",
+    "Capital One Financial Corp",
+    "stock",
+    3507.37,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "CLSK",
+    "CleanSpark, Inc.",
+    "stock",
+    3015.12,
+    3,
+    3,
+    5,
+    1
+   ],
+   [
+    "PCG",
+    "PG&E Corp",
+    "stock",
+    2331.27,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "GEMI",
+    "Gemini Space Station Inc",
+    "stock",
+    2324.23,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "BTG",
+    "B2Gold",
+    "stock",
+    2295.0,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "DUOL",
+    "Duolingo, Inc.",
+    "stock",
+    2236.01,
+    2,
+    2,
+    9,
+    1
+   ],
+   [
+    "C",
+    "Citigroup Inc",
+    "stock",
+    1764.85,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "SCHW",
+    "Charles Schwab Corporation",
+    "stock",
+    1419.82,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "SO",
+    "Southern Co",
+    "stock",
+    1345.66,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "CLOI",
+    "VanEck CLO ETF",
+    "etf",
+    1276.28,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "CLOA",
+    "iShares AAA CLO Active ETF",
+    "etf",
+    1031.25,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "CVNA",
+    "Carvana Co",
+    "stock",
+    833.88,
+    4,
+    4,
+    4,
+    1
+   ],
+   [
+    "PTON",
+    "Peloton Interactive, Inc.",
+    "stock",
+    774.5,
+    1,
+    1,
+    9,
+    1
+   ],
+   [
+    "LOW",
+    "Lowe's Companies Inc",
+    "stock",
+    582.63,
+    2,
+    2,
+    4,
+    1
+   ],
+   [
+    "OPRA",
+    "Opera Ltd",
+    "stock",
+    341.61,
+    1,
+    1,
+    4,
+    1
+   ],
+   [
+    "HTZ",
+    "Hertz Global Holdings, Inc",
+    "stock",
+    180.37,
+    2,
+    2,
+    9,
+    1
+   ],
+   [
+    "CLW",
+    "Clearwater Paper Corporation",
+    "stock",
+    0.28,
+    1,
+    1,
+    6,
+    1
+   ],
+   [
+    "RACE",
+    "Ferrari N.V.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TJX",
+    "Tjx Companies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "UNP",
+    "Union Pacific Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PNFP",
+    "Pinnacle Financial Partners, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PATH",
+    "UiPath, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TWST",
+    "Twist Bioscience Corporation",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "GTLB",
+    "GitLab Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WING",
+    "Wingstop Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "XNDU",
+    "Xanadu Quantum Technologies Limited",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PLNT",
+    "Planet Fitness, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CAKE",
+    "Cheesecake Factory Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "QURE",
+    "uniQure N.V.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GRND",
+    "Grindr Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "OUST",
+    "Ouster, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CLOV",
+    "Clover Health Investments, Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TE",
+    "T1 Energy Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HYMB",
+    "SPDR Nuveen ICE High Yield Municipal Bond ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IBIT",
+    "iShares Bitcoin Trust ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EAT",
+    "Brinker International, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CROX",
+    "Crocs, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BNY",
+    "Bank of New York Mellon Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VIK",
+    "Viking Holdings Ltd",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MDLN",
+    "Medline Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CXMT",
+    "ChangXin Memory Technologies",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    0
+   ],
+   [
+    "XPD",
+    "Palladium",
+    "commodity",
+    0.0,
+    1,
+    1,
+    -1,
+    0
+   ],
+   [
+    "NVTS",
+    "Navitas Semiconductor Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SEZL",
+    "Sezzle Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VVV",
+    "Valvoline Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "UUUU",
+    "Energy Fuels Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SMR",
+    "NuScale Power Corporation",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "CL",
+    "Crude Oil",
+    "commodity",
+    0.0,
+    1,
+    0,
+    -1,
+    0
+   ],
+   [
+    "VKTX",
+    "Viking Therapeutics, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "LEU",
+    "Centrus Energy Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ETN",
+    "Eaton Corporation, Plc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AEO",
+    "American Eagle Outfitters",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KSS",
+    "Kohls Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GLXY",
+    "Galaxy Digital Inc",
+    "stock",
+    0.0,
+    5,
+    4,
+    -1,
+    1
+   ],
+   [
+    "PLD",
+    "Prologis Inc",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "RUM",
+    "Rumble Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NVAX",
+    "Novavax, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ETHE",
+    "Grayscale Ethereum Trust ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    0
+   ],
+   [
+    "PSNL",
+    "Personalis, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SG",
+    "Sweetgreen, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KODK",
+    "EASTMAN KODAK COMPANY",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TRON",
+    "Tron Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BTGO",
+    "BitGo Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BKNG",
+    "Booking Holdings Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MO",
+    "Altria Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SYK",
+    "Stryker Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VRTX",
+    "Vertex Pharmaceuticals Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CDNS",
+    "Cadence Design Systems, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FTNT",
+    "Fortinet, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PWR",
+    "Quanta Services, Inc.",
+    "stock",
+    0.0,
+    2,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CME",
+    "Cme Group Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PNC",
+    "Pnc Financial Services Group",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GD",
+    "General Dynamics Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MLP",
+    "Maui Land & Pineapple Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AMT",
+    "American Tower Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MNST",
+    "Monster Beverage Corporation",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "WMB",
+    "Williams Companies Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ELV",
+    "Elevance Health, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CMI",
+    "Cummins Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KKR",
+    "Kkr & Co. Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FUFU",
+    "BitFuFu Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MDLZ",
+    "Mondelez International, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MCO",
+    "Moody'S Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NET",
+    "Cloudflare, Inc.",
+    "stock",
+    0.0,
+    3,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HLT",
+    "Hilton Worldwide Holdings Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EMR",
+    "Emerson Electric Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FDX",
+    "Fedex Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SHW",
+    "The Sherwin-Williams Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ROST",
+    "Ross Stores, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BAM",
+    "Brookfield Asset Management Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MPWR",
+    "Monolithic Power Systems, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CTAS",
+    "Cintas Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BSX",
+    "Boston Scientific Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WW",
+    "WW International, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GM",
+    "General Motors Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TONX",
+    "TON Strategy Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AEP",
+    "American Electric Power Company, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SPG",
+    "Simon Property Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TDG",
+    "Transdigm Group Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "URI",
+    "United Rentals, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TRV",
+    "The Travelers Companies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "REGN",
+    "Regeneron Pharmaceuticals, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BKR",
+    "Baker Hughes Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TFC",
+    "Truist Financial Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AFL",
+    "Aflac Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TRGP",
+    "Targa Resources Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TGT",
+    "Target Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ALL",
+    "The Allstate Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LCID",
+    "Lucid Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AIP",
+    "Arteris, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NUE",
+    "Nucor Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AJG",
+    "Arthur J. Gallagher & Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CARR",
+    "Carrier Global Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MET",
+    "Metlife, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FANG",
+    "Diamondback Energy, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RCAT",
+    "Red Cat Holdings, Inc.",
+    "stock",
+    0.0,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "FAST",
+    "Fastenal Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FLEX",
+    "Flex Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AZO",
+    "Autozone, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LNG",
+    "Cheniere Energy Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ETR",
+    "Entergy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CTVA",
+    "Corteva, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ENRD",
+    "Legato Merger Corp. III",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ODFL",
+    "Old Dominion Freight Line, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CRML",
+    "Critical Metals Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MCHP",
+    "Microchip Technology Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WYFI",
+    "WhiteFiber, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ADSK",
+    "Autodesk, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HEI",
+    "Heico Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IDXX",
+    "Idexx Laboratories, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FERG",
+    "Ferguson Enterprises Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KDP",
+    "Keurig Dr Pepper Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "YUM",
+    "Yum! Brands, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "VTR",
+    "Ventas, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BDX",
+    "Becton, Dickinson And Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KR",
+    "The Kroger Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ED",
+    "Consolidated Edison, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ADM",
+    "Archer Daniels Midland Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LYV",
+    "Live Nation Entertainment Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "STLD",
+    "Steel Dynamics, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SYY",
+    "Sysco Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "A",
+    "Agilent Technologies Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ROOT",
+    "Root, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IRM",
+    "Iron Mountain Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PAYX",
+    "Paychex, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MTA",
+    "Metalla Royalty & Streaming Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BTBT",
+    "Bit Digital, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WAT",
+    "Waters Corp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HIG",
+    "The Hartford Insurance Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KVUE",
+    "Kenvue Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HBAN",
+    "Huntington Bancshares Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MS",
+    "Morgan Stanley",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ROP",
+    "Roper Technologies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ECHO",
+    "Echostar Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    5,
+    1
+   ],
+   [
+    "MLM",
+    "Martin Marietta Materials",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HEI.A",
+    "Heico Corp Cl A",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EQT",
+    "EQTCorp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CNC",
+    "Centene Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CBOE",
+    "Cboe Global Markets, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TWLO",
+    "Twilio Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NTRA",
+    "Natera, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NTRS",
+    "Northern Trust Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KRAQ",
+    "KRAKacquisition Corp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VICI",
+    "Vici Properties Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DTE",
+    "Dte Energy Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "Q",
+    "Qnity Electronics, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GEHC",
+    "Ge Healthcare Technologies Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SPCE",
+    "Virgin Galactic Holdings, Inc.",
+    "stock",
+    0.0,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "DXCM",
+    "Dexcom, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BIIB",
+    "Biogen Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KHC",
+    "The Kraft Heinz Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FISV",
+    "Fiserv, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ATO",
+    "Atmos Energy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TDY",
+    "Teledyne Technologies Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CFG",
+    "Citizens Financial Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MTSI",
+    "Macom Technology Solutions Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FSLR",
+    "First Solar, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "OTIS",
+    "Otis Worldwide Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CW",
+    "Curtiss-Wright Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AVB",
+    "Avalonbay Communities, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VRSN",
+    "Verisign, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ES",
+    "Eversource Energy",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RELL",
+    "Richardson Electronics, Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SCCO",
+    "Southern Copper Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SITC",
+    "SITE Centers Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CVS",
+    "Cvs Health Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PGR",
+    "Progressive Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BMY",
+    "Bristol-Myers Squibb Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PH",
+    "Parker-Hannifin Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MAR",
+    "Marriott International",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HWM",
+    "Howmet Aerospace Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NEM",
+    "Newmont Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DUK",
+    "Duke Energy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MCK",
+    "Mckesson Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ADP",
+    "Automatic Data Processing, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WM",
+    "Waste Management, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FCX",
+    "Freeport-Mcmoran Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "USB",
+    "U.S. Bancorp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SNPS",
+    "Synopsys, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "CSX",
+    "Csx Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HCA",
+    "Hca Healthcare, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MMM",
+    "3M Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MRSH",
+    "Marsh",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SUIG",
+    "Sui Group Holdings Limited",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ICE",
+    "Intercontinental Exchange Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CI",
+    "The Cigna Group",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NOC",
+    "Northrop Grumman Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HSDT",
+    "Solana Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MPC",
+    "Marathon Petroleum Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VLO",
+    "Valero Energy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ORLY",
+    "O'Reilly Automotive, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EOG",
+    "Eog Resources, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PSX",
+    "Phillips 66",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ECL",
+    "Ecolab, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ITW",
+    "Illinois Tool Works Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KMI",
+    "Kinder Morgan, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NSC",
+    "Norfolk Southern Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BIRD",
+    "Allbirds, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MSI",
+    "Motorola Solutions, Inc. New",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WBD",
+    "Warner Bros. Discovery, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RSG",
+    "Republic Services Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DLR",
+    "Digital Realty Trust, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GWW",
+    "W.W. Grainger, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "APD",
+    "Air Products & Chemicals, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FIX",
+    "Comfort Systems Usa, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PCAR",
+    "Paccar Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SRE",
+    "Sempra",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "D",
+    "Dominion Energy, Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "O",
+    "Realty Income Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "OKE",
+    "Oneok, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PSA",
+    "Public Storage",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LHX",
+    "L3Harris Technologies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KEYS",
+    "Keysight Technologies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "COR",
+    "Cencora, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DVN",
+    "Devon Energy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EA",
+    "Electronic Arts Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AME",
+    "Ametek, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CAH",
+    "Cardinal Health, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DAL",
+    "Delta Air Lines, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ABFL",
+    "Abacus FCF Leaders ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EW",
+    "Edwards Lifesciences Corp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NDAQ",
+    "Nasdaq, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "XEL",
+    "Xcel Energy Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FITB",
+    "Fifth Third Bancorp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EBAY",
+    "Ebay Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EXC",
+    "Exelon Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AVL",
+    "Direxion Shares ETF Trust Direxion Daily AVGO Bull 2X ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "STT",
+    "State Street Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MSCI",
+    "Msci, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HUM",
+    "Humana Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WAB",
+    "Wabtec Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BITX",
+    "2x Bitcoin Strategy ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DHI",
+    "D.R. Horton Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CCI",
+    "Crown Castle Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AMP",
+    "Ameriprise Financial, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AIG",
+    "American International Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CBRE",
+    "Cbre Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PEG",
+    "Public Service Enterprise Group Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ALNY",
+    "Alnylam Pharmaceuticals, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IBKR",
+    "Interactive Brokers Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "JBL",
+    "Jabil Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WEC",
+    "Wec Energy Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PRU",
+    "Prudential Financial, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AXON",
+    "Axon Enterprise, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "HSY",
+    "The Hershey Company",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "RKT",
+    "Rocket Companies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VMC",
+    "Vulcan Materials Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EME",
+    "Emcor Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ZTS",
+    "Zoetis Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CASY",
+    "Casey'S General Stores, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KMB",
+    "Kimberly-Clark Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LVS",
+    "Las Vegas Sands Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "UAL",
+    "United Airlines Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HAL",
+    "Halliburton Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MTB",
+    "M&T Bank Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EXR",
+    "Extra Space Storage, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NTAP",
+    "Netapp, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EWQ",
+    "iShares MSCI France ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EL",
+    "The Estee Lauder Companies Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RVMD",
+    "Revolution Medicines, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IQV",
+    "Iqvia Holdings Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FEZ",
+    "State Street SPDR EURO STOXX 50 ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AEE",
+    "Ameren Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RJF",
+    "Raymond James Financial, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FLBL",
+    "Franklin Senior Loan ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CPRT",
+    "Copart, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FLQM",
+    "Franklin U.S. Mid Cap Multifactor Index ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ARES",
+    "Ares Management Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DOV",
+    "Dover Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TPR",
+    "Tapestry, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FICO",
+    "Fair Isaac Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SILVER",
+    "Silver",
+    "commodity",
+    0.0,
+    5,
+    4,
+    -1,
+    0
+   ],
+   [
+    "RMD",
+    "Resmed Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CNP",
+    "Centerpoint Energy, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IR",
+    "Ingersoll Rand Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EIX",
+    "Edison International",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FE",
+    "Firstenergy Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PPL",
+    "Ppl Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VEEV",
+    "Veeva Systems Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "JBHT",
+    "J.B. Hunt Transport Services, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EXPE",
+    "Expedia Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HYGW",
+    "iShares High Yield Corporate Bond BuyWrite Strategy ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CRS",
+    "Carpenter Technology Corp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TPL",
+    "Texas Pacific Land Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NRG",
+    "Nrg Energy, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "XPO",
+    "Xpo, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PPG",
+    "PPG Industries, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HUBB",
+    "Hubbell Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ITA",
+    "iShares U.S. Aerospace & Defense ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DOW",
+    "DOW Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CTSH",
+    "Cognizant Technology Solutions Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "STZ",
+    "Constellation Brands, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "WSM",
+    "Williams-Sonoma, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KEY",
+    "Keycorp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "JPST",
+    "JPMorgan Ultra-Short Income ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PFG",
+    "Principal Financial Group Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WST",
+    "West Pharmaceutical Services, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CHD",
+    "Church & Dwight Co., Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FTAI",
+    "Ftai Aviation Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "UTHR",
+    "United Therapeutics Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MTD",
+    "Mettler-Toledo International",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TROW",
+    "T. Rowe Price Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CMS",
+    "Cms Energy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RL",
+    "Ralph Lauren Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "L",
+    "Loews Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MSTU",
+    "T-Rex 2X Long MSTR Daily Target ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LEN",
+    "Lennar Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FFIV",
+    "F5, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SBAC",
+    "Sba Communications Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NLR",
+    "VanEck Uranium and Nuclear ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "CHRW",
+    "C.H. Robinson Worldwide, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EXPD",
+    "Expeditors International Of Washington, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TW",
+    "Tradeweb Markets Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DLTR",
+    "Dollar Tree Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "INCY",
+    "Incyte Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BURL",
+    "Burlington Stores, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ULTA",
+    "Ulta Beauty, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RS",
+    "Reliance, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "INSM",
+    "Insmed Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EFX",
+    "Equifax, Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RBA",
+    "Rb Global, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DKS",
+    "Dick'S Sporting Goods, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AKAM",
+    "Akamai Technologies, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "FTV",
+    "Fortive Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SCHF",
+    "Schwab International Equity ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LSCC",
+    "Lattice Semiconductor Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SHV",
+    "iShares Trust iShares 0-1 Year Treasury Bond ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "INVH",
+    "Invitation Homes Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LII",
+    "Lennox International Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WY",
+    "Weyerhaeuser Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SPXL",
+    "Direxion Daily S&P 500 Bull 3x ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ROKU",
+    "Roku, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KIM",
+    "Kimco Realty Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ZBH",
+    "Zimmer Biomet Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CHTR",
+    "Charter Communications, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WPC",
+    "W.P. Carey Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CF",
+    "CF Industries Holding, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RGLD",
+    "Royal Gold, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CDW",
+    "CDW Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SSNC",
+    "SS&C Technologies Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TZA",
+    "Direxion Daily Small Cap Bear 3x ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "OVV",
+    "Ovintiv Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MAA",
+    "Mid-America Apartment Communities, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "URA",
+    "Global X Uranium ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NBIX",
+    "Neurocrine Biosciences, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "USPX",
+    "Franklin U.S. Equity Index ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TSCO",
+    "Tractor Supply Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TXT",
+    "Textron, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VCX",
+    "Fundrise Innovation Fund, LLC",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CG",
+    "The Carlyle Group Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PFGC",
+    "Performance Food Group Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PTC",
+    "PTC Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VT",
+    "Vanguard Total World Stock ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TKO",
+    "Tko Group Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VUG",
+    "Vanguard Growth ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "DECK",
+    "Deckers Outdoor Corp",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LAMR",
+    "Lamar Advertising Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "XBI",
+    "State Street SPDR S&P Biotech ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "REG",
+    "Regency Centers Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BWA",
+    "Borgwarner Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "UNM",
+    "Unum Group",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SGI",
+    "Somnigroup International Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MAS",
+    "Masco Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "THC",
+    "Tenet Healthcare Corporation New",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CSGP",
+    "Costar Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RGA",
+    "Reinsurance Group Of America, Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NTNX",
+    "Nutanix, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MKC",
+    "Mccormick & Company, Incorporated Non-Vtg Cs",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EG",
+    "Everest Group, Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EXEL",
+    "Exelixis, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EVR",
+    "Evercore Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "KNX",
+    "Knight-Swift Transportation Holdings Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FNF",
+    "Fidelity National Financial, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AIZ",
+    "Assurant, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RNR",
+    "Renaissancere Holdings Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VICR",
+    "Vicor Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SJM",
+    "The J.M. Smucker Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TYL",
+    "Tyler Technologies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SAIA",
+    "Saia, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ALGN",
+    "Align Technology, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SWK",
+    "Stanley Black & Decker, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AVY",
+    "Avery Dennison Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NYT",
+    "New York Times Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EQH",
+    "Equitable Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FHN",
+    "First Horizon Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WBS",
+    "Webster Financial Corporation Waterbury",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ELAN",
+    "Elanco Animal Health Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PL",
+    "Planet Labs Pbc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ZBRA",
+    "Zebra Technologies Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DAX",
+    "Global X Funds Global X DAX Germany ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EWG",
+    "iShares MSCI Germany ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "EWU",
+    "iShares MSCI United Kingdom ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FAAA",
+    "Fidelity Merrimack Street Trust Fidelity AAA CLO ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GDX",
+    "VanEck Gold Miners ETF",
+    "etf",
+    0.0,
+    3,
+    2,
+    -1,
+    1
+   ],
+   [
+    "APH",
+    "Amphenol Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IEMG",
+    "iShares Core MSCI Emerging Markets ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IJR",
+    "iShares Core S&P Small-Cap ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "INFL",
+    "Horizon Kinetics Inflation Beneficiaries ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CHWY",
+    "Chewy, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MOO",
+    "VanEck Agribusiness ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NASA",
+    "Tema Space Innovators ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NVDL",
+    "GraniteShares ETF Trust GraniteShares 2x Long NVDA Daily ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RKTL",
+    "Defiance Daily Target 2X Long RKT ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CINF",
+    "Cincinnati Financial Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SECU",
+    "iShares Securitized Income Active ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "XYL",
+    "Xylem Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "QSR",
+    "Restaurant Brands International Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WRB",
+    "W.R. Berkley Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EQR",
+    "Equity Residential",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ATI",
+    "ATI Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AWK",
+    "American Water Works Company, Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ILMN",
+    "Illumina, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FCNCA",
+    "First Citizens Bancshares, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RF",
+    "Regions Financial Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GILD",
+    "Gilead Sciences, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DG",
+    "Dollar General Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SYSB",
+    "iShares Systematic Bond ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VRSK",
+    "Verisk Analytics, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SYF",
+    "Synchrony Financial",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DRI",
+    "Darden Restaurants, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TEAM",
+    "Atlassian Corporation",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "LPLA",
+    "Lpl Financial Holdings Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ROL",
+    "Rollins, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CPAY",
+    "Corpay, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MKL",
+    "Markel Group Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HPQ",
+    "HP Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "DGX",
+    "Quest Diagnostics Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NI",
+    "Nisource Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "FWONK",
+    "Liberty Media Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VGK",
+    "Vanguard FTSE Europe ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VOO",
+    "Vanguard S&P 500 ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    3,
+    1
+   ],
+   [
+    "WWD",
+    "Woodward, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VXUS",
+    "Vanguard STAR Funds Vanguard Total International Stock ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SNX",
+    "Td Synnex Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MKSI",
+    "Mks Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WELL",
+    "Welltower Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EXE",
+    "Expand Energy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "OMC",
+    "Omnicom Group Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "XLE",
+    "State Street Energy Select Sector SPDR ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "XOP",
+    "State Street SPDR S&P Oil & Gas Exploration & Production ETF",
+    "etf",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ROIV",
+    "Roivant Sciences Ltd.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BRO",
+    "Brown & Brown, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "YLDE",
+    "Legg Mason ETF Investment Trust Franklin ClearBridge Enhanced Income ETF",
+    "etf",
+    0.0,
+    2,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VLTO",
+    "Veralto Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LUV",
+    "Southwest Airlines Co.",
+    "stock",
+    0.0,
+    3,
+    3,
+    -1,
+    1
+   ],
+   [
+    "FIS",
+    "Fidelity National Information Services, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "USFD",
+    "Us Foods Holding Corp.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TSN",
+    "Tyson Foods, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ENTG",
+    "Entegris, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SNA",
+    "Snap-On Incorporated",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PKG",
+    "Packaging Corp Of America",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EVRG",
+    "Evergy, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IFF",
+    "International Flavors & Fragrances Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LNT",
+    "Alliant Energy Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "VTRS",
+    "Viatris Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ESS",
+    "Essex Property Trust, Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GIS",
+    "General Mills, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "APG",
+    "Api Group Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "EWBC",
+    "East West Bancorp, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ALB",
+    "Albemarle Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AA",
+    "Alcoa Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GPN",
+    "Global Payments, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BR",
+    "Broadridge Financial Solutions Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IP",
+    "International Paper Co.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BWXT",
+    "Bwx Technologies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PR",
+    "Permian Resources Corporation",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "ITT",
+    "ITT Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HST",
+    "Host Hotels & Resorts, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WCC",
+    "Wesco International Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BBY",
+    "Best Buy Company, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "IEX",
+    "Idex Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NLY",
+    "Annaly Capital Management. Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SUI",
+    "Sun Communities, Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "NDSN",
+    "Nordson Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "WSO",
+    "Watsco, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LDOS",
+    "Leidos Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CLH",
+    "Clean Harbors, Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GEN",
+    "Gen Digital Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "MLI",
+    "Mueller Industries, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BALL",
+    "Ball Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "J",
+    "Jacobs Solutions Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DKNG",
+    "Draftkings Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DOC",
+    "Healthpeak Properties, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GNRC",
+    "Generac Holdings Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ARMK",
+    "Aramark",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "LECO",
+    "Lincoln Electric Holdings, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "JLL",
+    "Jones Lang Lasalle, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GLPI",
+    "Gaming And Leisure Properties, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "OHI",
+    "Omega Healthcare Investors Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GPC",
+    "Genuine Parts Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "APA",
+    "Apa Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ONTO",
+    "Onto Innovation Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RRX",
+    "Regal Rexnord Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "RPM",
+    "Rpm International, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CSL",
+    "Carlisle Companies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "COO",
+    "The Cooper Companies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TRU",
+    "Transunion",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TOL",
+    "Toll Brothers, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ALLY",
+    "Ally Financial Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "UDR",
+    "Udr, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GL",
+    "Globe Life Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PEN",
+    "Penumbra, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "PNW",
+    "Pinnacle West Capital Corporation",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ELS",
+    "Equity Lifestyle Properties, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "SOLS",
+    "Solstice Advanced Materials Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "GGG",
+    "Graco Inc",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CLX",
+    "Clorox Company",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HUT",
+    "Hut 8 Corp.",
+    "stock",
+    0.0,
+    3,
+    3,
+    -1,
+    1
+   ],
+   [
+    "AUR",
+    "Aurora Innovation, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "DT",
+    "Dynatrace, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "BJ",
+    "Bjs Wholesale Club Holdings, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "TRMB",
+    "Trimble Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "HAS",
+    "Hasbro, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "U",
+    "Unity Software Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "AIT",
+    "Applied Industrial Technologies, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CPT",
+    "Camden Property Trust",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "ARW",
+    "Arrow Electronics, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "CAVA",
+    "Cava Group, Inc.",
+    "stock",
+    0.0,
+    1,
+    1,
+    -1,
+    1
+   ],
+   [
+    "TEM",
+    "Tempus Ai, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ],
+   [
+    "CORZ",
+    "Core Scientific, Inc.",
+    "stock",
+    0.0,
+    2,
+    2,
+    -1,
+    1
+   ]
+  ]
+ },
+ "tradfi_reference": {
+  "assets_checked": 836,
+  "assets_with_tradfi_market": 823,
+  "venues": [
+   {
+    "name": "Binance",
+    "listings": 823,
+    "share": 1.0
+   }
+  ],
+  "distinct_venues": 1,
+  "total_listings": 823,
+  "venue_note": "Reported as a count, deliberately. When the field returns one venue, a concentration index over it is arithmetic rather than a finding - it can only be 10,000. The number worth quoting is how many listings came back and how many distinct venues they name.",
+  "note": "quotes/latest returns tradfi_markets[] beside tokens[]: the non-token venues that quote the asset, each with an exchange, a ticker and a market URL. These are exchange listings rather than the asset's primary market - a tokenised equity's entry points at a crypto exchange's stock product, not at the exchange the share itself trades on. Read it as 'is this asset quoted anywhere off chain', and read the venue split beside it: if one venue supplies nearly all of them, that is a second concentration sitting underneath the issuer one."
+ },
+ "not_in_this_catalogue": {
+  "absent": [
+   "BUIDL",
+   "BENJI",
+   "USYC",
+   "OUSG",
+   "USDY",
+   "TBILL",
+   "JTRSY",
+   "USTBL",
+   "FOBXX"
+  ],
+  "present": [
+   {
+    "symbol": "USTB",
+    "name": "Victory Portfolios II VictoryShares Short-Term Bond ETF",
+    "asset_type": "etf",
+    "has_tokens": false,
+    "attributed_value": 0.0
+   },
+   {
+    "symbol": "JAAA",
+    "name": "Janus Henderson AAA CLO ETF",
+    "asset_type": "etf",
+    "has_tokens": true,
+    "attributed_value": 357317.66
+   },
+   {
+    "symbol": "BOXX",
+    "name": "Alpha Architect 1-3 Month Box ETF",
+    "asset_type": "etf",
+    "has_tokens": false,
+    "attributed_value": 0.0
+   }
+  ],
+  "note": "Tickers a reader arriving from an RWA league table would expect, looked up by symbol in CoinMarketCap's own RWA map on this run. Absent means absent from this catalogue - not from the world, and not a judgement on the product. A ticker can also be present in the map and still carry nothing, which is its own kind of absence and is reported separately."
+ },
+ "token_references": [
+  {
+   "symbol": "XAUt",
+   "chain": "Ethereum",
+   "contract": "0x68749665FF8D2d112Fa859AA293F07A622782F38",
+   "website": "https://gold.tether.to/",
+   "explorer": "https://etherscan.io/token/0x68749665FF8D2d112Fa859AA293F07A622782F38",
+   "docs": null,
+   "issuer": "Tether Holdings",
+   "market_cap": 3029840934.09
+  },
+  {
+   "symbol": "PAXG",
+   "chain": "Ethereum",
+   "contract": "0x45804880de22913dafe09f4980848ece6ecbaf78",
+   "website": "https://www.paxg.com/",
+   "explorer": "https://etherscan.io/token/0x45804880de22913dafe09f4980848ece6ecbaf78",
+   "docs": "https://www.paxos.com/pax-gold",
+   "issuer": "Paxos",
+   "market_cap": 1832285859.31
+  },
+  {
+   "symbol": "CRCLB",
+   "chain": "BNB",
+   "contract": "0x80f3d493ebce97e343c53d29a137942416b4ffc0",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0x80f3d493ebce97e343c53d29a137942416b4ffc0",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 148211578.34
+  },
+  {
+   "symbol": "SPCXB",
+   "chain": "BNB",
+   "contract": "0xbe9d156892e55e7154bcd3cb0fea677f9d3103e1",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0xbe9d156892e55e7154bcd3cb0fea677f9d3103e1",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 137979225.88
+  },
+  {
+   "symbol": "MSTRX",
+   "chain": "Solana",
+   "contract": "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ",
+   "website": "https://assets.backed.fi/products/microstrategy-xstock",
+   "explorer": "https://solscan.io/token/XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 110776039.23
+  },
+  {
+   "symbol": "CRCLX",
+   "chain": "Solana",
+   "contract": "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1",
+   "website": "https://assets.backed.fi/products/circle-xstock",
+   "explorer": "https://solscan.io/token/XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 102604274.64
+  },
+  {
+   "symbol": "CRCLon",
+   "chain": "Ethereum",
+   "contract": "0x3632DEa96A953C11dac2f00b4A05a32CD1063fAE",
+   "website": "https://app.ondo.finance/assets/crclon",
+   "explorer": "https://etherscan.io/token/0x3632DEa96A953C11dac2f00b4A05a32CD1063fAE",
+   "docs": null,
+   "issuer": "Ondo Assets",
+   "market_cap": 98362484.33
+  },
+  {
+   "symbol": "MSTRB",
+   "chain": "BNB",
+   "contract": "0xe87afb3076aeb0f9b14e368de8145ae6a2826a14",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0xe87afb3076aeb0f9b14e368de8145ae6a2826a14",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 94761839.84
+  },
+  {
+   "symbol": "QQQB",
+   "chain": "BNB",
+   "contract": "0x205812cdbed920aff76c6580abd681a46d11efc7",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0x205812cdbed920aff76c6580abd681a46d11efc7",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 93634517.36
+  },
+  {
+   "symbol": "XAUM",
+   "chain": "Ethereum",
+   "contract": "0x2103E845C5E135493Bb6c2A4f0B8651956eA8682",
+   "website": "https://www.matrixdock.com/xaum",
+   "explorer": "https://etherscan.io/token/0x2103E845C5E135493Bb6c2A4f0B8651956eA8682",
+   "docs": null,
+   "issuer": "Matrixdock",
+   "market_cap": 70239574.45
+  },
+  {
+   "symbol": "preSPCX",
+   "chain": "Solana",
+   "contract": "4HtfQVWujUfTmZJbtDjSjdJPmqYyri4BpnipjqsD9HLS",
+   "website": "https://republic.com/",
+   "explorer": "https://solscan.io/token/4HtfQVWujUfTmZJbtDjSjdJPmqYyri4BpnipjqsD9HLS",
+   "docs": null,
+   "issuer": "Republic",
+   "market_cap": 68580542.28
+  },
+  {
+   "symbol": "TSLAX",
+   "chain": "Solana",
+   "contract": "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB",
+   "website": "https://assets.backed.fi/products/tesla-xstock",
+   "explorer": "https://solscan.io/token/XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 67976010.86
+  },
+  {
+   "symbol": "SPYX",
+   "chain": "Solana",
+   "contract": "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W",
+   "website": "https://assets.backed.fi/products/sp500-xstock",
+   "explorer": "https://solscan.io/token/XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 66949667.17
+  },
+  {
+   "symbol": "SNDKB",
+   "chain": "BNB",
+   "contract": "0x3ee4df61bd4f867e349beae8bfe07bc31b4850fb",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0x3ee4df61bd4f867e349beae8bfe07bc31b4850fb",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 65809464.85
+  },
+  {
+   "symbol": "IVVon",
+   "chain": "Ethereum",
+   "contract": "0x62cA254a363dc3c748e7E955c20447aB5bF06fF7",
+   "website": "https://app.ondo.finance/assets/ivvon",
+   "explorer": "https://etherscan.io/token/0x62cA254a363dc3c748e7E955c20447aB5bF06fF7",
+   "docs": null,
+   "issuer": "Ondo Assets",
+   "market_cap": 60217098.41
+  },
+  {
+   "symbol": "EWGx",
+   "chain": "Solana",
+   "contract": "XsM51PKxDNQBZR65VRxRjNqcMWUBoYwHeVn2FR6WXi9",
+   "website": "https://assets.backed.fi/products/ishares-msci-germany-xstock",
+   "explorer": "https://etherscan.io/token/0xed2bdd82366728c1f2a7e8b93c4dd4a58404bf65",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 56880853.08
+  },
+  {
+   "symbol": "MUB",
+   "chain": "BNB",
+   "contract": "0xcdf2f3e0fa43c47a6662a91c9e4a7c5f69762699",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0xcdf2f3e0fa43c47a6662a91c9e4a7c5f69762699",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 53887187.19
+  },
+  {
+   "symbol": "SPCXx",
+   "chain": "Solana",
+   "contract": "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8",
+   "website": "https://assets.backed.fi/",
+   "explorer": "https://solscan.io/token/Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8",
+   "docs": "https://docs.xstocks.fi",
+   "issuer": "Backed Assets",
+   "market_cap": 51404467.63
+  },
+  {
+   "symbol": "INTCB",
+   "chain": "BNB",
+   "contract": "0xe614e2fc6c787035ff51f452e8e826bfd32d5283",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0xe614e2fc6c787035ff51f452e8e826bfd32d5283",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 49674951.09
+  },
+  {
+   "symbol": "NLRx",
+   "chain": "Solana",
+   "contract": "XsTSfxoQry8okZoGMN5t6mExibDq3gA2NDLJeLztX7E",
+   "website": "https://assets.backed.fi/products/vaneck-uranium-and-nuclear-xstock",
+   "explorer": "https://etherscan.io/token/0x238c2306b77a0c33ff609e72f89bf7e1323a9999",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 47813995.73
+  },
+  {
+   "symbol": "SPYon",
+   "chain": "Ethereum",
+   "contract": "0xFeDC5f4a6c38211c1338aa411018DFAf26612c08",
+   "website": "https://app.ondo.finance/assets/spyon",
+   "explorer": "https://etherscan.io/token/0xFeDC5f4a6c38211c1338aa411018DFAf26612c08",
+   "docs": null,
+   "issuer": "Ondo Assets",
+   "market_cap": 46357342.48
+  },
+  {
+   "symbol": "QQQX",
+   "chain": "Solana",
+   "contract": "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ",
+   "website": "https://assets.backed.fi/products/nasdaq-xstock",
+   "explorer": "https://solscan.io/token/Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 44463970.36
+  },
+  {
+   "symbol": "NVDAX",
+   "chain": "Solana",
+   "contract": "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh",
+   "website": "https://assets.backed.fi/products/nvidia-xstock",
+   "explorer": "https://solscan.io/token/Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh",
+   "docs": null,
+   "issuer": "Backed Assets",
+   "market_cap": 44353193.2
+  },
+  {
+   "symbol": "NVDAB",
+   "chain": "BNB",
+   "contract": "0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 42996697.03
+  },
+  {
+   "symbol": "SOXLB",
+   "chain": "BNB",
+   "contract": "0xd97d097a89113fa59b76c572e5b2eb647e8eefaf",
+   "website": "https://www.bstocks.finance/",
+   "explorer": "https://bscscan.com/address/0xd97d097a89113fa59b76c572e5b2eb647e8eefaf",
+   "docs": null,
+   "issuer": "bStocks",
+   "market_cap": 40291466.88
+  }
+ ],
+ "reserves_note": "Backstop does not and cannot verify reserves. These endpoints publish no attestation, no custodian and no redemption terms. What is listed here is the contract address and the issuer's own published links, which is where such a check would have to begin - against the issuer's reports, not against this API.",
+ "market_pairs_probe": {
+  "available": false,
+  "sample_rwa_id": "1",
+  "rows": 0
+ },
+ "endpoints": {
+  "map": {
+   "path": "/v5/real-world-assets/map",
+   "tier": "Basic",
+   "credits": "free",
+   "why": "the canonical asset universe - rwa_id, asset class, and which assets have tokens at all"
+  },
+  "assets_list": {
+   "path": "/v5/real-world-assets/assets/list",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "asset-level tokenised market cap, used to reconcile the per-token totals against"
+  },
+  "quotes": {
+   "path": "/v5/real-world-assets/quotes/latest",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "the heart of it - tokens[] gives each token's own issuer and market cap; tradfi_markets[] says whether an underlying market exists"
+  },
+  "info": {
+   "path": "/v5/real-world-assets/info",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "descriptive metadata on the largest assets - industry, primary exchange, SEC CIK where the asset is an equity"
+  },
+  "issuers_list": {
+   "path": "/v5/real-world-assets/issuers/list",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "the issuer directory - name, website and declared token count for all 25"
+  },
+  "issuer": {
+   "path": "/v5/real-world-assets/issuers",
+   "tier": "Basic",
+   "credits": "1 per call",
+   "why": "each issuer's declared token count, cross-checked against what the token data actually attributes to them"
+  },
+  "market_pairs": {
+   "path": "/v5/real-world-assets/market-pairs/list",
+   "tier": "Growth",
+   "credits": "1 per call",
+   "why": "venue depth per asset; probed every run so the plan gate is recorded from evidence"
+  },
+  "crypto_info": {
+   "path": "/v2/cryptocurrency/info",
+   "tier": "Basic",
+   "credits": "1 per 100 ids",
+   "why": "the only route to a chain - no RWA endpoint carries one, so each token's crypto_id is taken across to the main cryptocurrency family for its platform"
+  },
+  "key_info": {
+   "path": "/v1/key/info",
+   "tier": "Basic",
+   "credits": "free",
+   "why": "plan limits and remaining credits, so the run adapts its own throttle and publishes what it spent"
+  }
+ },
+ "api": {
+  "calls": 109,
+  "credits": 75,
+  "refused": [
+   {
+    "path": "/v5/real-world-assets/market-pairs/list",
+    "params": {
+     "rwa_id": "1"
+    },
+    "reason": "1006: Your API Key subscription plan doesn't support this endpoint."
+   }
+  ]
+ }
+}
